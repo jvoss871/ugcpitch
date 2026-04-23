@@ -159,13 +159,15 @@ export default function PitchPage() {
 
   const handleSaveEdits = () => {
     const updatedContent = allContent.filter(c => selectedContentIds.includes(c.id));
+    // Clear shareId so the next copy regenerates with updated content
     storage.updatePitch(authUser.username, pitchId, {
       title: editedTitle,
       intro: editedIntro,
       outreach: editedOutreach,
       selectedContent: updatedContent,
+      shareId: null,
     });
-    setPitch({ ...pitch, title: editedTitle, intro: editedIntro, outreach: editedOutreach, selectedContent: updatedContent });
+    setPitch({ ...pitch, title: editedTitle, intro: editedIntro, outreach: editedOutreach, selectedContent: updatedContent, shareId: null });
     setEditMode(false);
   };
 
@@ -176,6 +178,20 @@ export default function PitchPage() {
   };
 
   const handleCopyShareLink = async () => {
+    const proHandle = planStatus?.handle ?? null;
+
+    const buildUrl = (id) => proHandle
+      ? `${window.location.origin}/${proHandle}/${id}`
+      : `${window.location.origin}/pitch/view?id=${id}`;
+
+    // Reuse existing shareId — only create a new one the first time
+    if (pitch.shareId) {
+      navigator.clipboard.writeText(buildUrl(pitch.shareId));
+      setCopiedLink(true);
+      setTimeout(() => setCopiedLink(false), 2000);
+      return;
+    }
+
     const shareData = {
       profile: {
         username: profile.username,
@@ -206,19 +222,17 @@ export default function PitchPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(shareData),
       });
+      if (!res.ok) throw new Error(`Server error ${res.status}`);
       const { id } = await res.json();
-      // Persist shareId so analytics can be fetched later
+      if (!id) throw new Error('No id returned');
       storage.updatePitch(authUser.username, pitchId, { shareId: id });
       setPitch(p => ({ ...p, shareId: id }));
-      const proHandle = planStatus?.handle;
-      const url = proHandle
-        ? `${window.location.origin}/${proHandle}/${id}`
-        : `${window.location.origin}/pitch/view?id=${id}`;
-      navigator.clipboard.writeText(url);
+      navigator.clipboard.writeText(buildUrl(id));
       setCopiedLink(true);
       setTimeout(() => setCopiedLink(false), 2000);
-    } catch {
-      alert('Failed to generate share link. Try again.');
+    } catch (err) {
+      console.error('Share link error:', err);
+      alert(`Failed to generate share link: ${err.message}`);
     }
   };
 
