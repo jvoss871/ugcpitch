@@ -5,8 +5,8 @@ const nextConfig = {
     return [
       {
         // Pro handle URLs: /sarah-creates/abc1234 → /pitch/view?id=abc1234
-        // File-system routes (dashboard, profile, pitch/*, etc.) take priority
-        source: '/:handle/:pitchId',
+        // Negative lookahead excludes all known app route prefixes
+        source: '/:handle((?!pitch|dashboard|profile|brand|content|create|admin|login|help|api|_next)[a-z0-9][a-z0-9-]*)/:pitchId',
         destination: '/pitch/view?id=:pitchId',
       },
     ];
