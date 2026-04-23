@@ -107,6 +107,7 @@ export default function PitchPage() {
   const [profile, setProfile] = useState(null);
   const [allContent, setAllContent] = useState([]);
   const [editMode, setEditMode] = useState(false);
+  const [editedTitle, setEditedTitle] = useState('');
   const [editedIntro, setEditedIntro] = useState('');
   const [editedOutreach, setEditedOutreach] = useState('');
   const [selectedContentIds, setSelectedContentIds] = useState([]);
@@ -138,6 +139,7 @@ export default function PitchPage() {
           brand: loadedBrand,
         });
         setAllContent(loadedContent);
+        setEditedTitle(loadedPitch.title);
         setEditedIntro(loadedPitch.intro);
         setEditedOutreach(loadedPitch.outreach);
         setSelectedContentIds((loadedPitch.selectedContent || []).map(c => c.id));
@@ -148,11 +150,12 @@ export default function PitchPage() {
   const handleSaveEdits = () => {
     const updatedContent = allContent.filter(c => selectedContentIds.includes(c.id));
     storage.updatePitch(authUser.username, pitchId, {
+      title: editedTitle,
       intro: editedIntro,
       outreach: editedOutreach,
       selectedContent: updatedContent,
     });
-    setPitch({ ...pitch, intro: editedIntro, outreach: editedOutreach, selectedContent: updatedContent });
+    setPitch({ ...pitch, title: editedTitle, intro: editedIntro, outreach: editedOutreach, selectedContent: updatedContent });
     setEditMode(false);
   };
 
@@ -184,6 +187,7 @@ export default function PitchPage() {
         messageType: pitch.messageType,
         selectedContent: pitch.selectedContent || [],
         customContent: pitch.customContent ?? null,
+        removeBranding: planStatus?.features?.remove_branding ?? false,
       },
     };
     try {
@@ -245,7 +249,15 @@ export default function PitchPage() {
               ← Dashboard
             </button>
             <span className="text-gray-200">|</span>
-            <span className="text-sm font-semibold text-gray-900 truncate max-w-xs">{pitch.title}</span>
+            {editMode ? (
+              <input
+                value={editedTitle}
+                onChange={e => setEditedTitle(e.target.value)}
+                className="text-sm font-semibold text-gray-900 border border-gray-300 rounded-lg px-3 py-1 focus:outline-none focus:ring-2 focus:ring-teal-500 w-48"
+              />
+            ) : (
+              <span className="text-sm font-semibold text-gray-900 truncate max-w-xs">{pitch.title}</span>
+            )}
             <span className="text-xs text-gray-400">{utils.formatDate(pitch.created_at)}</span>
           </div>
           <div className="flex items-center gap-2">
@@ -276,7 +288,7 @@ export default function PitchPage() {
                 </button>
                 <button onClick={handleCopyShareLink}
                   className={`px-4 py-2 text-sm rounded-lg font-medium transition ${copiedLink ? 'bg-green-500 text-white' : 'bg-teal-600 text-white hover:bg-teal-700'}`}>
-                  {copiedLink ? '✓ Link Copied!' : '🔗 Copy Share Link'}
+                  {copiedLink ? '✓ Link Copied!' : 'Copy Share Link'}
                 </button>
               </>
             )}

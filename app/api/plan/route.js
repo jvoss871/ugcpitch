@@ -16,7 +16,7 @@ export async function GET(req) {
   const user = await getUser(username);
 
   if (!user) {
-    return Response.json({ status: 'trial', daysLeft: 3, features: defaultFeatures(), oneTimePitches: 0 });
+    return Response.json({ status: 'free', pitchLimit: 10, features: defaultFeatures(), oneTimePitches: 0 });
   }
 
   const oneTimePitches = user.oneTimePitches ?? 0;
@@ -26,12 +26,18 @@ export async function GET(req) {
   }
   if (user.plan === 'starter') {
     const pitchLimit = 50 + (user.bonusPitches ?? 0);
-    return Response.json({ status: 'starter', daysLeft: null, features: defaultFeatures(user.features), pitchLimit, oneTimePitches });
+    return Response.json({ status: 'starter', features: defaultFeatures(user.features), pitchLimit, oneTimePitches });
+  }
+  if (user.plan === 'free') {
+    return Response.json({ status: 'free', pitchLimit: 10, features: defaultFeatures(), oneTimePitches });
   }
 
+  // Legacy trial users
   const trialEnd = user.trialEndsAt
     ? new Date(user.trialEndsAt).getTime()
-    : new Date(user.trialStartedAt).getTime() + 3 * 86400000;
+    : user.trialStartedAt
+      ? new Date(user.trialStartedAt).getTime() + 3 * 86400000
+      : 0;
 
   const msLeft = trialEnd - Date.now();
   const daysLeft = Math.max(0, Math.ceil(msLeft / 86400000));

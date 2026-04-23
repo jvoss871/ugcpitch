@@ -1,7 +1,8 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import { useAuth } from './context/AuthContext';
 
 const PROBLEMS = [
@@ -38,20 +39,34 @@ const FEATURES = [
 
 const PLANS = [
   {
+    name: 'Free',
+    price: '$0',
+    period: 'forever',
+    description: 'Start pitching today. No card required.',
+    cta: 'Get started free',
+    highlight: false,
+    features: [
+      '10 pitches per month',
+      'Full AI pitch generation',
+      'Branded pitch pages',
+      'Content library',
+      'Response generation',
+      '"Made with UGC Pitch" badge',
+    ],
+  },
+  {
     name: 'Starter',
     price: '$9',
     period: 'per month',
     description: 'For creators who pitch regularly and want to look more professional.',
-    cta: 'Start free trial',
+    cta: 'Get started',
     highlight: false,
     features: [
       '50 pitches per month',
-      'AI pitch generation',
-      'Branded pitch pages',
-      'Full content library',
-      'All templates',
+      'Everything in Free',
       'Open tracking',
       'Folder organization',
+      'All templates',
     ],
   },
   {
@@ -59,7 +74,7 @@ const PLANS = [
     price: '$19',
     period: 'per month',
     description: 'For creators building a serious pitch pipeline and closing brand deals.',
-    cta: 'Start free trial',
+    cta: 'Get started',
     highlight: true,
     features: [
       'Unlimited pitches',
@@ -72,29 +87,12 @@ const PLANS = [
 ];
 
 export default function Home() {
-  const [username, setUsername] = useState('');
-  const [error, setError] = useState('');
-  const { user, setUser } = useAuth();
+  const { user } = useAuth();
   const router = useRouter();
-  const loginRef = useRef(null);
 
   useEffect(() => {
     if (user) router.push('/dashboard');
   }, [user, router]);
-
-  const handleLogin = (e) => {
-    e.preventDefault();
-    if (!username.trim()) { setError('Username is required'); return; }
-    if (username.length < 2) { setError('At least 2 characters'); return; }
-    localStorage.setItem('ugcpitch_user', username);
-    setUser({ username });
-    fetch('/api/user-registry', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ username }),
-    }).catch(() => {});
-    router.push('/dashboard');
-  };
 
   if (user) return null;
 
@@ -103,7 +101,6 @@ export default function Home() {
 
       {/* ── HERO ─────────────────────────────────────────────────────────── */}
       <section className="relative overflow-hidden bg-gradient-to-br from-gray-950 via-gray-900 to-teal-950 text-white pt-28 pb-32 px-6">
-        {/* Background glow */}
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[400px] rounded-full opacity-20 blur-3xl pointer-events-none"
           style={{ background: 'radial-gradient(circle, #0d9488, transparent)' }} />
 
@@ -119,12 +116,12 @@ export default function Home() {
             UGC Pitch generates a custom pitch for every brand opportunity — with your best content, your voice, and a shareable page that looks like you hired a designer.
           </p>
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-            <button
-              onClick={() => loginRef.current?.scrollIntoView({ behavior: 'smooth' })}
-              className="w-full sm:w-auto px-8 py-4 bg-teal-500 hover:bg-teal-400 text-white font-bold text-lg rounded-2xl transition-all hover:scale-105 shadow-lg shadow-teal-500/20"
+            <Link
+              href="/login"
+              className="w-full sm:w-auto px-8 py-4 bg-teal-500 hover:bg-teal-400 text-white font-bold text-lg rounded-2xl transition-all hover:scale-105 shadow-lg shadow-teal-500/20 text-center"
             >
               Start for free →
-            </button>
+            </Link>
             <span className="text-gray-500 text-sm">No credit card required</span>
           </div>
         </div>
@@ -210,23 +207,25 @@ export default function Home() {
           <div className="text-center mb-16">
             <p className="text-xs font-bold uppercase tracking-widest text-teal-400 mb-3">Pricing</p>
             <h2 className="text-4xl font-black text-white">Simple, honest pricing.</h2>
-            <p className="text-gray-400 mt-3">3-day free trial on all plans. No credit card required.</p>
+            <p className="text-gray-400 mt-3">Start free. Upgrade when you're ready. No credit card required.</p>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-3xl mx-auto">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto items-stretch">
             {PLANS.map((plan) => (
               <div key={plan.name}
-                className="rounded-3xl p-8 flex flex-col"
+                className="relative rounded-3xl p-8 flex flex-col"
                 style={{
                   backgroundColor: plan.highlight ? '#0d9488' : '#111827',
                   border: plan.highlight ? 'none' : '1px solid #1f2937',
                   boxShadow: plan.highlight ? '0 20px 60px rgba(13,148,136,0.3)' : 'none',
                 }}>
-                <div className="mb-6">
-                  {plan.highlight && (
-                    <span className="inline-block bg-white/20 text-white text-xs font-bold uppercase tracking-widest px-3 py-1 rounded-full mb-4">
+                {plan.highlight && (
+                  <div className="absolute -top-3.5 left-1/2 -translate-x-1/2">
+                    <span className="inline-block bg-white text-teal-700 text-xs font-black uppercase tracking-widest px-4 py-1.5 rounded-full shadow-lg whitespace-nowrap">
                       Most Popular
                     </span>
-                  )}
+                  </div>
+                )}
+                <div className="mb-6">
                   <h3 className="text-2xl font-black text-white mb-1">{plan.name}</h3>
                   <div className="flex items-baseline gap-2 mb-3">
                     <span className="text-5xl font-black text-white">{plan.price}</span>
@@ -246,48 +245,34 @@ export default function Home() {
                   ))}
                 </ul>
 
-                <button
-                  onClick={() => loginRef.current?.scrollIntoView({ behavior: 'smooth' })}
-                  className="w-full py-3.5 rounded-xl font-bold text-sm transition-all hover:scale-105"
+                <Link
+                  href="/login"
+                  className="w-full py-3.5 rounded-xl font-bold text-sm transition-all hover:scale-105 text-center block"
                   style={{
                     backgroundColor: plan.highlight ? '#fff' : '#0d9488',
                     color: plan.highlight ? '#0d9488' : '#fff',
                   }}
                 >
                   {plan.cta}
-                </button>
+                </Link>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* ── CTA / LOGIN ──────────────────────────────────────────────────── */}
-      <section ref={loginRef} className="bg-gradient-to-br from-teal-600 to-teal-800 py-24 px-6">
+      {/* ── CTA ──────────────────────────────────────────────────────────── */}
+      <section className="bg-gradient-to-br from-teal-600 to-teal-800 py-24 px-6">
         <div className="max-w-md mx-auto text-center">
           <h2 className="text-4xl font-black text-white mb-3">Ready to pitch smarter?</h2>
           <p className="text-teal-100/80 mb-10">Start your 3-day free trial. No credit card required.</p>
-
-          <div className="bg-white rounded-3xl p-8 shadow-2xl">
-            <form onSubmit={handleLogin} className="space-y-4">
-              <div className="text-left">
-                <label className="block text-sm font-semibold text-gray-700 mb-2">Your Creator Handle</label>
-                <input
-                  type="text"
-                  placeholder="e.g., sarah_creates"
-                  value={username}
-                  onChange={e => { setUsername(e.target.value); setError(''); }}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500 text-gray-900"
-                />
-                {error && <p className="text-red-500 text-sm mt-2">{error}</p>}
-              </div>
-              <button type="submit"
-                className="w-full bg-teal-600 hover:bg-teal-700 text-white font-bold py-3.5 rounded-xl transition-all hover:scale-105">
-                Get Started Free →
-              </button>
-            </form>
-            <p className="text-xs text-gray-400 mt-4">No credit card. No email required to start.</p>
-          </div>
+          <Link
+            href="/login"
+            className="inline-block px-10 py-4 bg-white text-teal-700 font-bold text-lg rounded-2xl transition-all hover:scale-105 shadow-lg"
+          >
+            Start pitching free →
+          </Link>
+          <p className="text-teal-100/60 text-sm mt-4">Free forever. Upgrade when you're ready.</p>
         </div>
       </section>
 

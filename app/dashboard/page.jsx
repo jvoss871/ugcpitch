@@ -213,25 +213,6 @@ export default function Dashboard() {
           </Link>
         </div>
 
-        {/* Trial / plan banner */}
-        {planStatus?.status === 'trial' && (
-          <div className="mb-4 flex items-center justify-between gap-4 px-4 py-3 rounded-xl text-sm"
-            style={{ backgroundColor: '#f0fdfa', border: '1px solid #99f6e4' }}>
-            <p className="text-teal-800 font-medium">
-              {planStatus.daysLeft === 1
-                ? 'Your free trial ends tomorrow.'
-                : `${planStatus.daysLeft} days left in your free trial.`}
-            </p>
-            <span className="text-teal-600 text-xs font-semibold flex-shrink-0">Upgrade to keep pitching →</span>
-          </div>
-        )}
-        {planStatus?.status === 'expired' && (
-          <div className="mb-4 flex items-center justify-between gap-4 px-4 py-3 rounded-xl text-sm"
-            style={{ backgroundColor: '#fef2f2', border: '1px solid #fecaca' }}>
-            <p className="text-red-800 font-medium">Your trial has ended. Upgrade to create new pitches.</p>
-            <span className="text-red-600 text-xs font-semibold flex-shrink-0">View plans →</span>
-          </div>
-        )}
 
         {/* Multi-select action bar */}
         {selected.length > 0 && (

@@ -10,8 +10,8 @@ function planBadge(plan, trialStartedAt, trialEndsAt) {
       : new Date(trialStartedAt).getTime() + 3 * 86400000;
     if (end < Date.now()) status = 'expired';
   }
-  const color = { trial: '#d97706', starter: '#2563eb', pro: '#0d9488', expired: '#dc2626' };
-  const bg    = { trial: '#fef3c7', starter: '#dbeafe', pro: '#f0fdfa',  expired: '#fee2e2' };
+  const color = { free: '#6b7280', trial: '#d97706', starter: '#2563eb', pro: '#0d9488', expired: '#dc2626' };
+  const bg    = { free: '#f3f4f6', trial: '#fef3c7', starter: '#dbeafe', pro: '#f0fdfa',  expired: '#fee2e2' };
   return (
     <span className="text-xs font-bold px-2.5 py-0.5 rounded-full capitalize"
       style={{ color: color[status], backgroundColor: bg[status] }}>
@@ -158,12 +158,12 @@ export default function AdminPage() {
               <>
                 <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
                   {[
-                    { label: 'Total Users',  value: overview.total },
-                    { label: 'In Trial',     value: overview.trial },
-                    { label: 'Expired',      value: overview.expired },
-                    { label: 'Starter',      value: overview.starter },
-                    { label: 'Pro',          value: overview.pro },
-                    { label: 'MRR',          value: `$${overview.mrr}` },
+                    { label: 'Total Users', value: overview.total },
+                    { label: 'Free',        value: overview.free },
+                    { label: 'Starter',     value: overview.starter },
+                    { label: 'Pro',         value: overview.pro },
+                    { label: 'Expired',     value: overview.expired },
+                    { label: 'MRR',         value: `$${overview.mrr}` },
                   ].map(s => (
                     <div key={s.label} className="bg-gray-900 rounded-2xl p-5 border border-gray-800">
                       <p className="text-xs text-gray-500 mb-2 uppercase tracking-widest">{s.label}</p>
@@ -231,14 +231,16 @@ export default function AdminPage() {
                     {/* Plan */}
                     <div>
                       <label className="block text-xs font-semibold text-gray-500 uppercase tracking-widest mb-2">Plan</label>
-                      <div className="flex gap-2">
-                        {['trial', 'starter', 'pro'].map(p => (
+                      <div className="flex gap-2 flex-wrap">
+                        {['free', 'starter', 'pro'].map(p => (
                           <button key={p} onClick={() => setEditState(s => ({
                             ...s,
                             plan: p,
                             features: p === 'pro'
                               ? { advanced_analytics: true, custom_url: true, remove_branding: true }
-                              : s.features,
+                              : p === 'free'
+                                ? { advanced_analytics: false, custom_url: false, remove_branding: false }
+                                : s.features,
                           }))}
                             className="px-4 py-1.5 rounded-lg text-sm font-semibold capitalize transition"
                             style={{
@@ -249,18 +251,6 @@ export default function AdminPage() {
                           </button>
                         ))}
                       </div>
-                    </div>
-
-                    {/* Trial end date */}
-                    <div>
-                      <label className="block text-xs font-semibold text-gray-500 uppercase tracking-widest mb-2">Trial End Date</label>
-                      <input
-                        type="date"
-                        value={editState.trialEndsAt}
-                        onChange={e => setEditState(s => ({ ...s, trialEndsAt: e.target.value }))}
-                        className="px-3 py-2 rounded-lg bg-gray-800 border border-gray-700 text-white text-sm focus:outline-none focus:ring-2 focus:ring-teal-500"
-                      />
-                      <p className="text-xs text-gray-600 mt-1">Overrides the default 3-day window. Leave blank to use default.</p>
                     </div>
 
                     {/* Feature flags */}

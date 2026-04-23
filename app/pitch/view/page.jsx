@@ -406,11 +406,13 @@ function PitchView() {
       </div>
 
       {/* ── FOOTER ───────────────────────────────────────────────────────── */}
-      <div className="py-10 text-center">
-        <p className="text-xs" style={{ color: T.bodyBg === '#0f1117' || T.bodyBg === '#111827' ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.2)' }}>
-          Made with UGC Pitch
-        </p>
-      </div>
+      {!pitch.removeBranding && (
+        <div className="py-10 text-center">
+          <p className="text-xs" style={{ color: T.bodyBg === '#0f1117' || T.bodyBg === '#111827' ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.2)' }}>
+            Generated with UGC Pitch — tailored for {pitch.title}
+          </p>
+        </div>
+      )}
 
     </div>
   );

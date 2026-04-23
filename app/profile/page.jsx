@@ -90,7 +90,7 @@ export default function Profile() {
       const { text } = await res.json();
       if (text) setProfile(p => ({ ...p, why_work_with_me: text }));
     } catch {
-      // silently fail — user can retry
+      // silently fail
     } finally {
       setGeneratingWhy(false);
     }
@@ -122,59 +122,57 @@ export default function Profile() {
       <div className="space-y-4">
 
         {/* Avatar + handle */}
-        <div className="card space-y-6">
-          <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-3">Profile Photo</label>
-            <div className="flex items-center gap-5">
+        <div className="card">
+          <div className="flex items-start gap-6">
+            <div className="flex-1 space-y-4">
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-2">Email</label>
+                <input type="text" disabled value={profile.username || ''}
+                  className="w-full px-4 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-600 cursor-not-allowed text-sm" />
+                <p className="text-xs text-gray-400 mt-1">Your login email</p>
+              </div>
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-2">Full Name</label>
+                <input
+                  type="text"
+                  value={profile.name || ''}
+                  onChange={e => setProfile(p => ({ ...p, name: e.target.value }))}
+                  placeholder="e.g., Alex Rivera"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 text-sm"
+                />
+                <p className="text-xs text-gray-400 mt-1">Shown on your public pitch pages</p>
+              </div>
+            </div>
+
+            <div className="flex-shrink-0 flex flex-col items-center gap-3">
               <div
                 onClick={() => fileInputRef.current?.click()}
-                className="w-20 h-20 rounded-full overflow-hidden flex-shrink-0 cursor-pointer ring-2 ring-offset-2 ring-teal-400 hover:ring-teal-600 transition"
+                className="w-32 h-32 rounded-full overflow-hidden cursor-pointer ring-2 ring-offset-2 ring-teal-400 hover:ring-teal-600 transition"
               >
                 {profile.avatar ? (
                   <img src={profile.avatar} alt="avatar" className="w-full h-full object-cover" />
                 ) : (
-                  <div className="w-full h-full bg-teal-600 flex items-center justify-center text-white text-2xl font-bold">
+                  <div className="w-full h-full bg-teal-600 flex items-center justify-center text-white text-4xl font-bold">
                     {profile.username?.[0]?.toUpperCase()}
                   </div>
                 )}
               </div>
-              <div>
-                <button type="button" onClick={() => fileInputRef.current?.click()}
-                  className="text-sm px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition">
-                  {profile.avatar ? 'Change Photo' : 'Upload Photo'}
+              <button type="button" onClick={() => fileInputRef.current?.click()}
+                className="text-xs px-3 py-1.5 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition">
+                {profile.avatar ? 'Change' : 'Upload Photo'}
+              </button>
+              {profile.avatar && (
+                <button type="button" onClick={() => setProfile(p => ({ ...p, avatar: null }))}
+                  className="text-xs text-red-500 hover:text-red-700 transition">
+                  Remove
                 </button>
-                {profile.avatar && (
-                  <button type="button" onClick={() => setProfile(p => ({ ...p, avatar: null }))}
-                    className="ml-2 text-sm text-red-500 hover:text-red-700 transition">
-                    Remove
-                  </button>
-                )}
-                <p className="text-xs text-gray-400 mt-1">Shown on your public pitch pages</p>
-              </div>
-            </div>
-            <input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={handleAvatarUpload} />
-          </div>
-
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">Full Name</label>
-              <input
-                type="text"
-                value={profile.name || ''}
-                onChange={e => setProfile(p => ({ ...p, name: e.target.value }))}
-                placeholder="e.g., Alex Rivera"
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 text-sm"
-              />
-              <p className="text-xs text-gray-400 mt-1">Shown on your public pitch pages</p>
-            </div>
-            <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">Username</label>
-              <input type="text" disabled value={profile.username}
-                className="w-full px-4 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-600 cursor-not-allowed text-sm" />
-              <p className="text-xs text-gray-400 mt-1">Used to log in</p>
+              )}
             </div>
           </div>
+          <input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={handleAvatarUpload} />
+        </div>
 
+        <div className="card">
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-semibold text-gray-700 mb-2">Location</label>

@@ -12,26 +12,30 @@ export async function GET(req) {
     const now = Date.now();
     const thirtyDaysAgo = now - 30 * 86400000;
 
-    let trial = 0, starter = 0, pro = 0, expired = 0;
+    let free = 0, starter = 0, pro = 0, expired = 0;
 
     for (const u of users) {
       if (u.plan === 'pro') { pro++; continue; }
       if (u.plan === 'starter') { starter++; continue; }
+      if (u.plan === 'free') { free++; continue; }
+      // Legacy trial users
       const trialEnd = u.trialEndsAt
         ? new Date(u.trialEndsAt).getTime()
-        : new Date(u.trialStartedAt).getTime() + 3 * 86400000;
+        : u.trialStartedAt
+          ? new Date(u.trialStartedAt).getTime() + 3 * 86400000
+          : 0;
       if (trialEnd < now) expired++;
-      else trial++;
+      else free++;
     }
 
     const mrr = starter * 9 + pro * 19;
-    const recentTrialUsers = users.filter(u => new Date(u.trialStartedAt).getTime() > thirtyDaysAgo);
-    const converted = recentTrialUsers.filter(u => u.plan === 'starter' || u.plan === 'pro').length;
-    const conversionRate = recentTrialUsers.length > 0
-      ? Math.round(converted / recentTrialUsers.length * 100)
+    const recentFreeUsers = users.filter(u => new Date(u.createdAt).getTime() > thirtyDaysAgo && (u.plan === 'free' || u.plan === 'trial'));
+    const converted = users.filter(u => new Date(u.createdAt).getTime() > thirtyDaysAgo && (u.plan === 'starter' || u.plan === 'pro')).length;
+    const conversionRate = (recentFreeUsers.length + converted) > 0
+      ? Math.round(converted / (recentFreeUsers.length + converted) * 100)
       : 0;
 
-    return Response.json({ total: users.length, trial, starter, pro, expired, mrr, conversionRate, recentTrialUsers: recentTrialUsers.length, converted });
+    return Response.json({ total: users.length, free, starter, pro, expired, mrr, conversionRate, recentTrialUsers: recentFreeUsers.length, converted });
   } catch {
     return Response.json({ total: 0, trial: 0, starter: 0, pro: 0, expired: 0, mrr: 0, conversionRate: 0, recentTrialUsers: 0, converted: 0 });
   }

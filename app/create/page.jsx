@@ -112,30 +112,30 @@ export default function CreatePitch() {
   if (loading) return <div className="text-center py-12">Loading...</div>;
   if (!authUser) return null;
 
-  const isExpired = planStatus?.status === 'expired';
-  const pitchLimit = planStatus?.pitchLimit ?? 50;
-  const isStarterLimited = planStatus?.status === 'starter' && storage.getMonthlyPitchCount(authUser.username) >= pitchLimit;
+  const status = planStatus?.status;
+  const pitchLimit = planStatus?.pitchLimit ?? (status === 'free' ? 10 : 50);
+  const monthlyCount = storage.getMonthlyPitchCount(authUser.username);
+  const isAtLimit = status !== 'pro' && monthlyCount >= pitchLimit;
   const oneTimePitches = planStatus?.oneTimePitches ?? 0;
-  const usingOneTime = (isExpired || isStarterLimited) && oneTimePitches > 0;
-  const blocked = (isExpired || isStarterLimited) && !usingOneTime;
+  const usingOneTime = isAtLimit && oneTimePitches > 0;
+  const blocked = isAtLimit && !usingOneTime;
 
   if (blocked) {
     return (
       <div className="max-w-lg mx-auto text-center py-24">
-        <p className="text-2xl font-black text-gray-900 mb-3">
-          {isExpired ? 'Your trial has ended' : 'Monthly limit reached'}
-        </p>
+        <p className="text-2xl font-black text-gray-900 mb-3">Monthly limit reached</p>
         <p className="text-gray-500 mb-8">
-          {isExpired
-            ? 'Upgrade to keep generating pitches and closing brand deals.'
-            : `You've used all ${pitchLimit} pitches this month. Upgrade to Pro for unlimited pitches.`}
+          You've used all {pitchLimit} pitches this month.
+          {status === 'free' ? ' Upgrade to keep pitching.' : ' Upgrade to Pro for unlimited pitches.'}
         </p>
         <div className="flex flex-col sm:flex-row gap-3 justify-center">
-          <div className="rounded-2xl border border-gray-200 p-6 text-left flex-1">
-            <p className="font-black text-gray-900 text-lg mb-1">Starter</p>
-            <p className="text-3xl font-black text-gray-900 mb-3">$9<span className="text-sm font-normal text-gray-500">/mo</span></p>
-            <p className="text-sm text-gray-500">50 pitches/month, all templates, open tracking.</p>
-          </div>
+          {status === 'free' && (
+            <div className="rounded-2xl border border-gray-200 p-6 text-left flex-1">
+              <p className="font-black text-gray-900 text-lg mb-1">Starter</p>
+              <p className="text-3xl font-black text-gray-900 mb-3">$9<span className="text-sm font-normal text-gray-500">/mo</span></p>
+              <p className="text-sm text-gray-500">50 pitches/month, open tracking, all templates.</p>
+            </div>
+          )}
           <div className="rounded-2xl bg-teal-600 p-6 text-left flex-1">
             <p className="font-black text-white text-lg mb-1">Pro</p>
             <p className="text-3xl font-black text-white mb-3">$19<span className="text-sm font-normal text-teal-200">/mo</span></p>

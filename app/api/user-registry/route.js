@@ -10,9 +10,7 @@ export async function POST(req) {
     user = {
       username,
       createdAt: new Date().toISOString(),
-      plan: 'trial',
-      trialStartedAt: new Date().toISOString(),
-      trialEndsAt: null,
+      plan: 'free',
       pitchCount: 0,
       features: {
         advanced_analytics: false,
