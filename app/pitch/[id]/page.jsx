@@ -116,10 +116,20 @@ export default function PitchPage() {
   const [customContent, setCustomContent] = useState(null);
   const [analytics, setAnalytics] = useState(null);
   const [showAnalytics, setShowAnalytics] = useState(false);
+  const [planStatus, setPlanStatus] = useState(null);
 
   useEffect(() => {
     if (!loading && !authUser) router.push('/');
   }, [authUser, loading, router]);
+
+  useEffect(() => {
+    if (authUser) {
+      fetch(`/api/plan?username=${encodeURIComponent(authUser.username)}`)
+        .then(r => r.json())
+        .then(setPlanStatus)
+        .catch(() => {});
+    }
+  }, [authUser]);
 
   useEffect(() => {
     if (authUser && pitchId) {
