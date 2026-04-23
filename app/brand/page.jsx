@@ -1,0 +1,278 @@
+'use client';
+
+import { useEffect, useState, useRef } from 'react';
+import { useRouter } from 'next/navigation';
+import { useAuth } from '../context/AuthContext';
+import { storage } from '@/lib/storage';
+import { TEMPLATES, getTemplate, buildTheme } from '@/lib/templates';
+
+const FONTS = [
+  { name: 'Inter',              stack: 'Inter, sans-serif' },
+  { name: 'Playfair Display',   stack: '"Playfair Display", serif' },
+  { name: 'Space Grotesk',      stack: '"Space Grotesk", sans-serif' },
+  { name: 'DM Serif Display',   stack: '"DM Serif Display", serif' },
+  { name: 'Syne',               stack: 'Syne, sans-serif' },
+  { name: 'Bebas Neue',         stack: '"Bebas Neue", sans-serif' },
+  { name: 'Plus Jakarta Sans',  stack: '"Plus Jakarta Sans", sans-serif' },
+  { name: 'Cormorant Garamond', stack: '"Cormorant Garamond", serif' },
+];
+
+function loadGoogleFont(name) {
+  const id = `gfont-${name.replace(/\s/g, '-')}`;
+  if (document.getElementById(id)) return;
+  const link = document.createElement('link');
+  link.id = id;
+  link.rel = 'stylesheet';
+  link.href = `https://fonts.googleapis.com/css2?family=${encodeURIComponent(name)}:wght@400;600;700;900&display=swap`;
+  document.head.appendChild(link);
+}
+
+export default function BrandSetup() {
+  const router = useRouter();
+  const { user: authUser } = useAuth();
+  const [brand, setBrand] = useState(null);
+  const [profile, setProfile] = useState(null);
+  const [saved, setSaved] = useState(false);
+  const colorRefs = useRef([]);
+
+  useEffect(() => {
+    if (!authUser) { router.push('/'); return; }
+    setBrand(storage.getBrand(authUser.username));
+    setProfile(storage.getProfile(authUser.username));
+    FONTS.forEach(f => loadGoogleFont(f.name));
+  }, [authUser]);
+
+  useEffect(() => {
+    if (brand?.font) loadGoogleFont(brand.font);
+  }, [brand?.font]);
+
+  const handleSave = () => {
+    storage.saveBrand(authUser.username, brand);
+    setSaved(true);
+    setTimeout(() => setSaved(false), 2000);
+  };
+
+  const setColor = (index, value) => {
+    setBrand(b => {
+      const colors = [...b.colors];
+      colors[index] = value;
+      return { ...b, colors };
+    });
+  };
+
+  if (!authUser || !brand) return <div className="text-center py-12">Loading...</div>;
+
+  const fontObj = FONTS.find(f => f.name === brand.font) ?? FONTS[0];
+  const [primary, dark, bg] = brand.colors;
+  const tmplPreview = getTemplate(brand.templateId ?? 'modern');
+  const T = buildTheme(tmplPreview, primary, dark, bg);
+
+  return (
+    <div className="max-w-2xl mx-auto animate-fade-in-up">
+      <div className="mb-8 flex items-start justify-between">
+        <div>
+          <h1 className="text-4xl font-bold text-gray-900 mb-1 font-display">Brand Setup</h1>
+          <p className="text-gray-500 text-sm">Colors and font used on your shareable pitch pages.</p>
+        </div>
+        <button onClick={handleSave} className="btn-primary">
+          {saved ? '✓ Saved!' : 'Save Changes'}
+        </button>
+      </div>
+
+      <div className="space-y-6">
+
+        {/* Colors */}
+        <div className="card space-y-5">
+          <div>
+            <p className="text-sm font-semibold text-gray-700 mb-1">Brand Colors</p>
+            <p className="text-xs text-gray-400">Up to 3 colors used across your pitch pages.</p>
+          </div>
+          <div className="flex gap-6">
+            {brand.colors.map((color, i) => (
+              <div key={i} className="flex flex-col items-center gap-2">
+                <button
+                  onClick={() => colorRefs.current[i]?.click()}
+                  className="w-16 h-16 rounded-2xl border-4 border-white shadow-md hover:scale-105 transition-transform relative"
+                  style={{ backgroundColor: color }}
+                >
+                  <span className="absolute bottom-1 right-1 text-[10px]">✏️</span>
+                </button>
+                <input ref={el => colorRefs.current[i] = el} type="color" value={color}
+                  onChange={e => setColor(i, e.target.value)} className="sr-only" />
+                <span className="text-xs font-mono text-gray-400">{color}</span>
+                <span className="text-xs text-gray-400">{i === 0 ? 'Primary' : i === 1 ? 'Dark' : 'Background'}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Font */}
+        <div className="card space-y-5">
+          <div>
+            <p className="text-sm font-semibold text-gray-700 mb-1">Heading Font</p>
+            <p className="text-xs text-gray-400">Used for your name and headings on pitch pages.</p>
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            {FONTS.map(font => (
+              <button key={font.name} onClick={() => setBrand(b => ({ ...b, font: font.name }))}
+                className="px-4 py-3 rounded-xl border-2 text-left transition-all hover:border-teal-400"
+                style={{
+                  borderColor: brand.font === font.name ? '#0d9488' : '#e5e7eb',
+                  backgroundColor: brand.font === font.name ? '#f0fdfa' : '#fff',
+                }}>
+                <p className="text-xs text-gray-400 mb-1">
+                  {brand.font === font.name && <span className="text-teal-500 mr-1">✓</span>}
+                  {font.name}
+                </p>
+                <p className="text-xl text-gray-900 truncate" style={{ fontFamily: font.stack }}>
+                  Your Name
+                </p>
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Template picker */}
+        <div className="card space-y-5">
+          <div>
+            <p className="text-sm font-semibold text-gray-700 mb-1">Page Template</p>
+            <p className="text-xs text-gray-400">Controls the layout and style of your public pitch page.</p>
+          </div>
+          <div className="grid grid-cols-2 gap-4">
+            {TEMPLATES.map(tmpl => {
+              const isActive = (brand.templateId ?? 'modern') === tmpl.id;
+              const heroBg =
+                tmpl.hero === 'dark'    ? dark :
+                tmpl.hero === 'primary' ? primary :
+                '#ffffff';
+              const heroText = tmpl.hero === 'white' ? '#111' : '#fff';
+              const bodyBg = tmpl.bodyBg === 'white' ? '#fff' : tmpl.bodyBg === 'cream' ? '#faf9f6' : bg;
+              const avatarR = tmpl.avatarShape === 'circle' ? '9999px' : '8px';
+              const cardB = tmpl.cardStyle === 'border' ? '1px solid #e5e7eb' : 'none';
+              const cardS = tmpl.cardStyle === 'border' ? 'none' : '0 1px 4px rgba(0,0,0,0.08)';
+
+              return (
+                <button
+                  key={tmpl.id}
+                  onClick={() => setBrand(b => ({ ...b, templateId: tmpl.id }))}
+                  className="text-left rounded-2xl overflow-hidden transition-all"
+                  style={{
+                    outline: isActive ? `3px solid ${primary}` : '3px solid transparent',
+                    outlineOffset: '2px',
+                  }}
+                >
+                  {/* Mini preview — 2× scaled down version */}
+                  <div className="w-full overflow-hidden rounded-xl" style={{ backgroundColor: bodyBg, height: 140 }}>
+                    {/* Hero strip */}
+                    <div style={{ backgroundColor: heroBg, padding: '10px 12px 8px' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 7 }}>
+                        <div style={{
+                          width: 28, height: 28, borderRadius: avatarR,
+                          backgroundColor: primary, flexShrink: 0,
+                        }} />
+                        <div>
+                          <div style={{ height: 4, width: 60, borderRadius: 2, backgroundColor: heroText, opacity: 0.9, marginBottom: 4 }} />
+                          <div style={{ height: 3, width: 40, borderRadius: 2, backgroundColor: heroText, opacity: 0.4 }} />
+                        </div>
+                      </div>
+                    </div>
+                    {/* Body strips */}
+                    <div style={{ padding: '8px 10px', display: 'flex', gap: 6 }}>
+                      <div style={{
+                        flex: 2, borderRadius: 6, backgroundColor: '#fff',
+                        border: cardB, boxShadow: cardS, padding: '7px 8px',
+                      }}>
+                        <div style={{ height: 3, width: '80%', borderRadius: 2, backgroundColor: '#d1d5db', marginBottom: 4 }} />
+                        <div style={{ height: 3, width: '60%', borderRadius: 2, backgroundColor: '#e5e7eb' }} />
+                      </div>
+                      <div style={{
+                        flex: 1, borderRadius: 6,
+                        backgroundColor: tmpl.cardStyle === 'border' ? '#fff' : dark,
+                        border: cardB, boxShadow: cardS, padding: '7px 8px',
+                        display: 'flex', alignItems: 'flex-end',
+                      }}>
+                        <div style={{ height: 3, width: '90%', borderRadius: 2, backgroundColor: tmpl.cardStyle === 'border' ? '#d1d5db' : 'rgba(255,255,255,0.4)' }} />
+                      </div>
+                    </div>
+                    <div style={{ padding: '0 10px' }}>
+                      <div style={{
+                        borderRadius: 6, backgroundColor: '#fff',
+                        border: cardB, boxShadow: cardS, padding: '7px 8px',
+                        borderLeft: `3px solid ${primary}`,
+                      }}>
+                        <div style={{ height: 3, width: '70%', borderRadius: 2, backgroundColor: '#d1d5db' }} />
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Label */}
+                  <div className="px-2 pt-2 pb-1">
+                    <div className="flex items-center gap-1.5">
+                      {isActive && <span style={{ color: primary, fontSize: 11 }}>✓</span>}
+                      <p className="text-sm font-semibold text-gray-900">{tmpl.name}</p>
+                    </div>
+                    <p className="text-xs text-gray-400">{tmpl.description}</p>
+                  </div>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Preview */}
+        <div key={`preview-${brand.templateId}-${brand.colors.join('-')}-${brand.font}`} className="card overflow-hidden p-0">
+          <div className="px-5 py-3 border-b border-gray-100 bg-gray-50 flex items-center justify-between">
+            <p className="text-xs font-semibold uppercase tracking-widest text-gray-400">Live Preview</p>
+            <p className="text-xs text-gray-400">{tmplPreview.name} template · {brand.font}</p>
+          </div>
+          <div className="p-6" style={{ backgroundColor: T.bodyBg === '#ffffff' ? '#f3f4f6' : T.bodyBg }}>
+            <div className="rounded-2xl overflow-hidden shadow-lg border border-black/5">
+              {/* Pitched for banner */}
+              <div style={{ backgroundColor: T.heroBannerBg, borderBottom: `1px solid ${T.heroBannerBorder}` }}
+                className="px-5 py-2.5 flex items-baseline gap-3">
+                <p className="text-xs font-bold uppercase tracking-widest" style={{ color: primary }}>Pitched for</p>
+                <p className="text-sm font-black" style={{ fontFamily: fontObj.stack, color: T.heroText }}>Brand Name</p>
+              </div>
+              {/* Hero */}
+              <div className="px-5 py-5 flex items-center gap-4"
+                style={{ backgroundColor: T.heroBg, borderBottom: T.heroBg === '#ffffff' ? '1px solid #e5e7eb' : 'none' }}>
+                <div className="w-12 h-12 overflow-hidden flex-shrink-0 flex items-center justify-center font-black text-lg"
+                  style={{ backgroundColor: primary, borderRadius: T.avatarRadius, color: '#fff' }}>
+                  {authUser.username?.[0]?.toUpperCase()}
+                </div>
+                <div>
+                  <p className="text-xs font-semibold uppercase tracking-widest mb-0.5" style={{ color: primary }}>UGC Creator</p>
+                  {profile?.name && (
+                    <p className="font-black text-xl leading-none" style={{ fontFamily: fontObj.stack, color: T.heroText }}>
+                      {profile.name}
+                    </p>
+                  )}
+                </div>
+              </div>
+              {/* Body */}
+              <div className="px-5 py-4 flex gap-3" style={{ backgroundColor: T.bodyBg }}>
+                <div className="flex-1 px-4 py-3"
+                  style={{ backgroundColor: T.cardBg, borderRadius: T.cardRadius, border: T.cardBorder, boxShadow: T.cardShadow ?? '0 1px 3px rgba(0,0,0,0.08)' }}>
+                  <p className="text-xs font-bold uppercase tracking-widest text-gray-400 mb-2">About</p>
+                  <p className="text-xs text-gray-600 leading-relaxed line-clamp-2">
+                    {profile?.bio || 'Your bio will appear here.'}
+                  </p>
+                </div>
+                {(profile?.why_work_with_me || profile?.positioning_statement) && (
+                  <div className="w-28 px-3 py-3 flex-shrink-0"
+                    style={{ backgroundColor: T.whyBg, borderRadius: T.cardRadius }}>
+                    <p className="text-[10px] font-bold uppercase tracking-widest mb-2" style={{ color: primary }}>Why Me</p>
+                    <p className="text-white text-[10px] leading-relaxed line-clamp-3 italic">
+                      &ldquo;{profile.why_work_with_me || profile.positioning_statement}&rdquo;
+                    </p>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  );
+}
