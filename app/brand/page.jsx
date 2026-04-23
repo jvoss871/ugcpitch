@@ -195,48 +195,109 @@ export default function BrandSetup() {
                     outlineOffset: '2px',
                   }}
                 >
-                  {/* Mini preview — 2× scaled down version */}
+                  {/* Mini preview */}
                   <div className="w-full overflow-hidden rounded-xl" style={{ backgroundColor: bodyBg, height: 140 }}>
-                    {/* Hero strip */}
-                    <div style={{ backgroundColor: heroBg, padding: '10px 12px 8px' }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 7 }}>
-                        <div style={{
-                          width: 28, height: 28, borderRadius: avatarR,
-                          backgroundColor: primary, flexShrink: 0,
-                        }} />
-                        <div>
-                          <div style={{ height: 4, width: 60, borderRadius: 2, backgroundColor: heroText, opacity: 0.9, marginBottom: 4 }} />
-                          <div style={{ height: 3, width: 40, borderRadius: 2, backgroundColor: heroText, opacity: 0.4 }} />
+
+                    {/* STACK (Modern) */}
+                    {tmpl.layout === 'stack' && <>
+                      <div style={{ backgroundColor: heroBg, padding: '10px 12px 8px' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 7 }}>
+                          <div style={{ width: 28, height: 28, borderRadius: avatarR, backgroundColor: primary, flexShrink: 0 }} />
+                          <div style={{ flex: 1 }}>
+                            <div style={{ height: 4, width: 60, borderRadius: 2, backgroundColor: heroText, opacity: 0.9, marginBottom: 4 }} />
+                            <div style={{ height: 3, width: 40, borderRadius: 2, backgroundColor: heroText, opacity: 0.4 }} />
+                          </div>
+                          <div style={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+                            <div style={{ height: 6, width: 30, borderRadius: 3, backgroundColor: 'rgba(131,58,180,0.6)' }} />
+                            <div style={{ height: 6, width: 30, borderRadius: 3, backgroundColor: '#010101', opacity: 0.5 }} />
+                          </div>
                         </div>
                       </div>
-                    </div>
-                    {/* Body strips */}
-                    <div style={{ padding: '8px 10px', display: 'flex', gap: 6 }}>
-                      <div style={{
-                        flex: 2, borderRadius: 6, backgroundColor: '#fff',
-                        border: cardB, boxShadow: cardS, padding: '7px 8px',
-                      }}>
-                        <div style={{ height: 3, width: '80%', borderRadius: 2, backgroundColor: '#d1d5db', marginBottom: 4 }} />
-                        <div style={{ height: 3, width: '60%', borderRadius: 2, backgroundColor: '#e5e7eb' }} />
+                      <div style={{ padding: '8px 10px', display: 'flex', gap: 6 }}>
+                        <div style={{ flex: 2, borderRadius: 6, backgroundColor: '#fff', border: cardB, boxShadow: cardS, padding: '7px 8px' }}>
+                          <div style={{ height: 3, width: '80%', borderRadius: 2, backgroundColor: '#d1d5db', marginBottom: 4 }} />
+                          <div style={{ height: 3, width: '60%', borderRadius: 2, backgroundColor: '#e5e7eb' }} />
+                        </div>
+                        <div style={{ flex: 1, borderRadius: 6, backgroundColor: dark, border: cardB, boxShadow: cardS, padding: '7px 8px', display: 'flex', alignItems: 'flex-end' }}>
+                          <div style={{ height: 3, width: '90%', borderRadius: 2, backgroundColor: 'rgba(255,255,255,0.4)' }} />
+                        </div>
                       </div>
-                      <div style={{
-                        flex: 1, borderRadius: 6,
-                        backgroundColor: tmpl.cardStyle === 'border' ? '#fff' : dark,
-                        border: cardB, boxShadow: cardS, padding: '7px 8px',
-                        display: 'flex', alignItems: 'flex-end',
-                      }}>
-                        <div style={{ height: 3, width: '90%', borderRadius: 2, backgroundColor: tmpl.cardStyle === 'border' ? '#d1d5db' : 'rgba(255,255,255,0.4)' }} />
+                      <div style={{ padding: '0 10px' }}>
+                        <div style={{ borderRadius: 6, backgroundColor: '#fff', border: cardB, boxShadow: cardS, padding: '7px 8px', borderLeft: `3px solid ${primary}` }}>
+                          <div style={{ height: 3, width: '70%', borderRadius: 2, backgroundColor: '#d1d5db' }} />
+                        </div>
                       </div>
-                    </div>
-                    <div style={{ padding: '0 10px' }}>
-                      <div style={{
-                        borderRadius: 6, backgroundColor: '#fff',
-                        border: cardB, boxShadow: cardS, padding: '7px 8px',
-                        borderLeft: `3px solid ${primary}`,
-                      }}>
-                        <div style={{ height: 3, width: '70%', borderRadius: 2, backgroundColor: '#d1d5db' }} />
+                    </>}
+
+                    {/* CENTERED (Minimal) */}
+                    {tmpl.layout === 'centered' && <>
+                      <div style={{ backgroundColor: heroBg, padding: '14px 12px 10px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 5 }}>
+                        <div style={{ width: 26, height: 26, borderRadius: '50%', backgroundColor: primary }} />
+                        <div style={{ height: 4, width: 55, borderRadius: 2, backgroundColor: heroText, opacity: 0.85 }} />
+                        <div style={{ height: 3, width: 38, borderRadius: 2, backgroundColor: heroText, opacity: 0.35 }} />
+                        <div style={{ display: 'flex', gap: 4, marginTop: 2 }}>
+                          {['#833ab4','#010101','#FF0000'].map((c,i) => <div key={i} style={{ width: 10, height: 10, borderRadius: '50%', backgroundColor: c }} />)}
+                        </div>
                       </div>
-                    </div>
+                      <div style={{ padding: '8px 14px', display: 'flex', flexDirection: 'column', gap: 4, backgroundColor: bodyBg }}>
+                        <div style={{ height: 3, width: '88%', borderRadius: 2, backgroundColor: '#d1d5db' }} />
+                        <div style={{ height: 3, width: '70%', borderRadius: 2, backgroundColor: '#e5e7eb' }} />
+                        <div style={{ height: 1, backgroundColor: `${primary}40`, margin: '4px 0' }} />
+                        <div style={{ height: 4, width: '65%', borderRadius: 2, backgroundColor: `${primary}60`, alignSelf: 'center' }} />
+                        <div style={{ height: 3, width: '50%', borderRadius: 2, backgroundColor: `${primary}40`, alignSelf: 'center' }} />
+                      </div>
+                    </>}
+
+                    {/* COVER (Bold) */}
+                    {tmpl.layout === 'cover' && <>
+                      <div style={{ backgroundColor: primary, padding: '12px 12px 18px' }}>
+                        <div style={{ height: 3, width: 35, borderRadius: 2, backgroundColor: 'rgba(255,255,255,0.4)', marginBottom: 4 }} />
+                        <div style={{ height: 5, width: 60, borderRadius: 2, backgroundColor: '#fff', marginBottom: 8 }} />
+                        <div style={{ display: 'flex', alignItems: 'flex-end', gap: 7 }}>
+                          <div style={{ width: 28, height: 28, borderRadius: avatarR, backgroundColor: 'rgba(255,255,255,0.25)', border: '2px solid rgba(255,255,255,0.5)', flexShrink: 0 }} />
+                          <div>
+                            <div style={{ height: 4, width: 48, borderRadius: 2, backgroundColor: '#fff', marginBottom: 3 }} />
+                            <div style={{ height: 3, width: 30, borderRadius: 2, backgroundColor: 'rgba(255,255,255,0.45)' }} />
+                          </div>
+                        </div>
+                      </div>
+                      <div style={{ backgroundColor: bodyBg, borderRadius: '10px 10px 0 0', marginTop: -8, padding: '8px 10px', display: 'flex', gap: 5 }}>
+                        <div style={{ flex: 1, borderRadius: 5, backgroundColor: '#fff', border: cardB, boxShadow: cardS, padding: '6px 7px' }}>
+                          <div style={{ height: 3, width: '80%', borderRadius: 2, backgroundColor: '#d1d5db', marginBottom: 3 }} />
+                          <div style={{ height: 3, width: '55%', borderRadius: 2, backgroundColor: '#e5e7eb' }} />
+                        </div>
+                        <div style={{ flex: 1, borderRadius: 5, backgroundColor: '#fff', border: cardB, boxShadow: cardS, padding: '6px 7px' }}>
+                          <div style={{ height: 3, width: '80%', borderRadius: 2, backgroundColor: '#d1d5db', marginBottom: 3 }} />
+                          <div style={{ height: 3, width: '55%', borderRadius: 2, backgroundColor: '#e5e7eb' }} />
+                        </div>
+                      </div>
+                    </>}
+
+                    {/* SIDEBAR (Editorial) */}
+                    {tmpl.layout === 'sidebar' && <>
+                      <div style={{ height: 18, backgroundColor: heroBg, borderBottom: '1px solid rgba(255,255,255,0.1)', display: 'flex', alignItems: 'center', gap: 6, padding: '0 10px' }}>
+                        <div style={{ height: 2, width: 28, borderRadius: 1, backgroundColor: primary }} />
+                        <div style={{ height: 3, width: 45, borderRadius: 1, backgroundColor: heroText, opacity: 0.7 }} />
+                      </div>
+                      <div style={{ display: 'flex', height: 122 }}>
+                        <div style={{ width: 42, backgroundColor: heroBg, borderRight: '1px solid rgba(255,255,255,0.1)', padding: '8px 6px', flexShrink: 0 }}>
+                          <div style={{ width: 20, height: 20, borderRadius: '50%', backgroundColor: primary, marginBottom: 5 }} />
+                          <div style={{ height: 3, width: '85%', borderRadius: 2, backgroundColor: heroText, opacity: 0.7, marginBottom: 3 }} />
+                          <div style={{ height: 2, width: '60%', borderRadius: 2, backgroundColor: heroText, opacity: 0.35, marginBottom: 8 }} />
+                          {[0.25,0.25,0.25].map((o,i) => <div key={i} style={{ height: 2, width: '70%', borderRadius: 2, backgroundColor: heroText, opacity: o, marginBottom: 4 }} />)}
+                        </div>
+                        <div style={{ flex: 1, backgroundColor: bodyBg, padding: '8px 10px', display: 'flex', flexDirection: 'column', gap: 4 }}>
+                          <div style={{ height: 3, width: '90%', borderRadius: 2, backgroundColor: '#d1d5db' }} />
+                          <div style={{ height: 3, width: '70%', borderRadius: 2, backgroundColor: '#e5e7eb' }} />
+                          <div style={{ height: 3, width: '80%', borderRadius: 2, backgroundColor: '#e5e7eb' }} />
+                          <div style={{ height: 16, borderLeft: `3px solid ${primary}`, paddingLeft: 5, display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: 3, marginTop: 4 }}>
+                            <div style={{ height: 3, width: '75%', borderRadius: 2, backgroundColor: '#d1d5db' }} />
+                            <div style={{ height: 3, width: '55%', borderRadius: 2, backgroundColor: '#e5e7eb' }} />
+                          </div>
+                        </div>
+                      </div>
+                    </>}
+
                   </div>
 
                   {/* Label */}
