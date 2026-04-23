@@ -189,11 +189,11 @@ export default function BrandSetup() {
                 <button
                   key={tmpl.id}
                   onClick={() => setBrand(b => ({ ...b, templateId: tmpl.id }))}
-                  className="text-left rounded-2xl overflow-hidden transition-all"
+                  className="text-left rounded-2xl transition-all"
                   style={{
-                    outline: isActive ? `2.5px solid ${primary}` : '2.5px solid transparent',
-                    outlineOffset: '3px',
-                    boxShadow: isActive ? `0 0 0 4px ${primary}28, 0 0 16px 2px ${primary}30` : 'none',
+                    boxShadow: isActive
+                      ? `0 0 0 3px ${primary}, 0 0 0 6px ${primary}30, 0 0 20px 4px ${primary}25`
+                      : '0 0 0 1px #e5e7eb',
                   }}
                 >
                   {/* Mini preview */}
@@ -304,7 +304,7 @@ export default function BrandSetup() {
                   {/* Label */}
                   <div className="px-2 pt-2 pb-1">
                     <div className="flex items-center gap-1.5">
-                      <p className="text-sm font-semibold" style={{ color: isActive ? primary : '#111827' }}>{tmpl.name}</p>
+                      <p className="text-sm font-semibold text-gray-900">{tmpl.name}</p>
                     </div>
                     <p className="text-xs text-gray-400">{tmpl.description}</p>
                   </div>
