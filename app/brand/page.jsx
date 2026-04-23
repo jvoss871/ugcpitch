@@ -97,9 +97,9 @@ export default function BrandSetup() {
   if (!authUser || !brand) return <div className="text-center py-12">Loading...</div>;
 
   const fontObj = FONTS.find(f => f.name === brand.font) ?? FONTS[0];
-  const [primary, dark, bg] = brand.colors;
+  const [primary, dark, bg, textColor = '#111111'] = brand.colors;
   const tmplPreview = getTemplate(brand.templateId ?? 'modern');
-  const T = buildTheme(tmplPreview, primary, dark, bg);
+  const T = buildTheme(tmplPreview, primary, dark, bg, textColor);
 
   return (
     <div className="max-w-2xl mx-auto animate-fade-in-up">
@@ -119,7 +119,7 @@ export default function BrandSetup() {
         <div className="card space-y-5">
           <div>
             <p className="text-sm font-semibold text-gray-700 mb-1">Brand Colors</p>
-            <p className="text-xs text-gray-400">Up to 3 colors used across your pitch pages.</p>
+            <p className="text-xs text-gray-400">4 colors used across your pitch pages.</p>
           </div>
           <div className="flex gap-6">
             {brand.colors.map((color, i) => (
@@ -134,7 +134,7 @@ export default function BrandSetup() {
                 <input ref={el => colorRefs.current[i] = el} type="color" value={color}
                   onChange={e => setColor(i, e.target.value)} className="sr-only" />
                 <span className="text-xs font-mono text-gray-400">{color}</span>
-                <span className="text-xs text-gray-400">{i === 0 ? 'Primary' : i === 1 ? 'Dark' : 'Background'}</span>
+                <span className="text-xs text-gray-400">{i === 0 ? 'Primary' : i === 1 ? 'Dark' : i === 2 ? 'Background' : 'Text'}</span>
               </div>
             ))}
           </div>

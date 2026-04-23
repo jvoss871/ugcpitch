@@ -218,10 +218,10 @@ function PitchView() {
 
   const initial = profile.username?.[0]?.toUpperCase() ?? '?';
   const brand = profile.brand ?? { colors: ['#0d9488', '#0f1117', '#f5f4f0'], font: 'Inter', templateId: 'modern' };
-  const [primary, dark, bg] = brand.colors;
+  const [primary, dark, bg, textColor = '#111111'] = brand.colors;
   const fontStack = `"${brand.font}", sans-serif`;
   const tmpl = getTemplate(profile.templateId ?? brand.templateId ?? 'modern');
-  const T = buildTheme(tmpl, primary, dark, bg);
+  const T = buildTheme(tmpl, primary, dark, bg, textColor);
 
   return (
     <div className="min-h-screen font-sans" style={{ backgroundColor: T.bodyBg }}>
@@ -340,7 +340,7 @@ function PitchView() {
           <div className="lg:col-span-3 p-8"
             style={{ backgroundColor: T.cardBg, borderRadius: T.cardRadius, boxShadow: T.cardShadow, border: T.cardBorder }}>
             <p className="text-xs font-bold uppercase tracking-widest text-gray-400 mb-4">About</p>
-            <p className="text-gray-800 text-lg leading-relaxed">{profile.bio}</p>
+            <p className="text-lg leading-relaxed" style={{ color: T.textColor }}>{profile.bio}</p>
           </div>
 
           {(profile.why_work_with_me || profile.positioning_statement) && (
@@ -364,7 +364,7 @@ function PitchView() {
           <p className="text-xs font-bold uppercase tracking-widest text-gray-400 mb-4">
             Why I&rsquo;m the right fit for {pitch.title}
           </p>
-          <p className="text-gray-800 text-lg leading-relaxed">{pitch.intro}</p>
+          <p className="text-lg leading-relaxed" style={{ color: T.textColor }}>{pitch.intro}</p>
         </div>
 
         {/* Custom content — made for this brand */}

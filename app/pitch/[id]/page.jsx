@@ -255,10 +255,10 @@ export default function PitchPage() {
 
   // Build theme for preview
   const brand = profile.brand ?? { colors: ['#0d9488', '#0f1117', '#f5f4f0'], font: 'Inter', templateId: 'modern' };
-  const [primary, dark, bg] = brand.colors;
+  const [primary, dark, bg, textColor = '#111111'] = brand.colors;
   const fontStack = `"${brand.font}", sans-serif`;
   const tmpl = getTemplate(brand.templateId ?? 'modern');
-  const T = buildTheme(tmpl, primary, dark, bg);
+  const T = buildTheme(tmpl, primary, dark, bg, textColor);
   const initial = profile.username?.[0]?.toUpperCase() ?? '?';
   const pitchContent = editMode
     ? allContent.filter(c => selectedContentIds.includes(c.id))
@@ -514,7 +514,7 @@ export default function PitchPage() {
             <div className="lg:col-span-3 p-8"
               style={{ backgroundColor: T.cardBg, borderRadius: T.cardRadius, boxShadow: T.cardShadow, border: T.cardBorder }}>
               <p className="text-xs font-bold uppercase tracking-widest text-gray-400 mb-4">About</p>
-              <p className="text-gray-800 text-lg leading-relaxed">{profile.bio}</p>
+              <p className="text-lg leading-relaxed" style={{ color: T.textColor }}>{profile.bio}</p>
             </div>
             {(profile.why_work_with_me || profile.positioning_statement) && (
               <div className="lg:col-span-2 p-8 flex flex-col justify-between relative overflow-hidden"
@@ -544,7 +544,7 @@ export default function PitchPage() {
               <textarea value={editedIntro} onChange={e => setEditedIntro(e.target.value)} rows={5}
                 className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 text-sm" />
             ) : (
-              <p className="text-gray-800 text-lg leading-relaxed">{pitch.intro}</p>
+              <p className="text-lg leading-relaxed" style={{ color: T.textColor }}>{pitch.intro}</p>
             )}
           </div>
 
