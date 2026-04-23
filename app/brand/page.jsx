@@ -33,21 +33,55 @@ export default function BrandSetup() {
   const [brand, setBrand] = useState(null);
   const [profile, setProfile] = useState(null);
   const [saved, setSaved] = useState(false);
+  const [planStatus, setPlanStatus] = useState(null);
+  const [handle, setHandle] = useState('');
+  const [handleStatus, setHandleStatus] = useState(null);
+  const [handleMsg, setHandleMsg] = useState('');
   const colorRefs = useRef([]);
+  const handleTimer = useRef(null);
 
   useEffect(() => {
     if (!authUser) { router.push('/'); return; }
     setBrand(storage.getBrand(authUser.username));
     setProfile(storage.getProfile(authUser.username));
     FONTS.forEach(f => loadGoogleFont(f.name));
+    fetch(`/api/plan?username=${encodeURIComponent(authUser.username)}`)
+      .then(r => r.json())
+      .then(d => { setPlanStatus(d); if (d.handle) setHandle(d.handle); })
+      .catch(() => {});
   }, [authUser]);
+
+  const validateHandle = (val) => {
+    clearTimeout(handleTimer.current);
+    const clean = val.toLowerCase().trim();
+    if (!clean) { setHandleStatus(null); setHandleMsg(''); return; }
+    if (!/^[a-z0-9-]+$/.test(clean) || clean.length < 2 || clean.length > 30) {
+      setHandleStatus('invalid');
+      setHandleMsg('Letters, numbers, and hyphens only, 2–30 characters');
+      return;
+    }
+    setHandleStatus('checking');
+    handleTimer.current = setTimeout(async () => {
+      const res = await fetch(`/api/validate-handle?handle=${encodeURIComponent(clean)}&username=${encodeURIComponent(authUser.username)}`);
+      const { available, error } = await res.json();
+      setHandleStatus(available ? 'available' : 'taken');
+      setHandleMsg(error || (available ? `ugcpitch.com/${clean}/your-pitch` : 'This handle is already taken'));
+    }, 400);
+  };
 
   useEffect(() => {
     if (brand?.font) loadGoogleFont(brand.font);
   }, [brand?.font]);
 
-  const handleSave = () => {
+  const handleSave = async () => {
     storage.saveBrand(authUser.username, brand);
+    if (planStatus?.features?.custom_url && handle.trim() && handleStatus === 'available') {
+      await fetch('/api/handle', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username: authUser.username, handle: handle.trim() }),
+      }).catch(() => {});
+    }
     setSaved(true);
     setTimeout(() => setSaved(false), 2000);
   };
@@ -218,6 +252,44 @@ export default function BrandSetup() {
             })}
           </div>
         </div>
+
+        {/* Subdomain — Pro only */}
+        {planStatus?.features?.custom_url && (
+          <div className="card">
+            <div className="flex items-center justify-between mb-1">
+              <label className="block text-sm font-semibold text-gray-700">Subdomain</label>
+              <span className="text-xs bg-teal-100 text-teal-700 font-bold px-2 py-0.5 rounded-full">Pro</span>
+            </div>
+            <p className="text-xs text-gray-400 mb-3">
+              Your pitches will be shared as <span className="font-mono">ugcpitch.com/your-subdomain/pitch-id</span>
+            </p>
+            <div className="flex items-center gap-2">
+              <span className="text-sm text-gray-400 flex-shrink-0">ugcpitch.com/</span>
+              <input
+                type="text"
+                value={handle}
+                onChange={e => { setHandle(e.target.value); validateHandle(e.target.value); }}
+                placeholder="sarah-creates"
+                className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 text-sm font-mono"
+              />
+            </div>
+            {handleStatus === 'checking' && (
+              <p className="text-xs text-gray-400 mt-2">Checking availability…</p>
+            )}
+            {handleMsg && handleStatus !== 'checking' && (
+              <p className={`text-xs mt-2 ${
+                handleStatus === 'available' ? 'text-teal-600' : 'text-red-500'
+              }`}>
+                {handleMsg}
+              </p>
+            )}
+            {!handleMsg && handle && handleStatus === null && (
+              <p className="text-xs text-gray-400 mt-2">
+                Current: <span className="font-mono font-semibold">ugcpitch.com/{handle}</span>
+              </p>
+            )}
+          </div>
+        )}
 
         {/* Preview */}
         <div key={`preview-${brand.templateId}-${brand.colors.join('-')}-${brand.font}`} className="card overflow-hidden p-0">
