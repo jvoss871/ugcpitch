@@ -192,7 +192,7 @@ export default function BrandSetup() {
                   className="text-left rounded-2xl transition-all"
                   style={{
                     boxShadow: isActive
-                      ? `0 0 0 3px ${primary}`
+                      ? '0 0 0 3px #0d9488'
                       : '0 0 0 1px #e5e7eb',
                   }}
                 >
