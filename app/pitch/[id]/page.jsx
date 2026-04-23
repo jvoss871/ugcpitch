@@ -524,7 +524,7 @@ export default function PitchPage() {
                   style={{ color: primary, opacity: 0.07, fontSize: '18rem', lineHeight: 1, fontFamily: 'Georgia, serif' }}>
                   &ldquo;
                 </div>
-                <blockquote className="text-white text-xl font-semibold leading-relaxed relative z-10 mt-6">
+                <blockquote className="text-xl font-semibold leading-relaxed relative z-10 mt-6" style={{ color: T.whyText }}>
                   &ldquo;{profile.why_work_with_me || profile.positioning_statement}&rdquo;
                 </blockquote>
               </div>
@@ -559,7 +559,7 @@ export default function PitchPage() {
                   <span style={{ color: primary }} className="text-lg">✦</span>
                   <p className="text-xs font-bold uppercase tracking-widest" style={{ color: primary }}>Made for {pitch.title}</p>
                 </div>
-                {customContent.label && <p className="text-white text-2xl font-bold mb-6">{customContent.label}</p>}
+                {customContent.label && <p className="text-2xl font-bold mb-6" style={{ color: T.whyText }}>{customContent.label}</p>}
                 <CustomContentEmbed url={customContent.url} primary={primary} />
               </div>
             </div>

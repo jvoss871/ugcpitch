@@ -239,7 +239,7 @@ function PitchView() {
           <span style={{ color: T.primaryColor }} className="text-lg">✦</span>
           <p className="text-xs font-bold uppercase tracking-widest" style={{ color: T.primaryColor }}>Made for {pitch.title}</p>
         </div>
-        {pitch.customContent.label && <p className="text-white text-2xl font-bold mb-6">{pitch.customContent.label}</p>}
+        {pitch.customContent.label && <p className="text-2xl font-bold mb-6" style={{ color: T.whyText }}>{pitch.customContent.label}</p>}
         <CustomContentEmbed url={pitch.customContent.url} label={pitch.customContent.label} T={T} />
       </div>
     </div>
@@ -352,7 +352,7 @@ function PitchView() {
                 <div className="absolute inset-0 flex items-center justify-center pointer-events-none select-none"
                   style={{ color: primary, opacity: 0.05, fontSize: '16rem', lineHeight: 1, fontFamily: 'Georgia, serif' }}>&ldquo;</div>
                 <p className="text-xs font-bold uppercase tracking-widest relative z-10 mb-4" style={{ color: primary }}>Why Work With Me</p>
-                <blockquote className="text-white text-2xl font-semibold leading-relaxed relative z-10">&ldquo;{whyText}&rdquo;</blockquote>
+                <blockquote className="text-2xl font-semibold leading-relaxed relative z-10" style={{ color: T.whyText }}>&ldquo;{whyText}&rdquo;</blockquote>
               </div>
             )}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -497,7 +497,7 @@ function PitchView() {
               <p className="text-xs font-bold uppercase tracking-widest relative z-10" style={{ color: primary }}>Why Work With Me</p>
               <div className="absolute inset-0 flex items-center justify-center pointer-events-none select-none"
                 style={{ color: primary, opacity: 0.07, fontSize: '18rem', lineHeight: 1, fontFamily: 'Georgia, serif' }}>&ldquo;</div>
-              <blockquote className="text-white text-xl font-semibold leading-relaxed relative z-10 mt-6">&ldquo;{whyText}&rdquo;</blockquote>
+              <blockquote className="text-xl font-semibold leading-relaxed relative z-10 mt-6" style={{ color: T.whyText }}>&ldquo;{whyText}&rdquo;</blockquote>
             </div>
           )}
         </div>
