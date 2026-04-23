@@ -200,7 +200,10 @@ export default function PitchPage() {
       // Persist shareId so analytics can be fetched later
       storage.updatePitch(authUser.username, pitchId, { shareId: id });
       setPitch(p => ({ ...p, shareId: id }));
-      const url = `${window.location.origin}/pitch/view?id=${id}`;
+      const proHandle = planStatus?.handle;
+      const url = proHandle
+        ? `${window.location.origin}/${proHandle}/${id}`
+        : `${window.location.origin}/pitch/view?id=${id}`;
       navigator.clipboard.writeText(url);
       setCopiedLink(true);
       setTimeout(() => setCopiedLink(false), 2000);

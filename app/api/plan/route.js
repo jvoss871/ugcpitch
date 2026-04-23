@@ -22,7 +22,7 @@ export async function GET(req) {
   const oneTimePitches = user.oneTimePitches ?? 0;
 
   if (user.plan === 'pro') {
-    return Response.json({ status: 'pro', daysLeft: null, features: proFeatures(user.features), oneTimePitches });
+    return Response.json({ status: 'pro', daysLeft: null, features: proFeatures(user.features), oneTimePitches, handle: user.handle ?? null });
   }
   if (user.plan === 'starter') {
     const pitchLimit = 50 + (user.bonusPitches ?? 0);
