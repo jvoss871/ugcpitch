@@ -56,8 +56,6 @@ export default function Dashboard() {
   useEffect(() => {
     if (!user) return;
     setFolders(storage.getFolders(user.username));
-    setProfile(storage.getProfile(user.username));
-    setBrand(storage.getBrand(user.username));
 
     const sorted = ps => [...ps].sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
 
@@ -87,6 +85,16 @@ export default function Dashboard() {
       .then(r => r.json())
       .then(setPlanStatus)
       .catch(() => {});
+
+    fetch(`/api/profile?username=${encodeURIComponent(user.username)}`)
+      .then(r => r.json())
+      .then(p => setProfile(p?.name ? p : storage.getProfile(user.username)))
+      .catch(() => setProfile(storage.getProfile(user.username)));
+
+    fetch(`/api/brand?username=${encodeURIComponent(user.username)}`)
+      .then(r => r.json())
+      .then(setBrand)
+      .catch(() => setBrand(storage.getBrand(user.username)));
   }, [user]);
 
   useEffect(() => {

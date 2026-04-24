@@ -39,7 +39,7 @@ export async function POST(req) {
       }],
       metadata: { username, plan },
       success_url: `${BASE_URL}/dashboard?upgraded=${plan}`,
-      cancel_url: `${BASE_URL}/create`,
+      cancel_url: `${BASE_URL}/upgrade`,
       allow_promotion_codes: true,
     });
 
