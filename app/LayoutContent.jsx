@@ -23,15 +23,16 @@ export default function LayoutContent({ children }) {
 
   // Pages that render with no app chrome
   if (pathname === '/pitch/view' || pathname === '/admin' || pathname === '/login') {
-    return <body>{children}</body>;
+    return <>{children}</>;
   }
 
   return (
-    <body className="bg-gradient-to-br from-teal-50 to-white min-h-screen">
+    <>
       <nav className="border-b border-gray-200 bg-white/80 backdrop-blur-sm sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
-          <Link href="/" className="text-2xl font-bold text-teal-600 font-display">
-            UGC Pitch
+          <Link href="/" className="flex items-center gap-2">
+            <img src="/logo.svg" alt="" className="w-8 h-8" />
+            <span className="text-xl font-black text-gray-900 tracking-tight">UGC <span className="text-teal-500">Edge</span></span>
           </Link>
 
           {!user ? (
@@ -89,15 +90,17 @@ export default function LayoutContent({ children }) {
         </div>
       </nav>
 
-      <main className="max-w-7xl mx-auto px-6 py-12">
+      <main className={`max-w-7xl mx-auto px-6 ${pathname === '/' ? 'pt-12' : 'py-12'}`}>
         {children}
       </main>
 
-      <footer className="border-t border-gray-200 mt-20 py-8 bg-white/50">
-        <div className="max-w-7xl mx-auto px-6 text-center text-sm text-gray-600">
-          <p>© 2025 UGC Pitch. Stop blending in.</p>
-        </div>
-      </footer>
-    </body>
+      {pathname !== '/' && (
+        <footer className="border-t border-gray-200 mt-20 py-8 bg-white/50">
+          <div className="max-w-7xl mx-auto px-6 text-center text-sm text-gray-600">
+            <p>© 2025 UGC Edge. Stop blending in.</p>
+          </div>
+        </footer>
+      )}
+    </>
   );
 }

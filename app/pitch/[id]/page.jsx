@@ -132,40 +132,36 @@ export default function PitchPage() {
   }, [authUser]);
 
   useEffect(() => {
-    if (authUser && pitchId) {
-      const loadedPitch = storage.getPitch(authUser.username, pitchId);
-      const loadedProfile = storage.getProfile(authUser.username);
-      const loadedContent = storage.getContent(authUser.username);
-      const loadedBrand = storage.getBrand(authUser.username);
-      if (loadedPitch) {
-        setCustomContent(loadedPitch.customContent ?? null);
-        setPitch(loadedPitch);
-        setProfile({
-          socials: { instagram: '', tiktok: '', youtube: '', canva: '', email: '' },
-          languages: [],
-          location: '',
-          why_work_with_me: '',
-          ...loadedProfile,
-          brand: loadedBrand,
-        });
-        setAllContent(loadedContent);
-        setEditedTitle(loadedPitch.title);
-        setEditedIntro(loadedPitch.intro);
-        setEditedOutreach(loadedPitch.outreach);
-        setSelectedContentIds((loadedPitch.selectedContent || []).map(c => c.id));
-      }
-    }
+    if (!authUser || !pitchId) return;
+    const profileDefaults = { socials: { instagram: '', tiktok: '', youtube: '', canva: '', email: '' }, languages: [], location: '', why_work_with_me: '' };
+    Promise.all([
+      fetch(`/api/pitches/${pitchId}`).then(r => r.ok ? r.json() : null),
+      fetch(`/api/profile?username=${encodeURIComponent(authUser.username)}`).then(r => r.json()).catch(() => storage.getProfile(authUser.username)),
+      fetch(`/api/content?username=${encodeURIComponent(authUser.username)}`).then(r => r.json()).catch(() => storage.getContent(authUser.username)),
+      fetch(`/api/brand?username=${encodeURIComponent(authUser.username)}`).then(r => r.json()).catch(() => storage.getBrand(authUser.username)),
+    ]).then(([loadedPitch, serverProfile, serverContent, serverBrand]) => {
+      if (!loadedPitch) return;
+      const loadedProfile = serverProfile?.name ? serverProfile : storage.getProfile(authUser.username);
+      const loadedContent = serverContent?.length > 0 ? serverContent : storage.getContent(authUser.username);
+      const loadedBrand = serverBrand ?? storage.getBrand(authUser.username);
+      setCustomContent(loadedPitch.customContent ?? null);
+      setPitch(loadedPitch);
+      setProfile({ ...profileDefaults, ...loadedProfile, brand: loadedBrand });
+      setAllContent(loadedContent);
+      setEditedTitle(loadedPitch.title);
+      setEditedIntro(loadedPitch.intro);
+      setEditedOutreach(loadedPitch.outreach);
+      setSelectedContentIds((loadedPitch.selectedContent || []).map(c => c.id));
+    });
   }, [authUser, pitchId]);
 
   const handleSaveEdits = () => {
     const updatedContent = allContent.filter(c => selectedContentIds.includes(c.id));
     // Clear shareId so the next copy regenerates with updated content
-    storage.updatePitch(authUser.username, pitchId, {
-      title: editedTitle,
-      intro: editedIntro,
-      outreach: editedOutreach,
-      selectedContent: updatedContent,
-      shareId: null,
+    fetch(`/api/pitches/${pitchId}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ title: editedTitle, intro: editedIntro, outreach: editedOutreach, selectedContent: updatedContent, shareId: null }),
     });
     setPitch({ ...pitch, title: editedTitle, intro: editedIntro, outreach: editedOutreach, selectedContent: updatedContent, shareId: null });
     setEditMode(false);
@@ -225,13 +221,16 @@ export default function PitchPage() {
       if (!res.ok) throw new Error(`Server error ${res.status}`);
       const { id } = await res.json();
       if (!id) throw new Error('No id returned');
-      storage.updatePitch(authUser.username, pitchId, { shareId: id });
+      fetch(`/api/pitches/${pitchId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ shareId: id }),
+      });
       setPitch(p => ({ ...p, shareId: id }));
       navigator.clipboard.writeText(buildUrl(id));
       setCopiedLink(true);
       setTimeout(() => setCopiedLink(false), 2000);
     } catch (err) {
-      console.error('Share link error:', err);
       alert(`Failed to generate share link: ${err.message}`);
     }
   };
@@ -243,9 +242,13 @@ export default function PitchPage() {
       const res = await fetch(`/api/analytics?shareId=${shareId}`);
       const data = await res.json();
       setAnalytics(data);
-      // Update opens in localStorage so dashboard badge stays current
-      const opens = Array.from({ length: data.views }, (_, i) => ({ timestamp: i === 0 ? (data.lastViewed ?? new Date().toISOString()) : new Date().toISOString() }));
-      storage.updatePitch(authUser.username, pitchId, { opens });
+      // Sync opens to server so dashboard badge stays current
+      const opens = Array.from({ length: data.views ?? 0 }, (_, i) => ({ timestamp: i === 0 ? (data.lastViewed ?? new Date().toISOString()) : new Date().toISOString() }));
+      fetch(`/api/pitches/${pitchId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ opens }),
+      });
     } catch { setAnalytics(null); }
     setShowAnalytics(true);
   };
@@ -410,203 +413,268 @@ export default function PitchPage() {
         </div>
       </div>
 
-      <div style={{ backgroundColor: T.bodyBg }}>
+      {/* ── PITCH PAGE PREVIEW — layout-aware ──────────────────────────── */}
+      {(() => {
+        const AvatarEl = ({ size }) => profile.avatar
+          ? <img src={profile.avatar} alt={profile.username} className="w-full h-full object-cover" />
+          : <div className="w-full h-full flex items-center justify-center font-black text-white" style={{ fontSize: size * 0.38 }}>{initial}</div>;
 
-        {/* Hero — pitched for banner */}
-        <div style={{ backgroundColor: T.heroBg, color: T.heroText }}>
-          <div style={{ borderBottom: `1px solid ${T.heroBannerBorder}`, backgroundColor: T.heroBannerBg }}>
-            <div className="max-w-5xl mx-auto px-8 py-5 flex items-baseline gap-4">
-              <p className="text-xs font-bold uppercase tracking-widest" style={{ color: primary }}>Pitched for</p>
-              <h2 className="text-3xl font-black tracking-tight" style={{ fontFamily: fontStack, color: T.heroText }}>
-                {pitch.title}
-              </h2>
-            </div>
+        const NicheTags = ({ borderColor, color }) => profile.niche_tags?.length > 0 ? (
+          <div className="flex flex-wrap gap-2">
+            {profile.niche_tags.map(t => (
+              <span key={t} className="text-xs font-semibold uppercase tracking-wider px-3 py-1 rounded-full"
+                style={{ border: `1px solid ${borderColor}`, color }}>{t}</span>
+            ))}
           </div>
+        ) : null;
 
-          <div className="max-w-5xl mx-auto px-8 pt-14 pb-16">
-            <div className="flex flex-col sm:flex-row items-start sm:items-end gap-8">
-              <div className="w-40 h-40 overflow-hidden flex-shrink-0 shadow-2xl"
-                style={{ borderRadius: T.avatarRadius, backgroundColor: primary }}>
-                {profile.avatar ? (
-                  <img src={profile.avatar} alt={profile.username} className="w-full h-full object-cover" />
-                ) : (
-                  <div className="w-full h-full flex items-center justify-center text-5xl font-black text-white">{initial}</div>
-                )}
-              </div>
-
-              <div className="flex-1">
-                <p className="text-sm font-semibold tracking-widest uppercase mb-1" style={{ color: primary }}>UGC Creator</p>
-                {profile.name && (
-                  <h1 className="text-5xl font-black tracking-tight leading-none mb-4" style={{ fontFamily: fontStack, color: T.heroText }}>
-                    {profile.name}
-                  </h1>
-                )}
-                {profile.niche_tags?.length > 0 && (
-                  <div className="flex flex-wrap gap-2">
-                    {profile.niche_tags.map(tag => (
-                      <span key={tag} className="text-xs font-semibold uppercase tracking-wider px-3 py-1 rounded-full"
-                        style={{ border: `1px solid ${T.tagBorder}`, color: T.tagText }}>
-                        {tag}
-                      </span>
-                    ))}
-                  </div>
-                )}
-                <div className="flex flex-wrap gap-3 mt-3">
-                  {profile.location && (
-                    <span className="text-xs" style={{ color: T.heroSubtext }}>{profile.location}</span>
-                  )}
-                  {profile.languages?.length > 0 && (
-                    <span className="text-xs" style={{ color: T.heroSubtext }}>{profile.languages.join(', ')}</span>
-                  )}
-                </div>
-              </div>
-
-              {/* Socials */}
-              {profile.socials && Object.values(profile.socials).some(Boolean) && (
-                <div className="flex flex-col gap-2 flex-shrink-0 sm:items-end">
-                  {profile.socials.instagram && (
-                    <a href={`https://instagram.com/${profile.socials.instagram.replace('@','')}`} target="_blank" rel="noopener noreferrer"
-                      className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold transition hover:scale-105"
-                      style={{ background: 'linear-gradient(135deg,#833ab4,#fd1d1d,#fcb045)', color: '#fff' }}>
-                      {profile.socials.instagram}
-                    </a>
-                  )}
-                  {profile.socials.tiktok && (
-                    <a href={`https://tiktok.com/@${profile.socials.tiktok.replace('@','')}`} target="_blank" rel="noopener noreferrer"
-                      className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold transition hover:scale-105"
-                      style={{ backgroundColor: '#010101', color: '#fff' }}>
-                      {profile.socials.tiktok}
-                    </a>
-                  )}
-                  {profile.socials.youtube && (
-                    <a href={`https://youtube.com/@${profile.socials.youtube.replace('@','')}`} target="_blank" rel="noopener noreferrer"
-                      className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold transition hover:scale-105"
-                      style={{ backgroundColor: '#FF0000', color: '#fff' }}>
-                      {profile.socials.youtube}
-                    </a>
-                  )}
-                  {profile.socials.canva && (
-                    <a href={profile.socials.canva.startsWith('http') ? profile.socials.canva : `https://${profile.socials.canva}`} target="_blank" rel="noopener noreferrer"
-                      className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold transition hover:scale-105"
-                      style={{ backgroundColor: '#7D2AE8', color: '#fff' }}>
-                      Canva Portfolio
-                    </a>
-                  )}
-                  {profile.socials.email && (
-                    <a href={`mailto:${profile.socials.email}`}
-                      className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold transition hover:scale-105"
-                      style={{ backgroundColor: 'rgba(255,255,255,0.1)', color: '#fff', border: '1px solid rgba(255,255,255,0.15)' }}>
-                      {profile.socials.email}
-                    </a>
-                  )}
-                </div>
-              )}
-            </div>
-          </div>
-          <div className="h-px" style={{ background: `linear-gradient(to right, transparent, ${T.heroBorder}, transparent)` }} />
-        </div>
-
-        {/* Body */}
-        <div className="max-w-5xl mx-auto px-8 py-16 space-y-12">
-
-          {/* About + Why Work With Me */}
-          <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
-            <div className="lg:col-span-3 p-8"
-              style={{ backgroundColor: T.cardBg, borderRadius: T.cardRadius, boxShadow: T.cardShadow, border: T.cardBorder }}>
-              <p className="text-xs font-bold uppercase tracking-widest text-gray-400 mb-4">About</p>
-              <p className="text-lg leading-relaxed" style={{ color: T.textColor }}>{profile.bio}</p>
-            </div>
-            {(profile.why_work_with_me || profile.positioning_statement) && (
-              <div className="lg:col-span-2 p-8 flex flex-col justify-between relative overflow-hidden"
-                style={{ backgroundColor: T.whyBg, borderRadius: T.cardRadius }}>
-                <p className="text-xs font-bold uppercase tracking-widest relative z-10" style={{ color: primary }}>Why Work With Me</p>
-                <div className="absolute inset-0 flex items-center justify-center pointer-events-none select-none"
-                  style={{ color: primary, opacity: 0.07, fontSize: '18rem', lineHeight: 1, fontFamily: 'Georgia, serif' }}>
-                  &ldquo;
-                </div>
-                <blockquote className="text-xl font-semibold leading-relaxed relative z-10 mt-6" style={{ color: T.whyText }}>
-                  &ldquo;{profile.why_work_with_me || profile.positioning_statement}&rdquo;
-                </blockquote>
-              </div>
-            )}
-          </div>
-
-          {/* Intro */}
-          <div className="p-8"
-            style={{ backgroundColor: T.cardBg, borderRadius: T.cardRadius, boxShadow: T.cardShadow, borderLeft: T.accentBar, border: T.cardBorder }}>
-            <div className="flex items-center justify-between mb-4">
-              <p className="text-xs font-bold uppercase tracking-widest text-gray-400">
-                Why I&rsquo;m the right fit for {pitch.title}
-              </p>
+        const IntroBlock = ({ className = '' }) => (
+          <div className={className}>
+            <div className="flex items-center justify-between mb-3">
+              <p className="text-xs font-bold uppercase tracking-widest text-gray-400">Why I&rsquo;m the right fit for {pitch.title}</p>
               {editMode && <span className="text-xs text-teal-600 font-semibold">Editing</span>}
             </div>
+            {editMode
+              ? <textarea value={editedIntro} onChange={e => setEditedIntro(e.target.value)} rows={5} className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 text-sm" />
+              : <p className="text-lg leading-relaxed" style={{ color: T.textColor }}>{pitch.intro}</p>}
+          </div>
+        );
+
+        const CustomCard = () => customContent?.url ? (
+          <div className="p-8 relative overflow-hidden" style={{ backgroundColor: T.darkColor, borderRadius: T.cardRadius }}>
+            <div className="absolute top-0 right-0 w-64 h-64 rounded-full opacity-5 pointer-events-none" style={{ backgroundColor: primary, transform: 'translate(30%,-30%)' }} />
+            <div className="relative z-10">
+              <div className="flex items-center gap-2 mb-4">
+                <span style={{ color: primary }} className="text-lg">✦</span>
+                <p className="text-xs font-bold uppercase tracking-widest" style={{ color: primary }}>Made for {pitch.title}</p>
+              </div>
+              {customContent.label && <p className="text-2xl font-bold mb-6" style={{ color: T.whyText }}>{customContent.label}</p>}
+              <CustomContentEmbed url={customContent.url} primary={primary} />
+            </div>
+          </div>
+        ) : null;
+
+        const ContentExamples = () => (editMode ? pitchContent.length > 0 || allContent.length > 0 : pitchContent.length > 0) ? (
+          <div>
+            <div className="flex items-baseline justify-between mb-6">
+              <p className="text-xs font-bold uppercase tracking-widest text-gray-400">Content Examples</p>
+              {editMode && <span className="text-xs text-teal-600 font-semibold">Select pieces to include</span>}
+            </div>
             {editMode ? (
-              <textarea value={editedIntro} onChange={e => setEditedIntro(e.target.value)} rows={5}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 text-sm" />
+              <div className="space-y-2">
+                {allContent.map(item => (
+                  <label key={item.id} className="flex items-start gap-3 p-3 rounded-lg border-2 cursor-pointer hover:bg-gray-50 transition"
+                    style={selectedContentIds.includes(item.id) ? { borderColor: '#0d9488', backgroundColor: '#f0fdfa' } : { borderColor: '#e5e7eb' }}>
+                    <input type="checkbox" checked={selectedContentIds.includes(item.id)}
+                      onChange={e => setSelectedContentIds(s => e.target.checked ? [...s, item.id] : s.filter(id => id !== item.id))}
+                      className="w-4 h-4 mt-1 rounded border-gray-300 text-teal-600" />
+                    <div>
+                      <p className="font-medium text-gray-900 text-sm">{item.title}</p>
+                      {item.tags?.length > 0 && <div className="flex flex-wrap gap-1 mt-1">{item.tags.map(tag => <span key={tag} className="text-xs bg-teal-100 text-teal-700 px-2 py-0.5 rounded capitalize">{tag}</span>)}</div>}
+                    </div>
+                  </label>
+                ))}
+              </div>
             ) : (
-              <p className="text-lg leading-relaxed" style={{ color: T.textColor }}>{pitch.intro}</p>
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+                {pitchContent.map((item, i) => <MediaCard key={item.id ?? i} item={item} />)}
+              </div>
             )}
           </div>
+        ) : null;
 
-          {/* Custom content — display only, set at creation */}
-          {customContent?.url && (
-            <div className="p-8 relative overflow-hidden"
-              style={{ backgroundColor: T.whyBg, borderRadius: T.cardRadius }}>
-              <div className="absolute top-0 right-0 w-64 h-64 rounded-full opacity-5 pointer-events-none"
-                style={{ backgroundColor: primary, transform: 'translate(30%,-30%)' }} />
-              <div className="relative z-10">
-                <div className="flex items-center gap-2 mb-4">
-                  <span style={{ color: primary }} className="text-lg">✦</span>
-                  <p className="text-xs font-bold uppercase tracking-widest" style={{ color: primary }}>Made for {pitch.title}</p>
+        const hasWhy = !!(profile.why_work_with_me || profile.positioning_statement);
+        const whyText = profile.why_work_with_me || profile.positioning_statement;
+
+        // ── CENTERED ────────────────────────────────────────────────────────
+        if (T.layout === 'centered') return (
+          <div style={{ backgroundColor: T.bodyBg }}>
+            <div style={{ backgroundColor: T.heroBg, borderBottom: `1px solid ${T.heroBorder}` }}>
+              <div className="max-w-3xl mx-auto px-8 py-14 text-center">
+                <div className="mx-auto mb-5 overflow-hidden shadow-xl" style={{ width: 96, height: 96, borderRadius: T.avatarRadius, backgroundColor: primary }}>
+                  <AvatarEl size={96} />
                 </div>
-                {customContent.label && <p className="text-2xl font-bold mb-6" style={{ color: T.whyText }}>{customContent.label}</p>}
-                <CustomContentEmbed url={customContent.url} primary={primary} />
+                <p className="text-xs font-bold uppercase tracking-widest mb-2" style={{ color: primary }}>UGC Creator</p>
+                {profile.name && <h1 className="text-5xl font-black tracking-tight mb-4" style={{ fontFamily: fontStack, color: T.heroText }}>{profile.name}</h1>}
+                <div className="flex flex-wrap gap-2 justify-center mb-2">
+                  {profile.niche_tags?.map(t => <span key={t} className="text-xs font-semibold uppercase tracking-wider px-3 py-1 rounded-full" style={{ border: `1px solid ${T.tagBorder}`, color: T.tagText }}>{t}</span>)}
+                </div>
               </div>
             </div>
-          )}
-
-          {/* Content examples */}
-          {(editMode ? pitchContent.length > 0 || allContent.length > 0 : pitchContent.length > 0) && (
-            <div>
-              <div className="flex items-baseline justify-between mb-6">
-                <p className="text-xs font-bold uppercase tracking-widest text-gray-400">Content Examples</p>
-                {editMode && <span className="text-xs text-teal-600 font-semibold">Select pieces to include</span>}
+            <div style={{ borderBottom: `1px solid #e5e7eb`, backgroundColor: T.heroBannerBg }}>
+              <div className="max-w-3xl mx-auto px-8 py-4 flex items-baseline gap-3 justify-center">
+                <p className="text-xs font-bold uppercase tracking-widest" style={{ color: primary }}>Pitched for</p>
+                <h2 className="text-2xl font-black" style={{ fontFamily: fontStack, color: T.heroText }}>{pitch.title}</h2>
               </div>
-              {editMode ? (
-                <div className="space-y-2">
-                  {allContent.map(item => (
-                    <label key={item.id}
-                      className="flex items-start gap-3 p-3 rounded-lg border-2 cursor-pointer hover:bg-gray-50 transition"
-                      style={selectedContentIds.includes(item.id) ? { borderColor: '#0d9488', backgroundColor: '#f0fdfa' } : { borderColor: '#e5e7eb' }}>
-                      <input type="checkbox" checked={selectedContentIds.includes(item.id)}
-                        onChange={e => setSelectedContentIds(s => e.target.checked ? [...s, item.id] : s.filter(id => id !== item.id))}
-                        className="w-4 h-4 mt-1 rounded border-gray-300 text-teal-600" />
-                      <div>
-                        <p className="font-medium text-gray-900 text-sm">{item.title}</p>
-                        {item.tags?.length > 0 && (
-                          <div className="flex flex-wrap gap-1 mt-1">
-                            {item.tags.map(tag => (
-                              <span key={tag} className="text-xs bg-teal-100 text-teal-700 px-2 py-0.5 rounded capitalize">{tag}</span>
-                            ))}
-                          </div>
-                        )}
-                      </div>
-                    </label>
-                  ))}
-                </div>
-              ) : (
-                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
-                  {pitchContent.map((item, i) => <MediaCard key={item.id ?? i} item={item} />)}
+            </div>
+            <div className="max-w-3xl mx-auto px-8 py-14 space-y-10">
+              <div>
+                <p className="text-xs font-bold uppercase tracking-widest mb-4" style={{ color: primary }}>About</p>
+                <p className="text-xl leading-relaxed" style={{ color: T.textColor }}>{profile.bio}</p>
+              </div>
+              {hasWhy && (
+                <div className="py-10 border-t border-b text-center" style={{ borderColor: '#e5e7eb' }}>
+                  <p className="text-xs font-bold uppercase tracking-widest mb-6 text-gray-400">Why Work With Me</p>
+                  <blockquote className="text-2xl font-semibold italic leading-relaxed" style={{ color: primary }}>&ldquo;{whyText}&rdquo;</blockquote>
                 </div>
               )}
+              <IntroBlock />
+              <CustomCard />
+              <ContentExamples />
             </div>
-          )}
-        </div>
+            <div className="py-8 text-center"><p className="text-xs text-gray-300 tracking-widest uppercase">Made with UGC Edge</p></div>
+          </div>
+        );
 
-        <div className="py-8" style={{ borderTop: '1px solid #e5e7eb' }}>
-          <p className="text-center text-xs text-gray-300 tracking-widest uppercase">Made with UGC Pitch</p>
-        </div>
-      </div>
+        // ── COVER ────────────────────────────────────────────────────────────
+        if (T.layout === 'cover') return (
+          <div style={{ backgroundColor: T.bodyBg }}>
+            <div style={{ backgroundColor: primary, paddingTop: '3.5rem', paddingBottom: '5rem' }}>
+              <div className="max-w-5xl mx-auto px-8">
+                <p className="text-sm font-bold uppercase tracking-widest mb-1" style={{ color: 'rgba(255,255,255,0.55)' }}>Pitched for</p>
+                <h2 className="text-4xl font-black tracking-tight mb-10" style={{ fontFamily: fontStack, color: '#fff' }}>{pitch.title}</h2>
+                <div className="flex flex-col sm:flex-row items-start sm:items-end gap-8">
+                  <div className="w-44 h-44 flex-shrink-0 overflow-hidden shadow-2xl" style={{ borderRadius: T.avatarRadius, backgroundColor: 'rgba(255,255,255,0.15)', border: '4px solid rgba(255,255,255,0.3)' }}>
+                    <AvatarEl size={176} />
+                  </div>
+                  <div className="flex-1 sm:pb-2">
+                    <p className="text-sm font-bold uppercase tracking-widest mb-2" style={{ color: 'rgba(255,255,255,0.55)' }}>UGC Creator</p>
+                    {profile.name && <h1 className="text-5xl font-black tracking-tight leading-none mb-4" style={{ fontFamily: fontStack, color: '#fff' }}>{profile.name}</h1>}
+                    <NicheTags borderColor="rgba(255,255,255,0.3)" color="rgba(255,255,255,0.8)" />
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div style={{ backgroundColor: T.bodyBg, borderRadius: '2.5rem 2.5rem 0 0', marginTop: '-2rem', paddingTop: '4rem', paddingBottom: '4rem' }}>
+              <div className="max-w-5xl mx-auto px-8 space-y-8">
+                {hasWhy && (
+                  <div className="p-8 relative overflow-hidden" style={{ backgroundColor: T.darkColor, borderRadius: T.cardRadius }}>
+                    <div className="absolute inset-0 flex items-center justify-center pointer-events-none select-none" style={{ color: primary, opacity: 0.05, fontSize: '16rem', lineHeight: 1, fontFamily: 'Georgia, serif' }}>&ldquo;</div>
+                    <p className="text-xs font-bold uppercase tracking-widest relative z-10 mb-4" style={{ color: primary }}>Why Work With Me</p>
+                    <blockquote className="text-2xl font-semibold leading-relaxed relative z-10" style={{ color: T.whyText }}>&ldquo;{whyText}&rdquo;</blockquote>
+                  </div>
+                )}
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                  <div className="p-8" style={{ backgroundColor: T.cardBg, borderRadius: T.cardRadius, boxShadow: T.cardShadow, border: T.cardBorder }}>
+                    <p className="text-xs font-bold uppercase tracking-widest text-gray-400 mb-4">About</p>
+                    <p className="text-lg leading-relaxed" style={{ color: T.textColor }}>{profile.bio}</p>
+                  </div>
+                  <div className="p-8" style={{ backgroundColor: T.cardBg, borderRadius: T.cardRadius, boxShadow: T.cardShadow, borderLeft: T.accentBar, border: T.cardBorder }}>
+                    <IntroBlock />
+                  </div>
+                </div>
+                <CustomCard />
+                <ContentExamples />
+              </div>
+            </div>
+            <div className="py-8 text-center"><p className="text-xs text-gray-300 tracking-widest uppercase">Made with UGC Edge</p></div>
+          </div>
+        );
+
+        // ── SIDEBAR ──────────────────────────────────────────────────────────
+        if (T.layout === 'sidebar') return (
+          <div style={{ backgroundColor: T.bodyBg, minHeight: '100vh' }}>
+            <div style={{ backgroundColor: T.heroBannerBg, borderBottom: `1px solid ${T.heroBannerBorder}` }}>
+              <div className="px-8 py-4 flex items-baseline gap-3">
+                <p className="text-xs font-bold uppercase tracking-widest flex-shrink-0" style={{ color: primary }}>Pitched for</p>
+                <h2 className="text-2xl font-black truncate" style={{ fontFamily: fontStack, color: T.heroText }}>{pitch.title}</h2>
+              </div>
+            </div>
+            <div style={{ display: 'flex' }}>
+              <div className="hidden lg:flex flex-col flex-shrink-0"
+                style={{ width: 272, backgroundColor: T.heroBg, borderRight: `1px solid ${T.heroBorder}`, padding: '3rem 1.75rem', color: T.heroText }}>
+                <div className="overflow-hidden mb-4" style={{ width: 68, height: 68, borderRadius: T.avatarRadius, backgroundColor: primary }}>
+                  <AvatarEl size={68} />
+                </div>
+                <p className="text-xs font-bold uppercase tracking-widest mb-1" style={{ color: primary }}>UGC Creator</p>
+                {profile.name && <h1 className="text-2xl font-black leading-tight mb-5" style={{ fontFamily: fontStack }}>{profile.name}</h1>}
+                {profile.niche_tags?.length > 0 && (
+                  <div className="mb-5">
+                    <p className="text-xs uppercase tracking-wider mb-2" style={{ color: T.heroSubtext }}>Niches</p>
+                    <div className="flex flex-wrap gap-1.5">{profile.niche_tags.map(t => <span key={t} className="text-xs px-2 py-0.5 rounded" style={{ backgroundColor: `${primary}20`, color: primary }}>{t}</span>)}</div>
+                  </div>
+                )}
+                {(profile.location || profile.languages?.length > 0) && (
+                  <div className="mb-5 space-y-1">
+                    {profile.location && <p className="text-xs" style={{ color: T.heroSubtext }}>{profile.location}</p>}
+                    {profile.languages?.length > 0 && <p className="text-xs" style={{ color: T.heroSubtext }}>{profile.languages.join(', ')}</p>}
+                  </div>
+                )}
+              </div>
+              <div className="flex-1 min-w-0" style={{ padding: '3rem 3.5rem' }}>
+                <div className="max-w-2xl space-y-10">
+                  <div>
+                    <p className="text-xs font-bold uppercase tracking-widest mb-3 text-gray-400">About</p>
+                    <p className="text-xl leading-relaxed" style={{ color: T.textColor }}>{profile.bio}</p>
+                  </div>
+                  {hasWhy && (
+                    <div className="pl-6 py-1" style={{ borderLeft: `4px solid ${primary}` }}>
+                      <p className="text-xs font-bold uppercase tracking-widest mb-3" style={{ color: primary }}>Why Work With Me</p>
+                      <blockquote className="text-xl font-semibold italic leading-relaxed" style={{ color: T.textColor }}>&ldquo;{whyText}&rdquo;</blockquote>
+                    </div>
+                  )}
+                  <IntroBlock />
+                  <CustomCard />
+                  <ContentExamples />
+                </div>
+              </div>
+            </div>
+            <div className="py-8 text-center"><p className="text-xs text-gray-300 tracking-widest uppercase">Made with UGC Edge</p></div>
+          </div>
+        );
+
+        // ── STACK (default) ──────────────────────────────────────────────────
+        return (
+          <div style={{ backgroundColor: T.bodyBg }}>
+            <div style={{ backgroundColor: T.heroBg, color: T.heroText }}>
+              <div style={{ borderBottom: `1px solid ${T.heroBannerBorder}`, backgroundColor: T.heroBannerBg }}>
+                <div className="max-w-5xl mx-auto px-8 py-5 flex items-baseline gap-4">
+                  <p className="text-xs font-bold uppercase tracking-widest" style={{ color: primary }}>Pitched for</p>
+                  <h2 className="text-3xl font-black tracking-tight" style={{ fontFamily: fontStack, color: T.heroText }}>{pitch.title}</h2>
+                </div>
+              </div>
+              <div className="max-w-5xl mx-auto px-8 pt-14 pb-16">
+                <div className="flex flex-col sm:flex-row items-start sm:items-end gap-8">
+                  <div className="w-40 h-40 overflow-hidden flex-shrink-0 shadow-2xl" style={{ borderRadius: T.avatarRadius, backgroundColor: primary }}>
+                    <AvatarEl size={160} />
+                  </div>
+                  <div className="flex-1">
+                    <p className="text-sm font-semibold tracking-widest uppercase mb-1" style={{ color: primary }}>UGC Creator</p>
+                    {profile.name && <h1 className="text-5xl font-black tracking-tight leading-none mb-4" style={{ fontFamily: fontStack, color: T.heroText }}>{profile.name}</h1>}
+                    <NicheTags borderColor={T.tagBorder} color={T.tagText} />
+                    <div className="flex flex-wrap gap-3 mt-3">
+                      {profile.location && <span className="text-xs" style={{ color: T.heroSubtext }}>{profile.location}</span>}
+                      {profile.languages?.length > 0 && <span className="text-xs" style={{ color: T.heroSubtext }}>{profile.languages.join(', ')}</span>}
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div className="h-px" style={{ background: `linear-gradient(to right, transparent, ${T.heroBorder}, transparent)` }} />
+            </div>
+            <div className="max-w-5xl mx-auto px-8 py-16 space-y-12">
+              <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
+                <div className="lg:col-span-3 p-8" style={{ backgroundColor: T.cardBg, borderRadius: T.cardRadius, boxShadow: T.cardShadow, border: T.cardBorder }}>
+                  <p className="text-xs font-bold uppercase tracking-widest text-gray-400 mb-4">About</p>
+                  <p className="text-lg leading-relaxed" style={{ color: T.textColor }}>{profile.bio}</p>
+                </div>
+                {hasWhy && (
+                  <div className="lg:col-span-2 p-8 flex flex-col justify-between relative overflow-hidden" style={{ backgroundColor: T.whyBg, borderRadius: T.cardRadius }}>
+                    <p className="text-xs font-bold uppercase tracking-widest relative z-10" style={{ color: primary }}>Why Work With Me</p>
+                    <div className="absolute inset-0 flex items-center justify-center pointer-events-none select-none" style={{ color: primary, opacity: 0.07, fontSize: '18rem', lineHeight: 1, fontFamily: 'Georgia, serif' }}>&ldquo;</div>
+                    <blockquote className="text-xl font-semibold leading-relaxed relative z-10 mt-6" style={{ color: T.whyText }}>&ldquo;{whyText}&rdquo;</blockquote>
+                  </div>
+                )}
+              </div>
+              <div className="p-8" style={{ backgroundColor: T.cardBg, borderRadius: T.cardRadius, boxShadow: T.cardShadow, borderLeft: T.accentBar, border: T.cardBorder }}>
+                <IntroBlock />
+              </div>
+              <CustomCard />
+              <ContentExamples />
+            </div>
+            <div className="py-8 text-center"><p className="text-xs text-gray-300 tracking-widest uppercase">Made with UGC Edge</p></div>
+          </div>
+        );
+      })()}
     </div>
   );
 }

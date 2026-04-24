@@ -40,7 +40,7 @@ export default function LoginPage() {
   const handleGoogle = async () => {
     await supabase.auth.signInWithOAuth({
       provider: 'google',
-      options: { redirectTo: `${window.location.origin}/dashboard` },
+      options: { redirectTo: `${window.location.origin}/auth/callback` },
     });
   };
 
@@ -54,8 +54,9 @@ export default function LoginPage() {
     <div className="min-h-screen bg-gray-950 flex items-center justify-center px-6">
       <div className="w-full max-w-sm">
 
-        <Link href="/" className="block text-center text-2xl font-black text-teal-400 mb-8 tracking-tight">
-          UGC Pitch
+        <Link href="/" className="flex items-center justify-center gap-2 mb-8">
+          <img src="/logo.svg" alt="" className="w-9 h-9" />
+          <span className="text-2xl font-black text-white tracking-tight">UGC <span className="text-teal-400">Edge</span></span>
         </Link>
 
         <div className="bg-gray-900 rounded-3xl p-8 border border-gray-800">
@@ -63,7 +64,7 @@ export default function LoginPage() {
             {mode === 'signin' ? 'Welcome back' : 'Get started free'}
           </h1>
           <p className="text-gray-500 text-sm mb-6">
-            {mode === 'signin' ? 'Sign in to your account' : '3-day free trial — no credit card needed'}
+            {mode === 'signin' ? 'Sign in to your account' : 'Free to start — no credit card needed'}
           </p>
 
           {message ? (

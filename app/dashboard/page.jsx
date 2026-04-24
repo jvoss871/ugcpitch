@@ -13,6 +13,24 @@ const DEFAULT_FOLDERS = [
   { id: 'archived', name: 'Archived' },
 ];
 
+function timeAgo(iso) {
+  if (!iso) return null;
+  const secs = Math.floor((Date.now() - new Date(iso)) / 1000);
+  if (secs < 60) return 'just now';
+  const mins = Math.floor(secs / 60);
+  if (mins < 60) return `${mins}m ago`;
+  const hrs = Math.floor(mins / 60);
+  if (hrs < 24) return `${hrs}h ago`;
+  return `${Math.floor(hrs / 24)}d ago`;
+}
+
+function rowBorderColor(pitch) {
+  if (pitch.folderId === 'accepted') return '#0d9488';
+  if (pitch.opens?.length > 0) return '#22c55e';
+  if (pitch.folderId === 'sent') return '#f59e0b';
+  return '#e5e7eb';
+}
+
 export default function Dashboard() {
   const { user, loading } = useAuth();
   const router = useRouter();
@@ -26,6 +44,9 @@ export default function Dashboard() {
   const [dragOverFolder, setDragOverFolder] = useState(null);
   const [moveMenuOpen, setMoveMenuOpen] = useState(false);
   const [planStatus, setPlanStatus] = useState(null);
+  const [profile, setProfile] = useState(null);
+  const [brand, setBrand] = useState(null);
+  const [bannerUpgrading, setBannerUpgrading] = useState(false);
   const newFolderInputRef = useRef(null);
 
   useEffect(() => {
@@ -33,12 +54,39 @@ export default function Dashboard() {
   }, [user, loading, router]);
 
   useEffect(() => {
-    if (user) {
-      const p = storage.getPitches(user.username);
-      setPitches(p.sort((a, b) => new Date(b.created_at) - new Date(a.created_at)));
-      setFolders(storage.getFolders(user.username));
-      setPlanStatus(storage.getPlanStatus(user.username));
-    }
+    if (!user) return;
+    setFolders(storage.getFolders(user.username));
+    setProfile(storage.getProfile(user.username));
+    setBrand(storage.getBrand(user.username));
+
+    const sorted = ps => [...ps].sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+
+    fetch(`/api/pitches?username=${encodeURIComponent(user.username)}`)
+      .then(r => r.json())
+      .then(async serverPitches => {
+        if (serverPitches.length === 0) {
+          const local = storage.getPitches(user.username);
+          if (local.length > 0) {
+            const migrated = await Promise.all(local.map(p =>
+              fetch('/api/pitches', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ ...p, username: user.username }),
+              }).then(r => r.json())
+            ));
+            storage.savePitches(user.username, []);
+            setPitches(sorted(migrated.filter(p => !p.error)));
+            return;
+          }
+        }
+        setPitches(sorted(serverPitches));
+      })
+      .catch(() => setPitches(sorted(storage.getPitches(user.username))));
+
+    fetch(`/api/plan?username=${encodeURIComponent(user.username)}`)
+      .then(r => r.json())
+      .then(setPlanStatus)
+      .catch(() => {});
   }, [user]);
 
   useEffect(() => {
@@ -63,8 +111,13 @@ export default function Dashboard() {
 
   // ── Move ──────────────────────────────────────────────────────────────
   const moveTo = (folderId) => {
-    storage.movePitchesToFolder(user.username, selected, folderId === 'all' ? null : folderId);
-    setPitches(storage.getPitches(user.username).sort((a, b) => new Date(b.created_at) - new Date(a.created_at)));
+    const target = folderId === 'all' ? null : folderId;
+    fetch('/api/pitches', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ ids: selected, folderId: target }),
+    });
+    setPitches(ps => ps.map(p => selected.includes(p.id) ? { ...p, folderId: target } : p));
     setSelected([]);
     setMoveMenuOpen(false);
   };
@@ -72,15 +125,19 @@ export default function Dashboard() {
   // ── Delete ────────────────────────────────────────────────────────────
   const deleteSelected = () => {
     if (!window.confirm(`Delete ${selected.length} pitch${selected.length !== 1 ? 'es' : ''}?`)) return;
-    storage.deletePitches(user.username, selected);
-    setPitches(storage.getPitches(user.username).sort((a, b) => new Date(b.created_at) - new Date(a.created_at)));
+    fetch('/api/pitches', {
+      method: 'DELETE',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ ids: selected }),
+    });
+    setPitches(ps => ps.filter(p => !selected.includes(p.id)));
     setSelected([]);
   };
 
   const deleteSingle = (e, pitchId) => {
     e.stopPropagation();
     if (!window.confirm('Delete this pitch?')) return;
-    storage.deletePitch(user.username, pitchId);
+    fetch(`/api/pitches/${pitchId}`, { method: 'DELETE' });
     setPitches(prev => prev.filter(p => p.id !== pitchId));
     setSelected(prev => prev.filter(id => id !== pitchId));
   };
@@ -99,7 +156,16 @@ export default function Dashboard() {
     storage.deleteFolder(user.username, folderId);
     setFolders(f => f.filter(x => x.id !== folderId));
     if (activeFolder === folderId) setActiveFolder('all');
-    setPitches(storage.getPitches(user.username).sort((a, b) => new Date(b.created_at) - new Date(a.created_at)));
+    // Move pitches out of deleted folder server-side
+    const affected = pitches.filter(p => p.folderId === folderId).map(p => p.id);
+    if (affected.length > 0) {
+      fetch('/api/pitches', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ids: affected, folderId: null }),
+      });
+    }
+    setPitches(ps => ps.map(p => p.folderId === folderId ? { ...p, folderId: null } : p));
   };
 
   // ── Drag & drop ───────────────────────────────────────────────────────
@@ -111,8 +177,13 @@ export default function Dashboard() {
   const handleDrop = (e, folderId) => {
     e.preventDefault();
     const ids = JSON.parse(e.dataTransfer.getData('pitchIds'));
-    storage.movePitchesToFolder(user.username, ids, folderId === 'all' ? null : folderId);
-    setPitches(storage.getPitches(user.username).sort((a, b) => new Date(b.created_at) - new Date(a.created_at)));
+    const target = folderId === 'all' ? null : folderId;
+    fetch('/api/pitches', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ ids, folderId: target }),
+    });
+    setPitches(ps => ps.map(p => ids.includes(p.id) ? { ...p, folderId: target } : p));
     setSelected([]);
     setDragOverFolder(null);
   };
@@ -130,8 +201,26 @@ export default function Dashboard() {
   if (loading) return <div className="text-center py-12">Loading...</div>;
   if (!user) return null;
 
+  const startCheckout = async (plan) => {
+    setBannerUpgrading(true);
+    try {
+      const res = await fetch('/api/stripe/checkout', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username: user.username, plan }),
+      });
+      const { url } = await res.json();
+      if (url) window.location.href = url;
+    } finally {
+      setBannerUpgrading(false);
+    }
+  };
+
   return (
-    <div className="flex gap-0 -mx-6 -my-12 min-h-[calc(100vh-80px)]">
+    <div className="flex flex-col -mx-6 -my-12 min-h-[calc(100vh-80px)]">
+
+
+      <div className="flex flex-1 gap-0">
 
       {/* ── LEFT SIDEBAR ─────────────────────────────────────────────── */}
       <aside className="w-52 flex-shrink-0 border-r border-gray-200 bg-white px-3 py-6 flex flex-col gap-1">
@@ -200,7 +289,7 @@ export default function Dashboard() {
       <div className="flex-1 px-8 py-6 overflow-y-auto">
 
         {/* Header */}
-        <div className="flex items-center justify-between mb-6">
+        <div className="flex items-center justify-between mb-4">
           <div>
             <h1 className="text-2xl font-bold text-gray-900">
               {allFolders.find(f => f.id === activeFolder)?.name ?? 'Pitches'}
@@ -212,6 +301,37 @@ export default function Dashboard() {
             + Create Pitch
           </Link>
         </div>
+
+        {/* Usage bar */}
+        {planStatus && planStatus.status !== 'pro' && (
+          (() => {
+            const used = planStatus.monthlyPitchCount ?? 0;
+            const limit = planStatus.pitchLimit ?? 10;
+            const pct = Math.min((used / limit) * 100, 100);
+            const nearLimit = pct >= 80;
+            return (
+              <div className="flex items-center gap-3 mb-5 px-4 py-2.5 bg-gray-50 rounded-xl border border-gray-100">
+                <div className="flex-1">
+                  <div className="flex items-center justify-between mb-1">
+                    <span className="text-xs font-semibold text-gray-500">Pitches this month</span>
+                    <span className={`text-xs font-bold ${nearLimit ? 'text-amber-600' : 'text-gray-700'}`}>{used} / {limit}</span>
+                  </div>
+                  <div className="h-1.5 bg-gray-200 rounded-full overflow-hidden">
+                    <div
+                      className="h-full rounded-full transition-all duration-500"
+                      style={{ width: `${pct}%`, backgroundColor: nearLimit ? '#f59e0b' : '#0d9488' }}
+                    />
+                  </div>
+                </div>
+                {nearLimit && (
+                  <Link href="/upgrade" className="text-xs font-bold text-amber-600 hover:text-amber-700 whitespace-nowrap">
+                    Upgrade →
+                  </Link>
+                )}
+              </div>
+            );
+          })()
+        )}
 
 
         {/* Multi-select action bar */}
@@ -247,27 +367,136 @@ export default function Dashboard() {
 
         {/* Pitch list */}
         {visiblePitches.length === 0 ? (
-          <div className="text-center py-20 text-gray-400">
-            <p className="text-4xl mb-3 opacity-20">—</p>
-            <p className="text-sm">No pitches here yet.</p>
-          </div>
+          (() => {
+            const step1Done = !!(profile?.name?.trim());
+            const step2Done = !!(brand && (
+              brand.colors?.[0] !== '#0d9488' ||
+              brand.font !== 'Inter' ||
+              brand.templateId !== 'modern'
+            ));
+            const step3Done = pitches.length > 0;
+            const allDone = step1Done && step2Done && step3Done;
+            const doneCount = [step1Done, step2Done, step3Done].filter(Boolean).length;
+
+            const steps = [
+              {
+                done: step1Done,
+                title: 'Complete your profile',
+                desc: 'Add your name, bio, niche tags, and social links.',
+                href: '/profile',
+                cta: 'Go to Profile',
+              },
+              {
+                done: step2Done,
+                title: 'Set your brand',
+                desc: 'Choose your colors, font, and pitch page template.',
+                href: '/brand',
+                cta: 'Go to Brand',
+              },
+              {
+                done: step3Done,
+                title: 'Create your first pitch',
+                desc: 'Paste a job description and generate a tailored pitch in seconds.',
+                href: '/create',
+                cta: 'Create Pitch',
+              },
+            ];
+
+            if (activeFolder !== 'all') {
+              return (
+                <div className="flex flex-col items-center justify-center py-24 text-center">
+                  <p className="text-gray-400 text-sm">Nothing here yet. Drag pitches from All Pitches to organize them.</p>
+                </div>
+              );
+            }
+
+            if (allDone) {
+              return (
+                <div className="flex flex-col items-center justify-center py-24 text-center">
+                  <div className="w-16 h-16 rounded-2xl bg-teal-50 flex items-center justify-center mb-5">
+                    <svg className="w-8 h-8 text-teal-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                      <path d="M12 5v14M5 12h14" strokeLinecap="round"/>
+                    </svg>
+                  </div>
+                  <h2 className="text-xl font-black text-gray-900 mb-2">No pitches yet</h2>
+                  <p className="text-sm text-gray-500 mb-6">Create your first pitch and start landing brand deals.</p>
+                  <Link href="/create"
+                    className="inline-flex items-center gap-2 text-sm font-semibold text-white bg-teal-600 hover:bg-teal-700 px-5 py-2.5 rounded-xl transition">
+                    Create your first pitch
+                  </Link>
+                </div>
+              );
+            }
+
+            return (
+              <div className="max-w-lg mx-auto py-12">
+                <div className="mb-6">
+                  <h2 className="text-xl font-black text-gray-900 mb-1">Get set up in 3 steps</h2>
+                  <p className="text-sm text-gray-500">{doneCount} of 3 complete</p>
+                  <div className="mt-3 h-1.5 rounded-full bg-gray-100 overflow-hidden">
+                    <div className="h-full rounded-full bg-teal-500 transition-all duration-500"
+                      style={{ width: `${(doneCount / 3) * 100}%` }} />
+                  </div>
+                </div>
+
+                <div className="space-y-3">
+                  {steps.map((step, i) => (
+                    <div key={i}
+                      className="flex items-start gap-4 p-5 rounded-2xl border transition-all"
+                      style={{
+                        backgroundColor: step.done ? '#f0fdf4' : '#ffffff',
+                        borderColor: step.done ? '#bbf7d0' : '#e5e7eb',
+                      }}>
+                      <div className="flex-shrink-0 mt-0.5">
+                        {step.done ? (
+                          <div className="w-6 h-6 rounded-full bg-teal-500 flex items-center justify-center">
+                            <svg className="w-3.5 h-3.5 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
+                              <polyline points="20 6 9 17 4 12"/>
+                            </svg>
+                          </div>
+                        ) : (
+                          <div className="w-6 h-6 rounded-full border-2 border-gray-300 flex items-center justify-center">
+                            <span className="text-xs font-bold text-gray-400">{i + 1}</span>
+                          </div>
+                        )}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className={`text-sm font-bold ${step.done ? 'text-teal-800 line-through decoration-teal-400' : 'text-gray-900'}`}>
+                          {step.title}
+                        </p>
+                        <p className="text-xs text-gray-500 mt-0.5">{step.desc}</p>
+                      </div>
+                      {!step.done && (
+                        <Link href={step.href}
+                          className="flex-shrink-0 text-xs font-bold text-teal-600 hover:text-teal-700 bg-teal-50 hover:bg-teal-100 px-3 py-1.5 rounded-lg transition whitespace-nowrap">
+                          {step.cta} →
+                        </Link>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            );
+          })()
         ) : (
           <div className="bg-white rounded-2xl border border-gray-200 overflow-hidden">
             {/* Column headers */}
-            <div className="grid grid-cols-[24px_1fr_80px_96px_24px] gap-4 items-center px-4 py-2 border-b border-gray-100 bg-gray-50">
+            <div className="grid grid-cols-[24px_1fr_90px_110px_52px] gap-4 items-center pl-5 pr-4 py-2 border-b border-gray-100 bg-gray-50">
               <input type="checkbox"
                 checked={selected.length === visiblePitches.length && visiblePitches.length > 0}
                 onChange={toggleSelectAll}
                 className="w-4 h-4 rounded border-gray-300 text-teal-600 cursor-pointer" />
               <span className="text-xs font-semibold uppercase tracking-widest text-gray-400">Title</span>
-              <span className="text-xs font-semibold uppercase tracking-widest text-gray-400 text-right">Analytics</span>
-              <span className="text-xs font-semibold uppercase tracking-widest text-gray-400 text-right">Created</span>
+              <span className="text-xs font-semibold uppercase tracking-widest text-gray-400 text-right">Views</span>
+              <span className="text-xs font-semibold uppercase tracking-widest text-gray-400 text-right">Activity</span>
               <span />
             </div>
 
-            {visiblePitches.map((pitch, i) => {
+            {visiblePitches.map((pitch) => {
               const isSelected = selected.includes(pitch.id);
               const folder = allFolders.find(f => f.id === pitch.folderId);
+              const hasViews = pitch.opens?.length > 0;
+              const lastOpen = hasViews ? pitch.opens[pitch.opens.length - 1]?.timestamp : null;
 
               return (
                 <div
@@ -275,8 +504,11 @@ export default function Dashboard() {
                   draggable
                   onDragStart={e => handleDragStart(e, pitch.id)}
                   onClick={() => router.push(`/pitch/${pitch.id}`)}
-                  className="group grid grid-cols-[24px_1fr_80px_96px_24px] gap-4 items-center px-4 py-3 cursor-pointer transition-colors hover:bg-gray-50 border-b border-gray-100 last:border-0"
-                  style={{ backgroundColor: isSelected ? '#f0fdfa' : undefined }}
+                  className="group grid grid-cols-[24px_1fr_90px_110px_52px] gap-4 items-center pr-4 py-3 cursor-pointer transition-colors hover:bg-gray-50 border-b border-gray-100 last:border-0 pl-4"
+                  style={{
+                    backgroundColor: isSelected ? '#f0fdfa' : undefined,
+                    borderLeft: `3px solid ${rowBorderColor(pitch)}`,
+                  }}
                 >
                   <input
                     type="checkbox"
@@ -297,38 +529,49 @@ export default function Dashboard() {
                     )}
                   </div>
 
-                  {/* Analytics cell */}
-                  <button
-                    onClick={e => { e.stopPropagation(); router.push(`/pitch/${pitch.id}`); }}
-                    title={pitch.opens?.length > 0 ? `${pitch.opens.length} view${pitch.opens.length !== 1 ? 's' : ''}` : 'No views yet'}
-                    className="flex items-center justify-end gap-1.5"
-                  >
-                    <svg className="w-3.5 h-3.5 flex-shrink-0" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"
-                      style={{ color: pitch.opens?.length > 0 ? '#22c55e' : '#d1d5db' }}>
-                      <path d="M3 18h2v-6H3v6zm4 0h2V9H7v9zm4 0h2V5h-2v13zm4 0h2v-3h-2v3zm4 0h2v-9h-2v9z" strokeLinejoin="round"/>
-                    </svg>
-                    {pitch.opens?.length > 0 && (
-                      <span className="text-xs text-gray-500">{pitch.opens.length}</span>
+                  {/* Views badge */}
+                  <div className="flex justify-end">
+                    {hasViews ? (
+                      <span className="text-xs font-semibold text-green-700 bg-green-50 px-2 py-0.5 rounded-full whitespace-nowrap">
+                        {pitch.opens.length} view{pitch.opens.length !== 1 ? 's' : ''}
+                      </span>
+                    ) : (
+                      <span className="text-xs text-gray-300">No views</span>
                     )}
-                  </button>
+                  </div>
 
-                  <span className="text-xs text-gray-400 w-24 text-right">
-                    {utils.formatDate(pitch.created_at)}
-                  </span>
+                  {/* Last seen / created */}
+                  <div className="text-right">
+                    {lastOpen ? (
+                      <span className="text-xs text-green-600 font-medium">Last seen {timeAgo(lastOpen)}</span>
+                    ) : (
+                      <span className="text-xs text-gray-400">{utils.formatDate(pitch.created_at)}</span>
+                    )}
+                  </div>
 
-                  <span className="flex items-center gap-2">
+                  {/* Actions */}
+                  <div className="flex items-center justify-end gap-1.5">
+                    <button
+                      onClick={e => { e.stopPropagation(); router.push(`/pitch/${pitch.id}#analytics`); }}
+                      title="View analytics"
+                      className="opacity-0 group-hover:opacity-100 w-6 h-6 flex items-center justify-center rounded-md text-gray-400 hover:text-teal-600 hover:bg-teal-50 transition"
+                    >
+                      <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M3 18h2v-6H3v6zm4 0h2V9H7v9zm4 0h2V5h-2v13zm4 0h2v-3h-2v3zm4 0h2v-9h-2v9z" />
+                      </svg>
+                    </button>
                     <button
                       onClick={e => deleteSingle(e, pitch.id)}
-                      className="opacity-0 group-hover:opacity-100 text-gray-300 hover:text-red-500 transition text-base leading-none"
                       title="Delete pitch"
+                      className="opacity-0 group-hover:opacity-100 w-6 h-6 flex items-center justify-center rounded-md text-gray-400 hover:text-red-500 hover:bg-red-50 transition text-base leading-none"
                     >×</button>
-                    <span className="text-gray-300 hover:text-teal-500 transition text-sm">→</span>
-                  </span>
+                  </div>
                 </div>
               );
             })}
           </div>
         )}
+      </div>
       </div>
     </div>
   );

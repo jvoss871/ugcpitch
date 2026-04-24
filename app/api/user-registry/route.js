@@ -1,7 +1,7 @@
 import { getUser, upsertUser } from '@/lib/db';
 
 export async function POST(req) {
-  const { username } = await req.json();
+  const { username, email } = await req.json();
   if (!username) return Response.json({ error: 'username required' }, { status: 400 });
 
   let user = await getUser(username);
@@ -9,6 +9,7 @@ export async function POST(req) {
   if (!user) {
     user = {
       username,
+      email: email ?? username,
       createdAt: new Date().toISOString(),
       plan: 'free',
       pitchCount: 0,
@@ -21,6 +22,7 @@ export async function POST(req) {
   }
 
   user.lastSeen = new Date().toISOString();
+  if (email && !user.email) user.email = email;
   await upsertUser(username, user);
   return Response.json({ ok: true });
 }

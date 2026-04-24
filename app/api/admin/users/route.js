@@ -1,4 +1,4 @@
-import { getUser, getAllUsers, upsertUser } from '@/lib/db';
+import { getUser, getAllUsers, upsertUser, deleteUser } from '@/lib/db';
 
 function checkAuth(req) {
   return !!process.env.ADMIN_PASSWORD && req.headers.get('x-admin-password') === process.env.ADMIN_PASSWORD;
@@ -21,4 +21,12 @@ export async function PATCH(req) {
   const updated = { ...user, ...updates };
   await upsertUser(username, updated);
   return Response.json({ ok: true, user: updated });
+}
+
+export async function DELETE(req) {
+  if (!checkAuth(req)) return Response.json({ error: 'Unauthorized' }, { status: 401 });
+  const { username } = await req.json();
+  if (!username) return Response.json({ error: 'username required' }, { status: 400 });
+  await deleteUser(username);
+  return Response.json({ ok: true });
 }

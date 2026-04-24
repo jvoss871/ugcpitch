@@ -42,13 +42,20 @@ export default function BrandSetup() {
 
   useEffect(() => {
     if (!authUser) { router.push('/'); return; }
-    setBrand(storage.getBrand(authUser.username));
-    setProfile(storage.getProfile(authUser.username));
     FONTS.forEach(f => loadGoogleFont(f.name));
     fetch(`/api/plan?username=${encodeURIComponent(authUser.username)}`)
       .then(r => r.json())
       .then(d => { setPlanStatus(d); if (d.handle) setHandle(d.handle); })
       .catch(() => {});
+    const defaults = { colors: ['#0d9488', '#0f1117', '#f5f4f0', '#111111'], font: 'Inter', templateId: 'modern' };
+    fetch(`/api/brand?username=${encodeURIComponent(authUser.username)}`)
+      .then(r => r.json())
+      .then(serverBrand => setBrand({ ...defaults, ...serverBrand }))
+      .catch(() => setBrand({ ...defaults, ...storage.getBrand(authUser.username) }));
+    fetch(`/api/profile?username=${encodeURIComponent(authUser.username)}`)
+      .then(r => r.json())
+      .then(serverProfile => setProfile(serverProfile?.name ? serverProfile : storage.getProfile(authUser.username)))
+      .catch(() => setProfile(storage.getProfile(authUser.username)));
   }, [authUser]);
 
   const validateHandle = (val) => {
@@ -65,7 +72,7 @@ export default function BrandSetup() {
       const res = await fetch(`/api/validate-handle?handle=${encodeURIComponent(clean)}&username=${encodeURIComponent(authUser.username)}`);
       const { available, error } = await res.json();
       setHandleStatus(available ? 'available' : 'taken');
-      setHandleMsg(error || (available ? `ugcpitch.com/${clean}/your-pitch` : 'This handle is already taken'));
+      setHandleMsg(error || (available ? `ugcedge.com/${clean}/your-pitch` : 'This handle is already taken'));
     }, 400);
   };
 
@@ -74,7 +81,11 @@ export default function BrandSetup() {
   }, [brand?.font]);
 
   const handleSave = async () => {
-    storage.saveBrand(authUser.username, brand);
+    await fetch('/api/brand', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ username: authUser.username, ...brand }),
+    }).catch(() => {});
     if (planStatus?.features?.custom_url && handle.trim() && handleStatus === 'available') {
       await fetch('/api/handle', {
         method: 'POST',
@@ -314,43 +325,57 @@ export default function BrandSetup() {
           </div>
         </div>
 
-        {/* Subdomain — Pro only */}
-        {planStatus?.features?.custom_url && (
-          <div className="card">
-            <div className="flex items-center justify-between mb-1">
-              <label className="block text-sm font-semibold text-gray-700">Subdomain</label>
-              <span className="text-xs bg-teal-100 text-teal-700 font-bold px-2 py-0.5 rounded-full">Pro</span>
-            </div>
-            <p className="text-xs text-gray-400 mb-3">
-              Your pitches will be shared as <span className="font-mono">ugcpitch.com/your-subdomain/pitch-id</span>
-            </p>
-            <div className="flex items-center gap-2">
-              <span className="text-sm text-gray-400 flex-shrink-0">ugcpitch.com/</span>
-              <input
-                type="text"
-                value={handle}
-                onChange={e => { setHandle(e.target.value); validateHandle(e.target.value); }}
-                placeholder="sarah-creates"
-                className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 text-sm font-mono"
-              />
-            </div>
-            {handleStatus === 'checking' && (
-              <p className="text-xs text-gray-400 mt-2">Checking availability…</p>
-            )}
-            {handleMsg && handleStatus !== 'checking' && (
-              <p className={`text-xs mt-2 ${
-                handleStatus === 'available' ? 'text-teal-600' : 'text-red-500'
-              }`}>
-                {handleMsg}
+        {/* Subdomain */}
+        {(() => {
+          const canUse = planStatus?.features?.custom_url;
+          return (
+            <div className={`card relative ${!canUse ? 'opacity-75' : ''}`}>
+              <div className="flex items-center justify-between mb-1">
+                <label className="block text-sm font-semibold text-gray-700">Subdomain</label>
+                {canUse
+                  ? <span className="text-xs bg-teal-100 text-teal-700 font-bold px-2 py-0.5 rounded-full">Pro</span>
+                  : <span className="text-xs bg-gray-100 text-gray-500 font-bold px-2 py-0.5 rounded-full flex items-center gap-1">
+                      <svg className="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
+                      Pro only
+                    </span>
+                }
+              </div>
+              <p className="text-xs text-gray-400 mb-3">
+                Share pitches as <span className="font-mono">ugcedge.com/your-handle/pitch-id</span>
               </p>
-            )}
-            {!handleMsg && handle && handleStatus === null && (
-              <p className="text-xs text-gray-400 mt-2">
-                Current: <span className="font-mono font-semibold">ugcpitch.com/{handle}</span>
-              </p>
-            )}
-          </div>
-        )}
+              <div className="flex items-center gap-2">
+                <span className="text-sm text-gray-400 flex-shrink-0">ugcedge.com/</span>
+                <input
+                  type="text"
+                  value={handle}
+                  onChange={e => { if (canUse) { setHandle(e.target.value); validateHandle(e.target.value); } }}
+                  placeholder="sarah-creates"
+                  disabled={!canUse}
+                  className="flex-1 px-4 py-2 border border-gray-300 rounded-lg text-sm font-mono disabled:bg-gray-50 disabled:text-gray-400 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-teal-500"
+                />
+              </div>
+              {canUse && handleStatus === 'checking' && (
+                <p className="text-xs text-gray-400 mt-2">Checking availability…</p>
+              )}
+              {canUse && handleMsg && handleStatus !== 'checking' && (
+                <p className={`text-xs mt-2 ${handleStatus === 'available' ? 'text-teal-600' : 'text-red-500'}`}>
+                  {handleMsg}
+                </p>
+              )}
+              {canUse && !handleMsg && handle && handleStatus === null && (
+                <p className="text-xs text-gray-400 mt-2">
+                  Current: <span className="font-mono font-semibold">ugcedge.com/{handle}</span>
+                </p>
+              )}
+              {!canUse && (
+                <p className="text-xs text-gray-400 mt-2">
+                  <a href={`mailto:support@ugcedge.com?subject=${encodeURIComponent('Upgrade my UGC Edge account')}`}
+                    className="text-teal-600 font-semibold hover:underline">Upgrade to Pro</a> to set a custom URL.
+                </p>
+              )}
+            </div>
+          );
+        })()}
 
         {/* Preview */}
         <div key={`preview-${brand.templateId}-${brand.colors.join('-')}-${brand.font}`} className="card overflow-hidden p-0">
@@ -360,47 +385,162 @@ export default function BrandSetup() {
           </div>
           <div className="p-6" style={{ backgroundColor: T.bodyBg === '#ffffff' ? '#f3f4f6' : T.bodyBg }}>
             <div className="rounded-2xl overflow-hidden shadow-lg border border-black/5">
-              {/* Pitched for banner */}
-              <div style={{ backgroundColor: T.heroBannerBg, borderBottom: `1px solid ${T.heroBannerBorder}` }}
-                className="px-5 py-2.5 flex items-baseline gap-3">
-                <p className="text-xs font-bold uppercase tracking-widest" style={{ color: primary }}>Pitched for</p>
-                <p className="text-sm font-black" style={{ fontFamily: fontObj.stack, color: T.heroText }}>Brand Name</p>
-              </div>
-              {/* Hero */}
-              <div className="px-5 py-5 flex items-center gap-4"
-                style={{ backgroundColor: T.heroBg, borderBottom: T.heroBg === '#ffffff' ? '1px solid #e5e7eb' : 'none' }}>
-                <div className="w-12 h-12 overflow-hidden flex-shrink-0 flex items-center justify-center font-black text-lg"
-                  style={{ backgroundColor: primary, borderRadius: T.avatarRadius, color: '#fff' }}>
-                  {authUser.username?.[0]?.toUpperCase()}
-                </div>
-                <div>
-                  <p className="text-xs font-semibold uppercase tracking-widest mb-0.5" style={{ color: primary }}>UGC Creator</p>
-                  {profile?.name && (
-                    <p className="font-black text-xl leading-none" style={{ fontFamily: fontObj.stack, color: T.heroText }}>
-                      {profile.name}
-                    </p>
-                  )}
-                </div>
-              </div>
-              {/* Body */}
-              <div className="px-5 py-4 flex gap-3" style={{ backgroundColor: T.bodyBg }}>
-                <div className="flex-1 px-4 py-3"
-                  style={{ backgroundColor: T.cardBg, borderRadius: T.cardRadius, border: T.cardBorder, boxShadow: T.cardShadow ?? '0 1px 3px rgba(0,0,0,0.08)' }}>
-                  <p className="text-xs font-bold uppercase tracking-widest text-gray-400 mb-2">About</p>
-                  <p className="text-xs text-gray-600 leading-relaxed line-clamp-2">
-                    {profile?.bio || 'Your bio will appear here.'}
-                  </p>
-                </div>
-                {(profile?.why_work_with_me || profile?.positioning_statement) && (
-                  <div className="w-28 px-3 py-3 flex-shrink-0"
-                    style={{ backgroundColor: T.whyBg, borderRadius: T.cardRadius }}>
-                    <p className="text-[10px] font-bold uppercase tracking-widest mb-2" style={{ color: primary }}>Why Me</p>
-                    <p className="text-white text-[10px] leading-relaxed line-clamp-3 italic">
-                      &ldquo;{profile.why_work_with_me || profile.positioning_statement}&rdquo;
-                    </p>
+
+              {/* ── Centered layout (Minimal) ── */}
+              {T.layout === 'centered' && (
+                <>
+                  <div style={{ backgroundColor: T.heroBannerBg, borderBottom: `1px solid ${T.heroBannerBorder}` }}
+                    className="px-5 py-2 flex items-baseline gap-3">
+                    <p className="text-xs font-bold uppercase tracking-widest" style={{ color: primary }}>Pitched for</p>
+                    <p className="text-sm font-black" style={{ fontFamily: fontObj.stack, color: T.heroText }}>Brand Name</p>
                   </div>
-                )}
-              </div>
+                  <div className="px-5 py-5 flex flex-col items-center text-center"
+                    style={{ backgroundColor: T.heroBg, borderBottom: '1px solid #e5e7eb' }}>
+                    <div className="w-12 h-12 flex-shrink-0 flex items-center justify-center font-black text-lg mb-2"
+                      style={{ backgroundColor: primary, borderRadius: T.avatarRadius, color: '#fff' }}>
+                      {authUser.username?.[0]?.toUpperCase()}
+                    </div>
+                    <p className="text-xs font-semibold uppercase tracking-widest mb-0.5" style={{ color: T.heroText, opacity: 0.6 }}>UGC Creator</p>
+                    {profile?.name && (
+                      <p className="font-black text-xl leading-none" style={{ fontFamily: fontObj.stack, color: T.heroText }}>
+                        {profile.name}
+                      </p>
+                    )}
+                    <div className="flex gap-2 mt-3">
+                      {[1,2,3].map(i => (
+                        <div key={i} className="w-6 h-6 rounded-full" style={{ backgroundColor: `${primary}22`, border: `1px solid ${primary}44` }} />
+                      ))}
+                    </div>
+                  </div>
+                  <div className="px-5 py-4" style={{ backgroundColor: T.bodyBg }}>
+                    <div className="px-4 py-3"
+                      style={{ backgroundColor: T.cardBg, borderRadius: T.cardRadius, border: T.cardBorder, boxShadow: T.cardShadow ?? '0 1px 3px rgba(0,0,0,0.08)' }}>
+                      <p className="text-xs font-bold uppercase tracking-widest text-gray-400 mb-2">About</p>
+                      <p className="text-xs text-gray-600 leading-relaxed line-clamp-2">
+                        {profile?.bio || 'Your bio will appear here.'}
+                      </p>
+                    </div>
+                  </div>
+                </>
+              )}
+
+              {/* ── Cover layout (Bold) ── */}
+              {T.layout === 'cover' && (
+                <>
+                  <div style={{ backgroundColor: T.heroBg, paddingBottom: '2rem' }}
+                    className="px-5 pt-4">
+                    <div className="flex items-baseline gap-2 mb-4">
+                      <p className="text-xs font-bold uppercase tracking-widest" style={{ color: T.heroText, opacity: 0.6 }}>Pitched for</p>
+                      <p className="text-sm font-black" style={{ fontFamily: fontObj.stack, color: T.heroText }}>Brand Name</p>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <div className="w-12 h-12 flex-shrink-0 flex items-center justify-center font-black text-lg"
+                        style={{ backgroundColor: 'rgba(255,255,255,0.2)', borderRadius: T.avatarRadius, color: T.heroText }}>
+                        {authUser.username?.[0]?.toUpperCase()}
+                      </div>
+                      <div>
+                        <p className="text-xs font-semibold uppercase tracking-widest mb-0.5" style={{ color: T.heroText, opacity: 0.65 }}>UGC Creator</p>
+                        {profile?.name && (
+                          <p className="font-black text-xl leading-none" style={{ fontFamily: fontObj.stack, color: T.heroText }}>
+                            {profile.name}
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                  <div className="px-5 py-4 -mt-4"
+                    style={{ backgroundColor: T.bodyBg, borderRadius: '1.5rem 1.5rem 0 0' }}>
+                    <div className="px-4 py-3"
+                      style={{ backgroundColor: T.cardBg, borderRadius: T.cardRadius, border: T.cardBorder, boxShadow: T.cardShadow ?? '0 1px 3px rgba(0,0,0,0.08)' }}>
+                      <p className="text-xs font-bold uppercase tracking-widest text-gray-400 mb-2">About</p>
+                      <p className="text-xs text-gray-600 leading-relaxed line-clamp-2">
+                        {profile?.bio || 'Your bio will appear here.'}
+                      </p>
+                    </div>
+                  </div>
+                </>
+              )}
+
+              {/* ── Sidebar layout (Editorial) ── */}
+              {T.layout === 'sidebar' && (
+                <div className="flex" style={{ minHeight: '130px' }}>
+                  <div className="flex-shrink-0 px-3 py-4 flex flex-col gap-2" style={{ width: '80px', backgroundColor: T.heroBg }}>
+                    <div className="w-9 h-9 flex-shrink-0 flex items-center justify-center font-black text-sm"
+                      style={{ backgroundColor: primary, borderRadius: T.avatarRadius, color: '#fff' }}>
+                      {authUser.username?.[0]?.toUpperCase()}
+                    </div>
+                    {profile?.name && (
+                      <p className="text-[9px] font-black leading-tight" style={{ fontFamily: fontObj.stack, color: T.heroText }}>
+                        {profile.name}
+                      </p>
+                    )}
+                    <p className="text-[8px] font-bold uppercase tracking-wider" style={{ color: primary }}>Creator</p>
+                    <div className="mt-auto flex flex-col gap-1">
+                      {[1,2,3].map(i => (
+                        <div key={i} className="text-[8px] font-semibold" style={{ color: T.heroText, opacity: 0.5 }}>— IG</div>
+                      ))}
+                    </div>
+                  </div>
+                  <div className="flex-1 px-3 py-4" style={{ backgroundColor: T.bodyBg }}>
+                    <div className="px-2 py-2 mb-2 text-[9px] text-gray-400 font-bold uppercase tracking-widest flex items-baseline gap-2">
+                      <span style={{ color: primary }}>Pitched for</span>
+                      <span className="font-black text-gray-700" style={{ fontFamily: fontObj.stack }}>Brand Name</span>
+                    </div>
+                    <div className="px-3 py-2.5"
+                      style={{ backgroundColor: T.cardBg, borderRadius: T.cardRadius, border: T.cardBorder, boxShadow: T.cardShadow ?? '0 1px 3px rgba(0,0,0,0.08)' }}>
+                      <p className="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-1">About</p>
+                      <p className="text-[10px] text-gray-600 leading-relaxed line-clamp-3">
+                        {profile?.bio || 'Your bio will appear here.'}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* ── Stack layout (Modern, default) ── */}
+              {(T.layout === 'stack' || !T.layout) && (
+                <>
+                  <div style={{ backgroundColor: T.heroBannerBg, borderBottom: `1px solid ${T.heroBannerBorder}` }}
+                    className="px-5 py-2.5 flex items-baseline gap-3">
+                    <p className="text-xs font-bold uppercase tracking-widest" style={{ color: primary }}>Pitched for</p>
+                    <p className="text-sm font-black" style={{ fontFamily: fontObj.stack, color: T.heroText }}>Brand Name</p>
+                  </div>
+                  <div className="px-5 py-5 flex items-center gap-4"
+                    style={{ backgroundColor: T.heroBg, borderBottom: T.heroBg === '#ffffff' ? '1px solid #e5e7eb' : 'none' }}>
+                    <div className="w-12 h-12 flex-shrink-0 flex items-center justify-center font-black text-lg"
+                      style={{ backgroundColor: primary, borderRadius: T.avatarRadius, color: '#fff' }}>
+                      {authUser.username?.[0]?.toUpperCase()}
+                    </div>
+                    <div>
+                      <p className="text-xs font-semibold uppercase tracking-widest mb-0.5" style={{ color: primary }}>UGC Creator</p>
+                      {profile?.name && (
+                        <p className="font-black text-xl leading-none" style={{ fontFamily: fontObj.stack, color: T.heroText }}>
+                          {profile.name}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                  <div className="px-5 py-4 flex gap-3" style={{ backgroundColor: T.bodyBg }}>
+                    <div className="flex-1 px-4 py-3"
+                      style={{ backgroundColor: T.cardBg, borderRadius: T.cardRadius, border: T.cardBorder, boxShadow: T.cardShadow ?? '0 1px 3px rgba(0,0,0,0.08)' }}>
+                      <p className="text-xs font-bold uppercase tracking-widest text-gray-400 mb-2">About</p>
+                      <p className="text-xs text-gray-600 leading-relaxed line-clamp-2">
+                        {profile?.bio || 'Your bio will appear here.'}
+                      </p>
+                    </div>
+                    {(profile?.why_work_with_me || profile?.positioning_statement) && (
+                      <div className="w-28 px-3 py-3 flex-shrink-0"
+                        style={{ backgroundColor: T.whyBg, borderRadius: T.cardRadius }}>
+                        <p className="text-[10px] font-bold uppercase tracking-widest mb-2" style={{ color: primary }}>Why Me</p>
+                        <p className="text-[10px] leading-relaxed line-clamp-3 italic" style={{ color: T.whyText }}>
+                          &ldquo;{profile.why_work_with_me || profile.positioning_statement}&rdquo;
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                </>
+              )}
+
             </div>
           </div>
         </div>

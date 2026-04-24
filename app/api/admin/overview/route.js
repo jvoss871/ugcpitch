@@ -8,7 +8,8 @@ export async function GET(req) {
   if (!checkAuth(req)) return Response.json({ error: 'Unauthorized' }, { status: 401 });
 
   try {
-    const users = await getAllUsers();
+    const allUsers = await getAllUsers();
+    const users = allUsers.filter(u => !u.isAdmin);
     const now = Date.now();
     const thirtyDaysAgo = now - 30 * 86400000;
 

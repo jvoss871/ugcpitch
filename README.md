@@ -1,4 +1,4 @@
-# UGC Pitch
+# UGC Edge
 
 Stop blending in. Get targeted.
 
@@ -30,7 +30,7 @@ A lightweight web app for UGC creators to generate opportunity-specific pitch pa
 ### 1. Clone and install
 
 ```bash
-cd ugc-pitch
+cd ugc-edge
 npm install
 ```
 

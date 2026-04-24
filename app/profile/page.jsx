@@ -53,13 +53,22 @@ export default function Profile() {
 
   useEffect(() => {
     if (!authUser) { router.push('/'); return; }
-    const p = storage.getProfile(authUser.username);
-    setProfile({
-      socials: { instagram: '', tiktok: '', canva: '', email: '' },
-      languages: [],
-      location: '',
-      ...p,
-    });
+    fetch(`/api/profile?username=${encodeURIComponent(authUser.username)}`)
+      .then(r => r.json())
+      .then(serverProfile => {
+        const base = { socials: { instagram: '', tiktok: '', canva: '', email: '' }, languages: [], location: '' };
+        if (!serverProfile.name) {
+          const local = storage.getProfile(authUser.username);
+          if (local.name) {
+            fetch('/api/profile', { method: 'PATCH', headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ username: authUser.username, ...local }) }).catch(() => {});
+          }
+          setProfile({ ...base, ...local });
+        } else {
+          setProfile({ ...base, ...serverProfile });
+        }
+      })
+      .catch(() => setProfile({ socials: { instagram: '', tiktok: '', canva: '', email: '' }, languages: [], location: '', ...storage.getProfile(authUser.username) }));
   }, [authUser]);
 
 
@@ -70,8 +79,12 @@ export default function Profile() {
     setProfile(p => ({ ...p, avatar: compressed }));
   };
 
-  const handleSave = () => {
-    storage.saveProfile(authUser.username, profile);
+  const handleSave = async () => {
+    await fetch('/api/profile', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ username: authUser.username, ...profile }),
+    }).catch(() => {});
     setSaved(true);
     setTimeout(() => setSaved(false), 2000);
   };

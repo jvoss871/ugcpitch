@@ -1,14 +1,10 @@
 import { Groq } from 'groq-sdk';
-import { getUser, upsertUser } from '@/lib/db';
+import { getUser, getMonthlyPitchCount, incrementMonthlyPitchCount } from '@/lib/db';
 
-async function incrementPitchCount(username) {
-  if (!username) return;
-  try {
-    const user = await getUser(username);
-    if (user) {
-      await upsertUser(username, { ...user, pitchCount: (user.pitchCount ?? 0) + 1 });
-    }
-  } catch {}
+function pitchLimit(user) {
+  if (!user || user.plan === 'pro') return Infinity;
+  if (user.plan === 'starter') return 50 + (user.bonusPitches ?? 0);
+  return 10;
 }
 
 const groq = new Groq({
@@ -29,6 +25,19 @@ export async function POST(req) {
         { error: 'Missing required fields' },
         { status: 400 }
       );
+    }
+
+    // Server-side limit enforcement
+    const username = profile.username;
+    if (username) {
+      const user = await getUser(username);
+      const limit = pitchLimit(user);
+      if (isFinite(limit)) {
+        const count = await getMonthlyPitchCount(username);
+        if (count >= limit) {
+          return Response.json({ error: 'Monthly pitch limit reached', limitReached: true }, { status: 429 });
+        }
+      }
     }
 
     // Collect all unique tags across the full content library
@@ -115,7 +124,7 @@ Return ONLY valid JSON (no markdown, no preamble) in this exact format:
       );
     }
 
-    await incrementPitchCount(profile.username);
+    await incrementMonthlyPitchCount(profile.username);
     return Response.json(generatedData);
   } catch (error) {
     console.error('Pitch generation error:', error);

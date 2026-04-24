@@ -35,7 +35,7 @@ const FAQ = [
   },
   {
     q: 'How do I get the branding removed from my pitch pages?',
-    a: 'The "Made with UGC Pitch" badge is removed on the Pro plan. Upgrade and it disappears automatically.',
+    a: 'The "Made with UGC Edge" badge is removed on the Pro plan. Upgrade and it disappears automatically.',
   },
 ];
 
@@ -46,7 +46,7 @@ export default function HelpPage() {
     <div className="max-w-2xl mx-auto animate-fade-in-up">
       <div className="mb-8">
         <h1 className="text-4xl font-bold text-gray-900 mb-1 font-display">Help & Tips</h1>
-        <p className="text-gray-500 text-sm">Everything you need to get the most out of UGC Pitch.</p>
+        <p className="text-gray-500 text-sm">Everything you need to get the most out of UGC Edge.</p>
       </div>
 
       <div className="space-y-4">
@@ -54,7 +54,7 @@ export default function HelpPage() {
         {/* Demo video */}
         <div className="card">
           <h2 className="text-base font-bold text-gray-900 mb-1">Product Demo</h2>
-          <p className="text-sm text-gray-500 mb-4">Watch this to get the most out of UGC Pitch.</p>
+          <p className="text-sm text-gray-500 mb-4">Watch this to get the most out of UGC Edge.</p>
           {DEMO_VIDEO_URL ? (
             <div className="relative w-full rounded-xl overflow-hidden" style={{ paddingTop: '56.25%' }}>
               <iframe
@@ -160,7 +160,7 @@ export default function HelpPage() {
         <div className="card text-center py-8">
           <p className="text-sm font-semibold text-gray-900 mb-1">Still stuck?</p>
           <p className="text-sm text-gray-500 mb-4">Reach out and we'll get you sorted.</p>
-          <a href="mailto:support@ugcpitch.com"
+          <a href="mailto:support@ugcedge.com"
             className="inline-block px-5 py-2.5 bg-teal-600 hover:bg-teal-700 text-white text-sm font-semibold rounded-xl transition">
             Contact Support
           </a>

@@ -78,7 +78,28 @@ export default function Content() {
   }, [authUser, loading, router]);
 
   useEffect(() => {
-    if (authUser) setContent(storage.getContent(authUser.username));
+    if (!authUser) return;
+    fetch(`/api/content?username=${encodeURIComponent(authUser.username)}`)
+      .then(r => r.json())
+      .then(async serverContent => {
+        if (serverContent.length === 0) {
+          const local = storage.getContent(authUser.username);
+          if (local.length > 0) {
+            await Promise.all(local.map(item =>
+              fetch('/api/content', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username: authUser.username, ...item }),
+              })
+            ));
+            storage.saveContent(authUser.username, []);
+            setContent(local);
+            return;
+          }
+        }
+        setContent(serverContent);
+      })
+      .catch(() => setContent(storage.getContent(authUser.username)));
   }, [authUser]);
 
   const handleFileChange = async (e) => {
@@ -102,13 +123,18 @@ export default function Content() {
     setInputMode(type === 'video' ? 'url' : 'upload');
   };
 
-  const handleAddContent = (e) => {
+  const handleAddContent = async (e) => {
     e.preventDefault();
     if (!formData.title.trim() || !formData.url.trim()) {
       alert('Please fill in title and add an image or URL');
       return;
     }
-    const newItem = storage.addContentItem(authUser.username, formData);
+    const res = await fetch('/api/content', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ username: authUser.username, ...formData }),
+    });
+    const newItem = await res.json();
     setContent(c => [...c, newItem]);
     setFormData(EMPTY_FORM);
     setPreview(null);
@@ -117,16 +143,25 @@ export default function Content() {
     setShowPanel(false);
   };
 
-  const handleDelete = (id) => {
+  const handleDelete = async (id) => {
     if (!window.confirm('Delete this content?')) return;
-    storage.deleteContentItem(authUser.username, id);
+    await fetch(`/api/content/${id}`, {
+      method: 'DELETE',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ username: authUser.username }),
+    });
     setContent(c => c.filter(x => x.id !== id));
   };
 
-  const handleToggleFeatured = (id) => {
+  const handleToggleFeatured = async (id) => {
     const item = content.find(c => c.id === id);
-    storage.updateContentItem(authUser.username, id, { featured: !item.featured });
-    setContent(c => c.map(x => x.id === id ? { ...x, featured: !x.featured } : x));
+    const featured = !item.featured;
+    await fetch(`/api/content/${id}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ username: authUser.username, featured }),
+    });
+    setContent(c => c.map(x => x.id === id ? { ...x, featured } : x));
   };
 
   const usedTags = [...new Set(content.flatMap(c => c.tags || []))].sort();

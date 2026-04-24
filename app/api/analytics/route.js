@@ -1,10 +1,20 @@
-import { appendAnalytic, getAnalytics } from '@/lib/db';
+import { appendAnalytic, getAnalytics, getPitchByShareId, updatePitch } from '@/lib/db';
 
 export async function POST(req) {
   try {
     const { shareId, type, ...data } = await req.json();
     if (!shareId || !type) return Response.json({ error: 'Missing fields' }, { status: 400 });
     await appendAnalytic(shareId, type, { ...data, recordedAt: new Date().toISOString() });
+
+    // Sync opens to the owning pitch so the dashboard badge stays current
+    if (type === 'view') {
+      getPitchByShareId(shareId).then(pitch => {
+        if (!pitch?.id) return;
+        const opens = [...(pitch.opens ?? []), { timestamp: new Date().toISOString() }];
+        updatePitch(pitch.id, { opens });
+      }).catch(() => {});
+    }
+
     return Response.json({ ok: true });
   } catch {
     return Response.json({ error: 'Failed' }, { status: 500 });

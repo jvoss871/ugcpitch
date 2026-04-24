@@ -11,6 +11,7 @@ export default function CreatePitch() {
   const [jobDescription, setJobDescription] = useState('');
   const [messageType, setMessageType] = useState('note');
   const [generating, setGenerating] = useState(false);
+  const [upgrading, setUpgrading] = useState(null);
   const [error, setError] = useState('');
   const [profile, setProfile] = useState(null);
   const [content, setContent] = useState([]);
@@ -27,12 +28,18 @@ export default function CreatePitch() {
 
   useEffect(() => {
     if (!authUser) return;
-    setProfile(storage.getProfile(authUser.username));
-    setContent(storage.getContent(authUser.username));
     fetch(`/api/plan?username=${encodeURIComponent(authUser.username)}`)
       .then(r => r.json())
       .then(setPlanStatus)
       .catch(() => {});
+    fetch(`/api/profile?username=${encodeURIComponent(authUser.username)}`)
+      .then(r => r.json())
+      .then(p => setProfile(p?.name ? p : storage.getProfile(authUser.username)))
+      .catch(() => setProfile(storage.getProfile(authUser.username)));
+    fetch(`/api/content?username=${encodeURIComponent(authUser.username)}`)
+      .then(r => r.json())
+      .then(c => setContent(c.length > 0 ? c : storage.getContent(authUser.username)))
+      .catch(() => setContent(storage.getContent(authUser.username)));
   }, [authUser]);
 
   const handleGenerate = async (e) => {
@@ -64,34 +71,47 @@ export default function CreatePitch() {
         }),
       });
 
+      if (response.status === 429) {
+        setPlanStatus(s => ({ ...s, monthlyPitchCount: pitchLimit }));
+        return;
+      }
+
       if (!response.ok) {
         throw new Error('Failed to generate pitch');
       }
 
       const generatedPitch = await response.json();
 
-      // Save pitch
-      const pitch = storage.addPitch(authUser.username, {
-        title: generatedPitch.brandName || 'Untitled Brand',
-        jobDescription,
-        messageType,
-        intro: generatedPitch.intro,
-        outreach: generatedPitch.outreach,
-        selectedTags: generatedPitch.selectedTags || [],
-        selectedContent: (() => {
-          const byTag = content
-            .filter((c) => (generatedPitch.selectedTags || []).some((t) => (c.tags || []).includes(t)))
-            .sort((a, b) => (b.featured ? 1 : 0) - (a.featured ? 1 : 0));
-          const pinnedUrl = customEnabled && customUrl.trim() ? customUrl.trim() : null;
-          const pinned = pinnedUrl
-            ? content.filter(c => c.url && c.url.trim() === pinnedUrl && !byTag.find(b => b.id === c.id))
-            : [];
-          return [...byTag, ...pinned];
-        })(),
-        customContent: customEnabled && customUrl.trim()
-          ? { url: customUrl.trim(), label: customLabel.trim() }
-          : null,
+      // Save pitch server-side
+      const selectedContent = (() => {
+        const byTag = content
+          .filter((c) => (generatedPitch.selectedTags || []).some((t) => (c.tags || []).includes(t)))
+          .sort((a, b) => (b.featured ? 1 : 0) - (a.featured ? 1 : 0));
+        const pinnedUrl = customEnabled && customUrl.trim() ? customUrl.trim() : null;
+        const pinned = pinnedUrl
+          ? content.filter(c => c.url && c.url.trim() === pinnedUrl && !byTag.find(b => b.id === c.id))
+          : [];
+        return [...byTag, ...pinned];
+      })();
+
+      const pitchRes = await fetch('/api/pitches', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          username: authUser.username,
+          title: generatedPitch.brandName || 'Untitled Brand',
+          jobDescription,
+          messageType,
+          intro: generatedPitch.intro,
+          outreach: generatedPitch.outreach,
+          selectedTags: generatedPitch.selectedTags || [],
+          selectedContent,
+          customContent: customEnabled && customUrl.trim()
+            ? { url: customUrl.trim(), label: customLabel.trim() }
+            : null,
+        }),
       });
+      const pitch = await pitchRes.json();
 
       if (usingOneTime) {
         fetch(`/api/plan?username=${encodeURIComponent(authUser.username)}`, { method: 'PATCH' })
@@ -101,8 +121,7 @@ export default function CreatePitch() {
       }
 
       router.push(`/pitch/${pitch.id}`);
-    } catch (err) {
-      console.error(err);
+    } catch {
       setError('Failed to generate pitch. Make sure you have a GROQ_API_KEY set.');
     } finally {
       setGenerating(false);
@@ -114,35 +133,99 @@ export default function CreatePitch() {
 
   const status = planStatus?.status;
   const pitchLimit = planStatus?.pitchLimit ?? (status === 'free' ? 10 : 50);
-  const monthlyCount = storage.getMonthlyPitchCount(authUser.username);
+  const monthlyCount = planStatus?.monthlyPitchCount ?? 0;
   const isAtLimit = status !== 'pro' && monthlyCount >= pitchLimit;
   const oneTimePitches = planStatus?.oneTimePitches ?? 0;
   const usingOneTime = isAtLimit && oneTimePitches > 0;
   const blocked = isAtLimit && !usingOneTime;
 
+  const startCheckout = async (plan) => {
+    setUpgrading(plan);
+    try {
+      const res = await fetch('/api/stripe/checkout', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username: authUser.username, plan }),
+      });
+      const { url, error } = await res.json();
+      if (error) throw new Error(error);
+      window.location.href = url;
+    } catch {
+      setUpgrading(null);
+    }
+  };
+
   if (blocked) {
     return (
-      <div className="max-w-lg mx-auto text-center py-24">
-        <p className="text-2xl font-black text-gray-900 mb-3">Monthly limit reached</p>
-        <p className="text-gray-500 mb-8">
-          You've used all {pitchLimit} pitches this month.
-          {status === 'free' ? ' Upgrade to keep pitching.' : ' Upgrade to Pro for unlimited pitches.'}
-        </p>
-        <div className="flex flex-col sm:flex-row gap-3 justify-center">
+      <div className="max-w-md mx-auto py-20 animate-fade-in-up">
+        <div className="text-center mb-10">
+          <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-amber-50 border border-amber-100 mb-5">
+            <svg className="w-7 h-7 text-amber-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+            </svg>
+          </div>
+          <h1 className="text-3xl font-black text-gray-900 mb-2">You've hit your limit</h1>
+          <p className="text-gray-500">
+            You've used all <span className="font-semibold text-gray-700">{pitchLimit} pitches</span> this month.
+            Upgrade to keep landing brand deals.
+          </p>
+        </div>
+
+        <div className="space-y-3 mb-8">
           {status === 'free' && (
-            <div className="rounded-2xl border border-gray-200 p-6 text-left flex-1">
-              <p className="font-black text-gray-900 text-lg mb-1">Starter</p>
-              <p className="text-3xl font-black text-gray-900 mb-3">$9<span className="text-sm font-normal text-gray-500">/mo</span></p>
-              <p className="text-sm text-gray-500">50 pitches/month, open tracking, all templates.</p>
+            <div className="rounded-2xl border border-gray-200 p-5">
+              <div className="flex items-start justify-between mb-3">
+                <div>
+                  <p className="font-black text-gray-900 text-lg leading-none">Starter</p>
+                  <p className="text-xs text-gray-400 mt-0.5">Great for active creators</p>
+                </div>
+                <p className="text-2xl font-black text-gray-900">$9<span className="text-sm font-normal text-gray-400">/mo</span></p>
+              </div>
+              <ul className="space-y-1.5 mb-4">
+                {['50 pitches per month', 'Open tracking', 'All 4 templates', 'Content library'].map(f => (
+                  <li key={f} className="flex items-center gap-2 text-sm text-gray-600">
+                    <svg className="w-4 h-4 text-teal-500 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                    {f}
+                  </li>
+                ))}
+              </ul>
+              <button
+                onClick={() => startCheckout('starter')}
+                disabled={!!upgrading}
+                className="block w-full text-center py-2.5 rounded-xl border border-gray-300 text-sm font-bold text-gray-700 hover:border-gray-400 disabled:opacity-60 transition">
+                {upgrading === 'starter' ? 'Redirecting…' : 'Upgrade to Starter'}
+              </button>
             </div>
           )}
-          <div className="rounded-2xl bg-teal-600 p-6 text-left flex-1">
-            <p className="font-black text-white text-lg mb-1">Pro</p>
-            <p className="text-3xl font-black text-white mb-3">$19<span className="text-sm font-normal text-teal-200">/mo</span></p>
-            <p className="text-sm text-teal-100">Unlimited pitches, advanced analytics, custom URL.</p>
+
+          <div className="rounded-2xl bg-gray-900 p-5">
+            <div className="flex items-start justify-between mb-3">
+              <div>
+                <p className="font-black text-white text-lg leading-none">Pro</p>
+                <p className="text-xs text-teal-400 mt-0.5">For serious creators</p>
+              </div>
+              <p className="text-2xl font-black text-white">$19<span className="text-sm font-normal text-gray-400">/mo</span></p>
+            </div>
+            <ul className="space-y-1.5 mb-4">
+              {['Unlimited pitches', 'Advanced analytics', 'Custom URL', 'Remove UGC Edge branding'].map(f => (
+                <li key={f} className="flex items-center gap-2 text-sm text-gray-300">
+                  <svg className="w-4 h-4 text-teal-400 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                  {f}
+                </li>
+              ))}
+            </ul>
+            <button
+              onClick={() => startCheckout('pro')}
+              disabled={!!upgrading}
+              className="block w-full text-center py-2.5 rounded-xl bg-teal-500 hover:bg-teal-400 disabled:opacity-60 text-sm font-bold text-white transition">
+              {upgrading === 'pro' ? 'Redirecting…' : 'Upgrade to Pro'}
+            </button>
           </div>
         </div>
-        <p className="text-xs text-gray-400 mt-6">Contact us to upgrade your account.</p>
+
+        <p className="text-center text-xs text-gray-400">
+          Reply usually within a few hours · <a href="mailto:support@ugcedge.com" className="underline hover:text-gray-600">support@ugcedge.com</a>
+        </p>
       </div>
     );
   }

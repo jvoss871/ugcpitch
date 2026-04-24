@@ -31,6 +31,8 @@ export default function AdminPage() {
   const [editState, setEditState]     = useState({});
   const [saving, setSaving]           = useState(false);
   const [search, setSearch]           = useState('');
+  const [confirmDelete, setConfirmDelete] = useState(null);
+  const [deleting, setDeleting]       = useState(false);
 
   const authHeaders = { 'Content-Type': 'application/json', 'x-admin-password': password };
 
@@ -74,7 +76,22 @@ export default function AdminPage() {
       features: { ...u.features },
       bonusPitches: u.bonusPitches ?? 0,
       oneTimePitches: u.oneTimePitches ?? 0,
+      isAdmin: u.isAdmin ?? false,
     });
+  };
+
+  const handleDeleteUser = async (username) => {
+    setDeleting(true);
+    await fetch('/api/admin/users', {
+      method: 'DELETE',
+      headers: authHeaders,
+      body: JSON.stringify({ username }),
+    });
+    setUsers(us => us.filter(u => u.username !== username));
+    setExpandedUser(null);
+    setConfirmDelete(null);
+    setDeleting(false);
+    fetchOverview();
   };
 
   const saveUser = async (username) => {
@@ -89,6 +106,7 @@ export default function AdminPage() {
         features: editState.features,
         bonusPitches: editState.plan === 'starter' ? (parseInt(editState.bonusPitches, 10) || 0) : 0,
         oneTimePitches: parseInt(editState.oneTimePitches, 10) || 0,
+        isAdmin: editState.isAdmin ?? false,
       }),
     });
     await fetchUsers();
@@ -101,7 +119,7 @@ export default function AdminPage() {
     return (
       <div className="min-h-screen bg-gray-950 flex items-center justify-center px-6">
         <div className="w-full max-w-sm">
-          <p className="text-gray-500 text-xs uppercase tracking-widest text-center mb-2">UGC Pitch</p>
+          <p className="text-gray-500 text-xs uppercase tracking-widest text-center mb-2">UGC Edge</p>
           <h1 className="text-white text-3xl font-black mb-8 text-center">Admin</h1>
           <form onSubmit={login} className="space-y-4">
             <input
@@ -123,9 +141,10 @@ export default function AdminPage() {
     );
   }
 
-  const filteredUsers = users.filter(u =>
-    u.username.toLowerCase().includes(search.toLowerCase())
-  );
+  const filteredUsers = users.filter(u => {
+    const q = search.toLowerCase();
+    return u.username.toLowerCase().includes(q) || (u.email ?? '').toLowerCase().includes(q);
+  });
 
   return (
     <div className="min-h-screen bg-gray-950 text-white">
@@ -208,8 +227,18 @@ export default function AdminPage() {
                   className="w-full grid grid-cols-[1fr_auto_auto_auto_auto] gap-4 items-center px-5 py-4 text-left hover:bg-gray-800/60 transition"
                 >
                   <div>
-                    <p className="font-bold text-white">{u.username}</p>
+                    <div className="flex items-center gap-2">
+                      <p className="font-bold text-white">{u.email ?? u.username}</p>
+                      {u.isAdmin && (
+                        <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-violet-950 text-violet-400 uppercase tracking-widest">
+                          admin
+                        </span>
+                      )}
+                    </div>
                     <p className="text-xs text-gray-600 mt-0.5">
+                      {u.username !== (u.email ?? u.username) && (
+                        <span className="text-gray-500 mr-2 font-mono">{u.username}</span>
+                      )}
                       Joined {new Date(u.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
                       {u.lastSeen && ` · Last seen ${new Date(u.lastSeen).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}`}
                     </p>
@@ -318,13 +347,57 @@ export default function AdminPage() {
                       <p className="text-xs text-gray-600 mt-1">Used first when the user hits their limit. Depletes permanently — does not reset monthly.</p>
                     </div>
 
-                    <button
-                      onClick={() => saveUser(u.username)}
-                      disabled={saving}
-                      className="px-5 py-2 bg-teal-600 hover:bg-teal-500 disabled:opacity-50 text-white text-sm font-bold rounded-xl transition"
-                    >
-                      {saving ? 'Saving…' : 'Save Changes'}
-                    </button>
+                    {/* Admin flag */}
+                    <div className="border-t border-gray-800 pt-5">
+                      <label className="flex items-center gap-3 cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={editState.isAdmin ?? false}
+                          onChange={e => setEditState(s => ({ ...s, isAdmin: e.target.checked }))}
+                          className="w-4 h-4 rounded border-gray-600 text-violet-600 focus:ring-violet-500 focus:ring-offset-gray-900"
+                        />
+                        <div>
+                          <span className="text-sm text-gray-300 font-semibold">Mark as Admin</span>
+                          <p className="text-xs text-gray-600 mt-0.5">Excludes this account from all stats and MRR.</p>
+                        </div>
+                      </label>
+                    </div>
+
+                    <div className="flex items-center justify-between pt-2">
+                      <button
+                        onClick={() => saveUser(u.username)}
+                        disabled={saving}
+                        className="px-5 py-2 bg-teal-600 hover:bg-teal-500 disabled:opacity-50 text-white text-sm font-bold rounded-xl transition"
+                      >
+                        {saving ? 'Saving…' : 'Save Changes'}
+                      </button>
+
+                      {confirmDelete === u.username ? (
+                        <div className="flex items-center gap-3">
+                          <p className="text-sm text-red-400">Delete this user?</p>
+                          <button
+                            onClick={() => setConfirmDelete(null)}
+                            className="px-3 py-1.5 text-xs font-semibold text-gray-400 hover:text-white bg-gray-800 rounded-lg transition"
+                          >
+                            Cancel
+                          </button>
+                          <button
+                            onClick={() => handleDeleteUser(u.username)}
+                            disabled={deleting}
+                            className="px-3 py-1.5 text-xs font-bold text-white bg-red-600 hover:bg-red-500 disabled:opacity-50 rounded-lg transition"
+                          >
+                            {deleting ? 'Deleting…' : 'Confirm Delete'}
+                          </button>
+                        </div>
+                      ) : (
+                        <button
+                          onClick={() => setConfirmDelete(u.username)}
+                          className="px-4 py-2 text-sm font-semibold text-red-400 hover:text-red-300 hover:bg-red-950 rounded-xl transition"
+                        >
+                          Delete User
+                        </button>
+                      )}
+                    </div>
                   </div>
                 )}
               </div>
