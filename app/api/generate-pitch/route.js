@@ -43,65 +43,71 @@ export async function POST(req) {
     // Collect all unique tags across the full content library
     const allTags = [...new Set(content.flatMap(c => c.tags || []))];
 
-    // Score each content item by how many of its tags appear in the job description,
-    // then take the top 10 most relevant pieces to send as context
+    // Score each content item by tag overlap with the job description, send top 20
     const jobDescLower = jobDescription.toLowerCase();
     const rankedContent = content
       .map(c => ({
         ...c,
-        _score: (c.tags || []).filter(t => jobDescLower.includes(t.toLowerCase())).length,
+        _score: (c.tags || []).filter(t => jobDescLower.includes(t.toLowerCase())).length
+          + (c.featured ? 0.5 : 0),
       }))
       .sort((a, b) => b._score - a._score)
-      .slice(0, 10);
+      .slice(0, 20);
 
     const contentSummary = rankedContent
       .map((c, i) => {
         const desc = c.description ? ` — ${c.description}` : '';
-        return `${i + 1}. ${c.title}${desc} (Tags: ${(c.tags || []).join(', ')}) [${c.type}]`;
+        const featured = c.featured ? ' ★featured' : '';
+        return `${i + 1}. [${c.type.toUpperCase()}]${featured} ${c.title}${desc} (Tags: ${(c.tags || []).join(', ')})`;
       })
       .join('\n');
 
     const systemPrompt = `You are a UGC pitch generator. Your job is to help creators write targeted, effort-evident pitches to brands.
 
 Creator Profile:
-- Username: ${profile.username}
+- Name: ${profile.name || profile.username}
 - Bio: ${profile.bio || 'Not set'}
 - Niches: ${profile.niche_tags?.join(', ') || 'Not specified'}
 - Positioning: ${profile.positioning_statement || 'Not set'}
+- Why work with me: ${profile.why_work_with_me || 'Not set'}
+- Location: ${profile.location || 'Not specified'}
+- Languages: ${profile.languages?.join(', ') || 'Not specified'}
+- Socials: ${Object.entries(profile.socials || {}).filter(([, v]) => v).map(([k, v]) => `${k}: ${v}`).join(', ') || 'None listed'}
 
-Creator's Content (most relevant pieces shown):
+Creator's Content Library (top matches shown, ★ = featured):
 ${contentSummary || 'No content yet'}
 
 Creator's full tag library: ${allTags.length > 0 ? allTags.join(', ') : 'none'}
 
 Your task:
-1. Extract the brand name from the job description (e.g. "Nike", "Notion", "SKIMS"). If no brand name is visible, infer the most likely company name from context. If truly unknown, use a short description like "Fitness Brand".
-2. Analyze the job description to understand what the brand needs
-3. Generate a compelling pitch introduction (2-3 sentences) that shows why this creator is perfect
-4. If messageType is 'note': Create a short, snappy response (1-2 sentences) suitable for Reddit comments or Instagram DMs
-5. If messageType is 'message': Create a professional, detailed email-style pitch (3-4 sentences) with clear value proposition
+1. Extract the brand name from the job description (e.g. "Nike", "Notion", "SKIMS"). If no brand name is visible, infer it from context. If truly unknown, use a short descriptor like "Fitness Brand".
+2. Analyze what the brand specifically needs — tone, format, demographic, content type.
+3. Write a compelling pitch intro (2-3 sentences) that shows direct relevance — reference specific content or skills from the library where possible.
+4. If messageType is 'note': Write a short punchy reply (1-2 sentences) for Reddit/DM. Get to the point immediately.
+5. If messageType is 'message': Write a confident, specific email pitch (3-5 sentences) that connects the creator's work directly to the brand's brief.
 
-TONE EXAMPLES (match this voice — confident, brief, human):
+TONE EXAMPLES (match this voice exactly — confident, brief, human, no corporate speak):
 - note: "Huge fan of what you're building — I've done a bunch of lifestyle/demo work that fits this brief perfectly. Happy to send samples."
-- message: "I came across your listing and this one's right in my wheelhouse — I've been creating fitness content for the past two years and have a solid library of demo-style videos that match the energy you're going for. My engagement skews 25–34F which I think lines up well with your target. Would love to put together a few concepts if you're open to it."
+- message: "I came across your listing and this one's right in my wheelhouse — I've been creating fitness content for the past two years and have a solid library of demo-style videos that match the energy you're going for. My engagement skews 25–34F which lines up well with your target. Would love to put together a few concepts if you're open to it."
 
-IMPORTANT:
-- Match the tone of the examples above — direct, warm, no filler phrases like "I am writing to express my interest"
-- Reference specific content or skills where relevant
-- Be confident but not arrogant
-- For selectedTags: choose ONLY from the creator's full tag library listed above. Do not invent new tags.
+RULES:
+- Direct, warm, zero filler ("I am writing to express my interest" is banned)
+- Reference specific content pieces or niches from the library where they fit
+- For selectedTags: ONLY use tags from the creator's full tag library. Never invent new ones.
+- Outreach must feel written by a human, not an AI
 
-Return ONLY valid JSON (no markdown, no preamble) in this exact format:
+Return ONLY valid JSON (no markdown, no preamble):
 {
   "brandName": "Extracted brand name",
-  "intro": "2-3 sentence pitch introduction",
-  "outreach": "The ${messageType} version of the outreach message",
-  "selectedTags": ["choose only from the creator's tag library"]
+  "intro": "2-3 sentence pitch introduction shown on the pitch page",
+  "outreach": "The ${messageType} outreach message the creator sends to the brand",
+  "selectedTags": ["tags from the creator's tag library that match this brand"]
 }`;
 
     const completion = await groq.chat.completions.create({
       model: 'llama-3.3-70b-versatile',
-      max_tokens: 800,
+      max_tokens: 2000,
+      temperature: 0.72,
       messages: [
         { role: 'system', content: systemPrompt },
         { role: 'user', content: `Job Description:\n${jobDescription}\n\nGenerate the pitch.` },

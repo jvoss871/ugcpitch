@@ -23,7 +23,7 @@ Positioning: ${positioning_statement || 'Not provided'}`,
         },
       ],
       temperature: 0.8,
-      max_tokens: 120,
+      max_tokens: 200,
     });
 
     const text = completion.choices[0]?.message?.content?.trim() ?? '';
