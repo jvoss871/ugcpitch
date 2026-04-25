@@ -36,6 +36,8 @@ export default function LayoutContent({ children }) {
       .catch(() => setPlanStatus('free'));
   }, [user]);
 
+  const planBadge = planStatus ? (PLAN_BADGE[planStatus] ?? PLAN_BADGE.free) : null;
+
   // Pages that render with no app chrome
   if (pathname === '/pitch/view' || pathname === '/admin' || pathname === '/login') {
     return <>{children}</>;
@@ -93,17 +95,14 @@ export default function LayoutContent({ children }) {
                     </Link>
                     <div className="border-t border-gray-100 mt-1 pt-1">
                       <Link href="/upgrade" onClick={() => setMenuOpen(false)}
-                        className="px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 flex items-center justify-between">
-                        <span>Manage Plan</span>
-                        {planStatus && (() => {
-                          const badge = PLAN_BADGE[planStatus] ?? PLAN_BADGE.free;
-                          return (
-                            <span className="text-xs font-bold px-2 py-0.5 rounded-full"
-                              style={{ backgroundColor: badge.bg, color: badge.color }}>
-                              {badge.label}
-                            </span>
-                          );
-                        })()}
+                        className="px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2 w-full">
+                        <span className="flex-1">Manage Plan</span>
+                        {planBadge && (
+                          <span className="text-xs font-bold px-2 py-0.5 rounded-full flex-shrink-0"
+                            style={{ backgroundColor: planBadge.bg, color: planBadge.color }}>
+                            {planBadge.label}
+                          </span>
+                        )}
                       </Link>
                     </div>
                     <div className="border-t border-gray-100 mt-1 pt-1">
