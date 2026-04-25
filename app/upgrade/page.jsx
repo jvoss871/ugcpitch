@@ -108,7 +108,7 @@ export default function UpgradePage() {
           return (
             <div
               key={plan.id}
-              className="rounded-2xl p-6 relative"
+              className="rounded-2xl p-6"
               style={{
                 backgroundColor: plan.dark ? '#0f1117' : '#fff',
                 border: isCurrentPlan
@@ -117,9 +117,11 @@ export default function UpgradePage() {
               }}
             >
               {isCurrentPlan && (
-                <span className="absolute top-4 right-4 text-xs font-bold bg-teal-500 text-white px-2.5 py-1 rounded-full">
-                  Current plan
-                </span>
+                <div className="flex justify-center mb-4">
+                  <span className="text-xs font-bold bg-teal-500 text-white px-3 py-1 rounded-full">
+                    Current plan
+                  </span>
+                </div>
               )}
               <div className="flex items-start justify-between mb-4">
                 <div>
@@ -183,17 +185,6 @@ export default function UpgradePage() {
             ? 'No billing account linked. If you subscribed recently, wait a moment and try again.'
             : `Billing portal error: ${portalError}. Please try again.`}
         </div>
-      )}
-
-      {isPaying && (
-        <p className="text-center text-xs text-gray-400 mt-6">
-          To cancel or change plans, use{' '}
-          <button onClick={openBillingPortal} disabled={managingBilling}
-            className="underline hover:text-gray-600 disabled:opacity-50 transition">
-            Manage subscription
-          </button>
-          .
-        </p>
       )}
 
     </div>
