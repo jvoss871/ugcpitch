@@ -101,7 +101,7 @@ export default function OGImage() {
             color: '#374151',
             marginLeft: '4px',
           }}>
-            · ugcedge.com
+            · ugc-edge.com
           </div>
         </div>
       </div>

@@ -1,7 +1,7 @@
 import { getPitch } from '@/lib/db';
 import PitchViewClient from './PitchViewClient';
 
-const SITE = 'https://ugcedge.com';
+const SITE = 'https://ugc-edge.com';
 
 export async function generateMetadata({ searchParams }) {
   const id = searchParams?.id;

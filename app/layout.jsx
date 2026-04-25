@@ -8,11 +8,11 @@ export const metadata = {
     template: '%s | UGC Edge',
   },
   description: 'Paste any brand listing. Get a custom pitch page with tailored copy, your best content, and your brand — ready to send in 30 seconds.',
-  metadataBase: new URL('https://ugcedge.com'),
+  metadataBase: new URL('https://ugc-edge.com'),
   openGraph: {
     title: 'UGC Edge — The pitch page that gets you picked',
     description: 'Paste any brand listing. Get a custom pitch page with tailored copy, your best content, and your brand — ready to send in 30 seconds.',
-    url: 'https://ugcedge.com',
+    url: 'https://ugc-edge.com',
     siteName: 'UGC Edge',
     type: 'website',
   },

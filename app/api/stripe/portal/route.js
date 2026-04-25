@@ -2,7 +2,7 @@ import Stripe from 'stripe';
 import { getUser } from '@/lib/db';
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
-const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://ugcedge.com';
+const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://ugc-edge.com';
 
 export async function POST(req) {
   try {

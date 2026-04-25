@@ -15,7 +15,7 @@ const PLANS = {
   },
 };
 
-const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://ugcedge.com';
+const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://ugc-edge.com';
 
 export async function POST(req) {
   try {

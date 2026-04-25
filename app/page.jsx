@@ -118,7 +118,7 @@ export default function Home() {
                   <div className="w-3 h-3 rounded-full bg-green-400" />
                 </div>
                 <div className="flex-1 mx-3 bg-white rounded-md h-6 flex items-center px-3 border border-gray-200">
-                  <span className="text-gray-400 text-[11px] font-mono truncate">ugcedge.com/p/jessica-kim-nike</span>
+                  <span className="text-gray-400 text-[11px] font-mono truncate">ugc-edge.com/p/jessica-kim-nike</span>
                 </div>
               </div>
 

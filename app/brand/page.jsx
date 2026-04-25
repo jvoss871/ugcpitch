@@ -72,7 +72,7 @@ export default function BrandSetup() {
       const res = await fetch(`/api/validate-handle?handle=${encodeURIComponent(clean)}&username=${encodeURIComponent(authUser.username)}`);
       const { available, error } = await res.json();
       setHandleStatus(available ? 'available' : 'taken');
-      setHandleMsg(error || (available ? `ugcedge.com/${clean}/your-pitch` : 'This handle is already taken'));
+      setHandleMsg(error || (available ? `ugc-edge.com/${clean}/your-pitch` : 'This handle is already taken'));
     }, 400);
   };
 
@@ -341,10 +341,10 @@ export default function BrandSetup() {
                 }
               </div>
               <p className="text-xs text-gray-400 mb-3">
-                Share pitches as <span className="font-mono">ugcedge.com/your-handle/pitch-id</span>
+                Share pitches as <span className="font-mono">ugc-edge.com/your-handle/pitch-id</span>
               </p>
               <div className="flex items-center gap-2">
-                <span className="text-sm text-gray-400 flex-shrink-0">ugcedge.com/</span>
+                <span className="text-sm text-gray-400 flex-shrink-0">ugc-edge.com/</span>
                 <input
                   type="text"
                   value={handle}
@@ -364,7 +364,7 @@ export default function BrandSetup() {
               )}
               {canUse && !handleMsg && handle && handleStatus === null && (
                 <p className="text-xs text-gray-400 mt-2">
-                  Current: <span className="font-mono font-semibold">ugcedge.com/{handle}</span>
+                  Current: <span className="font-mono font-semibold">ugc-edge.com/{handle}</span>
                 </p>
               )}
               {!canUse && (
