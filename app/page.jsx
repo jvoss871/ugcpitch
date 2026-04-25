@@ -234,9 +234,9 @@ export default function Home() {
       <section className="bg-white py-24 px-6">
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-14">
-            <p className="text-xs font-bold uppercase tracking-widest text-teal-600 mb-3">Sound familiar?</p>
-            <h2 className="text-4xl font-black text-gray-900">The UGC pitch struggle is real.</h2>
-            <p className="text-gray-500 mt-3 max-w-xl mx-auto">Most creators are sending the same generic pitch as everyone else. Here's what that actually looks like.</p>
+            <p className="text-xs font-bold uppercase tracking-widest text-teal-600 mb-3">Why most creators never get a reply</p>
+            <h2 className="text-4xl font-black text-gray-900">Most creators never get a reply. Here's why.</h2>
+            <p className="text-gray-500 mt-3 max-w-xl mx-auto">Agencies see hundreds of applications. Most get ignored instantly.</p>
           </div>
 
           <div className="space-y-6">
@@ -270,7 +270,7 @@ export default function Home() {
                   <iframe
                     className="w-full h-full"
                     src="https://www.youtube.com/embed/VIDEO_ID?rel=0&modestbranding=1"
-                    title="The UGC pitch struggle is real"
+                    title="Most creators never get a reply. Here's why."
                     allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                     allowFullScreen
                     style={{ display: 'block' }}
