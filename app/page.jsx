@@ -5,28 +5,6 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useAuth } from './context/AuthContext';
 
-const PROBLEMS = [
-  {
-    problem: 'You copy-paste the same pitch to every brand',
-    solve: 'Every pitch is generated from the job description — tailored language, relevant examples, right tone.',
-  },
-  {
-    problem: 'Brands can\'t tell you apart from 200 other creators',
-    solve: 'Your shareable pitch page is designed, branded, and built specifically for that opportunity.',
-  },
-  {
-    problem: 'You\'re guessing which content to include',
-    solve: 'AI picks your most relevant work based on the brand\'s niche and what they\'re asking for.',
-  },
-  {
-    problem: 'Your pitch lives in a DM and disappears',
-    solve: 'Every pitch gets a permanent link. Brands can revisit it, share it with their team, and track opens.',
-  },
-  {
-    problem: 'You have no idea if anyone even looked at it',
-    solve: 'See every time your pitch is opened so you know when to follow up.',
-  },
-];
 
 
 const PLANS = [
@@ -286,7 +264,7 @@ export default function Home() {
                 </div>
               </div>
 
-              <p className="text-xs text-gray-400 border-t border-gray-200 pt-4">If you don't bring the strategy, you're just another task on their to-do list</p>
+              <p className="text-xs text-gray-400 border-t border-gray-200 pt-4">No concept means you're just another task they have to manage.</p>
             </div>
 
             {/* Card 3 — Irrelevant portfolios */}
