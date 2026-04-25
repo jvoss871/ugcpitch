@@ -248,14 +248,13 @@ export default function Home() {
               <p className="text-xs font-bold uppercase tracking-widest text-gray-400 mb-2">Generic pitches</p>
               <p className="text-xl font-black text-gray-900 mb-5">You sound like everyone else</p>
 
-              {/* Visual: stacked "Interested" comments */}
-              <div className="flex-1 flex flex-col justify-center gap-2 mb-5">
-                {['Interested', 'Interested', 'Interested'].map((text, i) => (
-                  <div key={i} className="flex items-center gap-2.5 bg-white border border-gray-200 rounded-xl px-4 py-2.5 shadow-sm">
-                    <div className="w-6 h-6 rounded-full bg-gray-200 flex-shrink-0" />
-                    <span className="text-sm font-medium text-gray-500">{text}</span>
-                  </div>
-                ))}
+              {/* Visual: ad thread competition image */}
+              <div className="flex-1 flex items-center justify-center mb-5 rounded-xl overflow-hidden">
+                <img
+                  src="/images/ad-thread-competition.png"
+                  alt="Creators competing in an ad thread"
+                  className="w-full h-auto block rounded-xl"
+                />
               </div>
 
               <p className="text-xs text-gray-400 border-t border-gray-200 pt-4">Generic replies get ignored instantly</p>
