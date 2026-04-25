@@ -213,7 +213,7 @@ export default function Home() {
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-14">
             <p className="text-xs font-bold uppercase tracking-widest text-teal-600 mb-3">Sound familiar?</p>
-            <h2 className="text-4xl font-black text-gray-900">Most creators never get a reply. Here's why.</h2>
+            <h2 className="text-4xl font-black text-gray-900">You're getting ignored — and this is why.</h2>
             <p className="text-gray-500 mt-3 max-w-xl mx-auto">Brands and agencies see hundreds of applications. Most get ignored instantly.</p>
           </div>
 
