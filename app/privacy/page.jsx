@@ -48,12 +48,7 @@ export default function Privacy() {
 
         <section>
           <h2 className="text-xl font-bold text-gray-900 mb-3">6. Your Rights</h2>
-          <p>You can request a copy of your data, ask us to correct it, or ask us to delete it at any time by emailing <a href="mailto:support@ugcedge.com" className="text-teal-600 hover:underline">support@ugcedge.com</a>. If you're in the EU/UK, you have additional rights under GDPR/UK GDPR.</p>
-        </section>
-
-        <section>
-          <h2 className="text-xl font-bold text-gray-900 mb-3">7. Contact</h2>
-          <p>Privacy questions: <a href="mailto:support@ugcedge.com" className="text-teal-600 hover:underline">support@ugcedge.com</a>.</p>
+          <p>You can request a copy of your data, ask us to correct it, or ask us to delete it at any time. If you're in the EU/UK, you have additional rights under GDPR/UK GDPR.</p>
         </section>
 
       </div>

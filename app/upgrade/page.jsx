@@ -180,8 +180,8 @@ export default function UpgradePage() {
       {portalError && (
         <div className="mt-4 px-4 py-3 bg-red-50 border border-red-200 rounded-xl text-sm text-red-700">
           {portalError === 'No billing account found'
-            ? 'No billing account linked. If you subscribed recently, wait a moment and try again — or email support@ugcedge.com.'
-            : `Billing portal error: ${portalError}. Email support@ugcedge.com and we'll sort it.`}
+            ? 'No billing account linked. If you subscribed recently, wait a moment and try again.'
+            : `Billing portal error: ${portalError}. Please try again.`}
         </div>
       )}
 
@@ -196,12 +196,6 @@ export default function UpgradePage() {
         </p>
       )}
 
-      <p className="text-center text-xs text-gray-400 mt-3">
-        Questions?{' '}
-        <a href="mailto:support@ugcedge.com" className="underline hover:text-gray-600">
-          support@ugcedge.com
-        </a>
-      </p>
     </div>
   );
 }

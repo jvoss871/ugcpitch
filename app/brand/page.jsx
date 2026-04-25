@@ -369,8 +369,7 @@ export default function BrandSetup() {
               )}
               {!canUse && (
                 <p className="text-xs text-gray-400 mt-2">
-                  <a href={`mailto:support@ugcedge.com?subject=${encodeURIComponent('Upgrade my UGC Edge account')}`}
-                    className="text-teal-600 font-semibold hover:underline">Upgrade to Pro</a> to set a custom URL.
+                  <a href="/upgrade" className="text-teal-600 font-semibold hover:underline">Upgrade to Pro</a> to set a custom URL.
                 </p>
               )}
             </div>

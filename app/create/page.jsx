@@ -224,7 +224,6 @@ export default function CreatePitch() {
         </div>
 
         <p className="text-center text-xs text-gray-400">
-          Reply usually within a few hours · <a href="mailto:support@ugcedge.com" className="underline hover:text-gray-600">support@ugcedge.com</a>
         </p>
       </div>
     );

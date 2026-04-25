@@ -156,15 +156,6 @@ export default function HelpPage() {
           </div>
         </div>
 
-        {/* Contact */}
-        <div className="card text-center py-8">
-          <p className="text-sm font-semibold text-gray-900 mb-1">Still stuck?</p>
-          <p className="text-sm text-gray-500 mb-4">Reach out and we'll get you sorted.</p>
-          <a href="mailto:support@ugcedge.com"
-            className="inline-block px-5 py-2.5 bg-teal-600 hover:bg-teal-700 text-white text-sm font-semibold rounded-xl transition">
-            Contact Support
-          </a>
-        </div>
 
       </div>
     </div>

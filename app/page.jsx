@@ -506,7 +506,6 @@ export default function Home() {
         <div className="flex items-center justify-center gap-6 mb-3">
           <a href="/terms" className="text-gray-600 hover:text-gray-400 text-sm transition">Terms</a>
           <a href="/privacy" className="text-gray-600 hover:text-gray-400 text-sm transition">Privacy</a>
-          <a href="mailto:support@ugcedge.com" className="text-gray-600 hover:text-gray-400 text-sm transition">Contact</a>
         </div>
         <p className="text-gray-700 text-sm">© 2025 UGC Edge. Stop blending in.</p>
       </div>

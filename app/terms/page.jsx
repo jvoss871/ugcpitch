@@ -48,7 +48,6 @@ export default function Terms() {
 
         <section>
           <h2 className="text-xl font-bold text-gray-900 mb-3">9. Contact</h2>
-          <p>Questions? Email us at <a href="mailto:support@ugcedge.com" className="text-teal-600 hover:underline">support@ugcedge.com</a>.</p>
         </section>
 
       </div>
