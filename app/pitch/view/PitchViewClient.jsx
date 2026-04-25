@@ -320,17 +320,30 @@ function PitchView({ pitchId: propId }) {
   };
 
   const Footer = () => !pitch.removeBranding ? (
-    <div className="py-10 text-center">
-      <p className="text-xs" style={{ color: T.bodyBg === '#0f1117' || T.bodyBg === '#111827' ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.2)' }}>
-        Generated with UGC Edge — tailored for {pitch.title}
-      </p>
+    <div style={{
+      position: 'fixed', bottom: 0, left: 0, right: 0, zIndex: 50,
+      backgroundColor: 'rgba(10,10,10,0.92)', backdropFilter: 'blur(12px)',
+      borderTop: '1px solid rgba(13,148,136,0.25)',
+      padding: '10px 20px',
+      display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 16,
+    }}>
+      <span style={{ color: 'rgba(255,255,255,0.4)', fontSize: 12 }}>Pitch created with</span>
+      <a href="https://ugc-edge.com" target="_blank" rel="noopener noreferrer"
+        style={{ color: '#0d9488', fontSize: 13, fontWeight: 900, letterSpacing: '-0.02em', textDecoration: 'none' }}>
+        UGC Edge
+      </a>
+      <span style={{ color: 'rgba(255,255,255,0.15)' }}>·</span>
+      <a href="https://ugc-edge.com" target="_blank" rel="noopener noreferrer"
+        style={{ color: 'rgba(255,255,255,0.35)', fontSize: 11, fontWeight: 700, textDecoration: 'none', letterSpacing: '0.06em', textTransform: 'uppercase' }}>
+        Create yours free →
+      </a>
     </div>
   ) : null;
 
   // ── CENTERED (Minimal) ─────────────────────────────────────────────────────
   if (T.layout === 'centered') {
     return (
-      <div className="min-h-screen font-sans animate-fade-in-up" style={{ backgroundColor: T.bodyBg }}>
+      <div className="min-h-screen font-sans animate-fade-in-up" style={{ backgroundColor: T.bodyBg, paddingBottom: pitch.removeBranding ? 0 : 52 }}>
         <div style={{ backgroundColor: T.heroBg, borderBottom: `1px solid ${T.heroBorder}` }}>
           <div className="max-w-3xl mx-auto px-8 py-16 text-center">
             <div className="mx-auto mb-5 overflow-hidden shadow-xl"
@@ -385,7 +398,7 @@ function PitchView({ pitchId: propId }) {
   // ── COVER (Bold) ───────────────────────────────────────────────────────────
   if (T.layout === 'cover') {
     return (
-      <div className="min-h-screen font-sans animate-fade-in-up" style={{ backgroundColor: T.bodyBg }}>
+      <div className="min-h-screen font-sans animate-fade-in-up" style={{ backgroundColor: T.bodyBg, paddingBottom: pitch.removeBranding ? 0 : 52 }}>
         <div style={{ backgroundColor: primary, paddingTop: '3.5rem', paddingBottom: '5rem' }}>
           <div className="max-w-5xl mx-auto px-8">
             <p className="text-sm font-bold uppercase tracking-widest mb-1" style={{ color: 'rgba(255,255,255,0.55)' }}>Pitched for</p>
@@ -441,7 +454,7 @@ function PitchView({ pitchId: propId }) {
   // ── SIDEBAR (Editorial) ────────────────────────────────────────────────────
   if (T.layout === 'sidebar') {
     return (
-      <div className="min-h-screen font-sans animate-fade-in-up" style={{ backgroundColor: T.bodyBg }}>
+      <div className="min-h-screen font-sans animate-fade-in-up" style={{ backgroundColor: T.bodyBg, paddingBottom: pitch.removeBranding ? 0 : 52 }}>
         <div style={{ backgroundColor: T.heroBannerBg, borderBottom: `1px solid ${T.heroBannerBorder}` }}>
           <div className="px-8 py-5 flex items-baseline gap-3">
             <p className="text-xs font-bold uppercase tracking-widest flex-shrink-0" style={{ color: primary }}>Pitched for</p>
@@ -519,7 +532,7 @@ function PitchView({ pitchId: propId }) {
 
   // ── STACK (Modern) — default ───────────────────────────────────────────────
   return (
-    <div className="min-h-screen font-sans animate-fade-in-up" style={{ backgroundColor: T.bodyBg }}>
+    <div className="min-h-screen font-sans animate-fade-in-up" style={{ backgroundColor: T.bodyBg, paddingBottom: pitch.removeBranding ? 0 : 52 }}>
       <div style={{ backgroundColor: T.heroBg, color: T.heroText }}>
         <div style={{ borderBottom: `1px solid ${T.heroBannerBorder}`, backgroundColor: T.heroBannerBg }}>
           <div className="max-w-5xl mx-auto px-8 py-6 flex items-baseline gap-4">
