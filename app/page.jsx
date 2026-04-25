@@ -264,7 +264,7 @@ export default function Home() {
                 </div>
               </div>
 
-              <p className="text-xs text-gray-400 border-t border-gray-200 pt-4">No concept means you're just another task they have to manage.</p>
+              <p className="text-xs text-gray-400 border-t border-gray-200 pt-4">No concept, no deal. Simple as that.</p>
             </div>
 
             {/* Card 3 — Irrelevant portfolios */}
