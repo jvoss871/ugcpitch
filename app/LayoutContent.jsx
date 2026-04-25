@@ -5,10 +5,17 @@ import { usePathname } from 'next/navigation';
 import Link from 'next/link';
 import { useAuth } from './context/AuthContext';
 
+const PLAN_BADGE = {
+  pro:     { label: 'Pro',     bg: '#0f1117', color: '#34d399' },
+  starter: { label: 'Starter', bg: '#f0fdf4', color: '#16a34a' },
+  free:    { label: 'Free',    bg: '#f3f4f6', color: '#6b7280' },
+};
+
 export default function LayoutContent({ children }) {
   const { user, logout } = useAuth();
   const pathname = usePathname();
   const [menuOpen, setMenuOpen] = useState(false);
+  const [planStatus, setPlanStatus] = useState(null);
   const menuRef = useRef(null);
 
   useEffect(() => {
@@ -20,6 +27,14 @@ export default function LayoutContent({ children }) {
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
+
+  useEffect(() => {
+    if (!user) { setPlanStatus(null); return; }
+    fetch(`/api/plan?username=${encodeURIComponent(user.username)}`)
+      .then(r => r.json())
+      .then(d => setPlanStatus(d.status ?? 'free'))
+      .catch(() => setPlanStatus('free'));
+  }, [user]);
 
   // Pages that render with no app chrome
   if (pathname === '/pitch/view' || pathname === '/admin' || pathname === '/login') {
@@ -76,6 +91,21 @@ export default function LayoutContent({ children }) {
                       className="px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 block">
                       Help & Tips
                     </Link>
+                    <div className="border-t border-gray-100 mt-1 pt-1">
+                      <Link href="/upgrade" onClick={() => setMenuOpen(false)}
+                        className="px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 flex items-center justify-between">
+                        <span>Manage Plan</span>
+                        {planStatus && (() => {
+                          const badge = PLAN_BADGE[planStatus] ?? PLAN_BADGE.free;
+                          return (
+                            <span className="text-xs font-bold px-2 py-0.5 rounded-full"
+                              style={{ backgroundColor: badge.bg, color: badge.color }}>
+                              {badge.label}
+                            </span>
+                          );
+                        })()}
+                      </Link>
+                    </div>
                     <div className="border-t border-gray-100 mt-1 pt-1">
                       <button onClick={() => { logout(); setMenuOpen(false); }}
                         className="w-full text-left px-4 py-2.5 text-sm text-red-500 hover:bg-gray-50">
