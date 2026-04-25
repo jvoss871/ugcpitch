@@ -101,23 +101,6 @@ export default function Home() {
               <span className="text-gray-500 text-sm self-center">Free forever · no credit card needed</span>
             </div>
 
-            {/* Social proof */}
-            <div className="flex items-center gap-3">
-              <div className="flex -space-x-2">
-                {[
-                  'bg-gradient-to-br from-pink-400 to-rose-500',
-                  'bg-gradient-to-br from-violet-400 to-purple-600',
-                  'bg-gradient-to-br from-blue-400 to-cyan-500',
-                  'bg-gradient-to-br from-amber-400 to-orange-500',
-                  'bg-gradient-to-br from-teal-400 to-emerald-500',
-                ].map((g, i) => (
-                  <div key={i} className={`w-8 h-8 rounded-full ${g} border-2 border-gray-950 flex-shrink-0`} />
-                ))}
-              </div>
-              <p className="text-gray-400 text-sm">
-                <span className="text-white font-semibold">50+ creators</span> landing brand deals
-              </p>
-            </div>
           </div>
 
           {/* Right — pitch page mockup */}
