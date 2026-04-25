@@ -297,8 +297,8 @@ export default function Home() {
 
           {/* Credibility line */}
           <div className="text-center">
-            <p className="text-sm text-gray-400 italic">
-              "From a UGC agency recruiter reviewing hundreds of pitches"
+            <p className="text-sm text-gray-900 italic">
+              — A DTC brand manager, after reviewing hundreds of pitches
             </p>
           </div>
 
