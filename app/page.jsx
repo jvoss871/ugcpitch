@@ -231,7 +231,7 @@ export default function Home() {
                 <img
                   src="/images/ad-thread-competition.png"
                   alt="Creators competing in an ad thread"
-                  className="w-full h-auto block scale-[2] origin-top"
+                  className="w-full h-auto block scale-[1.75] origin-top"
                 />
               </div>
 
