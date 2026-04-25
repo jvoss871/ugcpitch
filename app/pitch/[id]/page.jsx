@@ -21,6 +21,74 @@ function getDriveId(url) {
   return match ? match[1] : null;
 }
 
+function IgIcon() { return <svg className="w-4 h-4 flex-shrink-0" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/></svg>; }
+function TtIcon() { return <svg className="w-4 h-4 flex-shrink-0" viewBox="0 0 24 24" fill="currentColor"><path d="M19.59 6.69a4.83 4.83 0 01-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 01-2.88 2.5 2.89 2.89 0 01-2.89-2.89 2.89 2.89 0 012.89-2.89c.28 0 .54.04.79.1V9.01a6.33 6.33 0 00-.79-.05 6.34 6.34 0 00-6.34 6.34 6.34 6.34 0 006.34 6.34 6.34 6.34 0 006.33-6.34V8.69a8.18 8.18 0 004.78 1.52V6.76a4.85 4.85 0 01-1.01-.07z"/></svg>; }
+function YtIcon() { return <svg className="w-4 h-4 flex-shrink-0" viewBox="0 0 24 24" fill="currentColor"><path d="M23.498 6.186a3.016 3.016 0 00-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 00.502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 002.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 002.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>; }
+function CvIcon() { return <svg className="w-4 h-4 flex-shrink-0" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm4.5 16.5c-.828 0-1.5-.672-1.5-1.5V9h-6v6c0 .828-.672 1.5-1.5 1.5S6 15.828 6 15V9c0-.828.672-1.5 1.5-1.5h9c.828 0 1.5.672 1.5 1.5v6c0 .828-.672 1.5-1.5 1.5z"/></svg>; }
+function EmIcon() { return <svg className="w-4 h-4 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>; }
+
+function Socials({ socials, variant = 'pills', primary }) {
+  if (!socials) return null;
+  const { instagram: ig, tiktok: tt, youtube: yt, canva: cv, email: em } = socials;
+  if (!ig && !tt && !yt && !cv && !em) return null;
+  const igHref = ig ? `https://instagram.com/${ig.replace('@', '')}` : null;
+  const ttHref = tt ? `https://tiktok.com/@${tt.replace('@', '')}` : null;
+  const ytHref = yt ? `https://youtube.com/@${yt.replace('@', '')}` : null;
+  const cvHref = cv ? (cv.startsWith('http') ? cv : `https://${cv}`) : null;
+  if (variant === 'icons') {
+    const items = [
+      ig && { href: igHref, bg: 'linear-gradient(135deg,#833ab4,#fd1d1d,#fcb045)', icon: <IgIcon /> },
+      tt && { href: ttHref, bg: '#010101', icon: <TtIcon /> },
+      yt && { href: ytHref, bg: '#FF0000', icon: <YtIcon /> },
+      cv && { href: cvHref, bg: '#7D2AE8', icon: <CvIcon /> },
+      em && { href: `mailto:${em}`, bg: `${primary}30`, icon: <EmIcon />, color: primary },
+    ].filter(Boolean);
+    return (
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10, marginTop: 16, flexWrap: 'wrap' }}>
+        {items.map((item, i) => (
+          <a key={i} href={item.href} target={item.href?.startsWith('mailto') ? undefined : '_blank'} rel="noopener noreferrer"
+            className="transition hover:scale-110"
+            style={{ width: 38, height: 38, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', background: item.bg, color: item.color ?? '#fff', flexShrink: 0 }}>
+            {item.icon}
+          </a>
+        ))}
+      </div>
+    );
+  }
+  if (variant === 'stacked') {
+    const items = [
+      ig && { href: igHref, label: ig, bg: 'linear-gradient(135deg,#833ab4,#fd1d1d,#fcb045)', icon: <IgIcon /> },
+      tt && { href: ttHref, label: tt, bg: '#010101', icon: <TtIcon /> },
+      yt && { href: ytHref, label: yt, bg: '#FF0000', icon: <YtIcon /> },
+      cv && { href: cvHref, label: 'Canva Portfolio', bg: '#7D2AE8', icon: <CvIcon /> },
+      em && { href: `mailto:${em}`, label: em, bg: `${primary}25`, icon: <EmIcon />, color: primary },
+    ].filter(Boolean);
+    return (
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+        {items.map((item, i) => (
+          <a key={i} href={item.href} target={item.href?.startsWith('mailto') ? undefined : '_blank'} rel="noopener noreferrer"
+            className="hover:opacity-70 transition"
+            style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 13, color: 'inherit', textDecoration: 'none', overflow: 'hidden' }}>
+            <span style={{ width: 24, height: 24, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', background: item.bg, color: item.color ?? '#fff', flexShrink: 0 }}>
+              {item.icon}
+            </span>
+            <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{item.label}</span>
+          </a>
+        ))}
+      </div>
+    );
+  }
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 8, alignItems: 'flex-start' }}>
+      {ig && <a href={igHref} target="_blank" rel="noopener noreferrer" className="hover:scale-105 transition" style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '8px 16px', borderRadius: 12, background: 'linear-gradient(135deg,#833ab4,#fd1d1d,#fcb045)', color: '#fff', fontSize: 14, fontWeight: 600, textDecoration: 'none' }}><IgIcon />{ig}</a>}
+      {tt && <a href={ttHref} target="_blank" rel="noopener noreferrer" className="hover:scale-105 transition" style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '8px 16px', borderRadius: 12, backgroundColor: '#010101', color: '#fff', fontSize: 14, fontWeight: 600, textDecoration: 'none' }}><TtIcon />{tt}</a>}
+      {yt && <a href={ytHref} target="_blank" rel="noopener noreferrer" className="hover:scale-105 transition" style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '8px 16px', borderRadius: 12, backgroundColor: '#FF0000', color: '#fff', fontSize: 14, fontWeight: 600, textDecoration: 'none' }}><YtIcon />{yt}</a>}
+      {cv && <a href={cvHref} target="_blank" rel="noopener noreferrer" className="hover:scale-105 transition" style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '8px 16px', borderRadius: 12, backgroundColor: '#7D2AE8', color: '#fff', fontSize: 14, fontWeight: 600, textDecoration: 'none' }}><CvIcon />Canva Portfolio</a>}
+      {em && <a href={`mailto:${em}`} className="hover:scale-105 transition" style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '8px 16px', borderRadius: 12, backgroundColor: 'rgba(255,255,255,0.1)', color: '#fff', border: '1px solid rgba(255,255,255,0.15)', fontSize: 14, fontWeight: 600, textDecoration: 'none' }}><EmIcon />{em}</a>}
+    </div>
+  );
+}
+
 function CustomContentEmbed({ url, primary }) {
   const ytId = getYouTubeId(url);
   const loomId = getLoomId(url);
@@ -94,6 +162,44 @@ function MediaCard({ item }) {
         </div>
       </div>
     </Wrapper>
+  );
+}
+
+function RatesSection({ pitch, T, primary }) {
+  const [open, setOpen] = useState(false);
+  if (!pitch.rates?.length) return null;
+  return (
+    <div style={{ backgroundColor: T.cardBg, borderRadius: T.cardRadius, boxShadow: T.cardShadow, border: T.cardBorder, overflow: 'hidden' }}>
+      <button onClick={() => setOpen(o => !o)}
+        className="w-full flex items-center justify-between px-8 py-5 text-left"
+        style={{ background: 'none', cursor: 'pointer' }}>
+        <p className="text-xs font-bold uppercase tracking-widest text-gray-400">Rates</p>
+        <div className="flex items-center gap-3">
+          <span className="text-xs font-semibold" style={{ color: T.textColor }}>{pitch.rates.length} package{pitch.rates.length !== 1 ? 's' : ''}</span>
+          <svg className={`w-4 h-4 text-gray-400 transition-transform ${open ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+            <path d="M6 9l6 6 6-6"/>
+          </svg>
+        </div>
+      </button>
+      {open && (
+        <div className="px-8 pb-6 border-t" style={{ borderColor: '#e5e7eb' }}>
+          {pitch.rates.map((rate, i) => {
+            const label = rate.lines?.length
+              ? rate.lines.map(l => `${l.qty} ${l.item}`).join(' + ')
+              : (rate.label || '');
+            return (
+              <div key={i} className="flex items-baseline justify-between py-4 border-b last:border-0" style={{ borderColor: '#f3f4f6' }}>
+                <div>
+                  <p className="font-semibold text-sm" style={{ color: T.textColor }}>{label}</p>
+                  {rate.notes && <p className="text-xs text-gray-400 mt-0.5">{rate.notes}</p>}
+                </div>
+                <p className="font-black text-lg ml-6 flex-shrink-0" style={{ color: primary }}>{rate.price}</p>
+              </div>
+            );
+          })}
+        </div>
+      )}
+    </div>
   );
 }
 
@@ -180,12 +286,32 @@ export default function PitchPage() {
       ? `${window.location.origin}/${proHandle}/${id}`
       : `${window.location.origin}/pitch/view?id=${id}`;
 
-    // Reuse existing shareId — only create a new one the first time
+    // Reuse existing shareId if no rates; if rates exist, patch them in (awaited) before copying
     if (pitch.shareId) {
-      navigator.clipboard.writeText(buildUrl(pitch.shareId));
-      setCopiedLink(true);
-      setTimeout(() => setCopiedLink(false), 2000);
-      return;
+      if (pitch.rates?.length > 0) {
+        try {
+          const patchRes = await fetch('/api/share-pitch', {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ id: pitch.shareId, rates: pitch.rates }),
+          });
+          if (patchRes.ok) {
+            navigator.clipboard.writeText(buildUrl(pitch.shareId));
+            setCopiedLink(true);
+            setTimeout(() => setCopiedLink(false), 2000);
+            return;
+          }
+          // PATCH failed (e.g. stale shareId not in DB) — fall through to regenerate
+          setPitch(p => ({ ...p, shareId: null }));
+        } catch {
+          setPitch(p => ({ ...p, shareId: null }));
+        }
+      } else {
+        navigator.clipboard.writeText(buildUrl(pitch.shareId));
+        setCopiedLink(true);
+        setTimeout(() => setCopiedLink(false), 2000);
+        return;
+      }
     }
 
     const shareData = {
@@ -210,6 +336,7 @@ export default function PitchPage() {
         selectedContent: pitch.selectedContent || [],
         customContent: pitch.customContent ?? null,
         removeBranding: planStatus?.features?.remove_branding ?? false,
+        rates: pitch.rates ?? null,
       },
     };
     try {
@@ -499,6 +626,7 @@ export default function PitchPage() {
                 <div className="flex flex-wrap gap-2 justify-center mb-2">
                   {profile.niche_tags?.map(t => <span key={t} className="text-xs font-semibold uppercase tracking-wider px-3 py-1 rounded-full" style={{ border: `1px solid ${T.tagBorder}`, color: T.tagText }}>{t}</span>)}
                 </div>
+                <Socials socials={profile.socials} variant="icons" primary={primary} />
               </div>
             </div>
             <div style={{ borderBottom: `1px solid #e5e7eb`, backgroundColor: T.heroBannerBg }}>
@@ -521,6 +649,7 @@ export default function PitchPage() {
               <IntroBlock />
               <CustomCard />
               <ContentExamples />
+              <RatesSection pitch={pitch} T={T} primary={primary} />
             </div>
             <div className="py-8 text-center"><p className="text-xs text-gray-300 tracking-widest uppercase">Made with UGC Edge</p></div>
           </div>
@@ -541,6 +670,9 @@ export default function PitchPage() {
                     <p className="text-sm font-bold uppercase tracking-widest mb-2" style={{ color: 'rgba(255,255,255,0.55)' }}>UGC Creator</p>
                     {profile.name && <h1 className="text-5xl font-black tracking-tight leading-none mb-4" style={{ fontFamily: fontStack, color: '#fff' }}>{profile.name}</h1>}
                     <NicheTags borderColor="rgba(255,255,255,0.3)" color="rgba(255,255,255,0.8)" />
+                    <div className="mt-4">
+                      <Socials socials={profile.socials} variant="pills" primary={primary} />
+                    </div>
                   </div>
                 </div>
               </div>
@@ -565,6 +697,7 @@ export default function PitchPage() {
                 </div>
                 <CustomCard />
                 <ContentExamples />
+                <RatesSection pitch={pitch} T={T} primary={primary} />
               </div>
             </div>
             <div className="py-8 text-center"><p className="text-xs text-gray-300 tracking-widest uppercase">Made with UGC Edge</p></div>
@@ -600,6 +733,7 @@ export default function PitchPage() {
                     {profile.languages?.length > 0 && <p className="text-xs" style={{ color: T.heroSubtext }}>{profile.languages.join(', ')}</p>}
                   </div>
                 )}
+                <Socials socials={profile.socials} variant="stacked" primary={primary} />
               </div>
               <div className="flex-1 min-w-0" style={{ padding: '3rem 3.5rem' }}>
                 <div className="max-w-2xl space-y-10">
@@ -616,6 +750,7 @@ export default function PitchPage() {
                   <IntroBlock />
                   <CustomCard />
                   <ContentExamples />
+                  <RatesSection pitch={pitch} T={T} primary={primary} />
                 </div>
               </div>
             </div>
@@ -647,6 +782,11 @@ export default function PitchPage() {
                       {profile.languages?.length > 0 && <span className="text-xs" style={{ color: T.heroSubtext }}>{profile.languages.join(', ')}</span>}
                     </div>
                   </div>
+                  {profile.socials && Object.values(profile.socials).some(Boolean) && (
+                    <div className="flex-shrink-0">
+                      <Socials socials={profile.socials} variant="pills" primary={primary} />
+                    </div>
+                  )}
                 </div>
               </div>
               <div className="h-px" style={{ background: `linear-gradient(to right, transparent, ${T.heroBorder}, transparent)` }} />
@@ -670,6 +810,7 @@ export default function PitchPage() {
               </div>
               <CustomCard />
               <ContentExamples />
+              <RatesSection pitch={pitch} T={T} primary={primary} />
             </div>
             <div className="py-8 text-center"><p className="text-xs text-gray-300 tracking-widest uppercase">Made with UGC Edge</p></div>
           </div>

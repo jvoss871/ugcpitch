@@ -23,6 +23,11 @@ function planBadge(plan, trialStartedAt, trialEndsAt) {
 export default function AdminPage() {
   const [password, setPassword]       = useState('');
   const [authed, setAuthed]           = useState(false);
+
+  useEffect(() => {
+    const stored = sessionStorage.getItem('admin_pw');
+    if (stored) { setPassword(stored); setAuthed(true); }
+  }, []);
   const [authError, setAuthError]     = useState('');
   const [tab, setTab]                 = useState('overview');
   const [overview, setOverview]       = useState(null);
@@ -44,7 +49,7 @@ export default function AdminPage() {
       body: JSON.stringify({ password }),
     });
     const { ok } = await res.json();
-    if (ok) setAuthed(true);
+    if (ok) { sessionStorage.setItem('admin_pw', password); setAuthed(true); }
     else setAuthError('Wrong password');
   };
 
@@ -152,6 +157,11 @@ export default function AdminPage() {
       {/* Header */}
       <div className="border-b border-gray-800 px-8 py-4 flex items-center justify-between">
         <h1 className="font-black text-lg tracking-tight">Admin</h1>
+        <div className="flex items-center gap-3">
+        <button onClick={() => { fetchOverview(); fetchUsers(); }}
+          className="text-xs font-semibold text-gray-400 hover:text-white transition px-3 py-1.5 rounded-lg border border-gray-700 hover:border-gray-500">
+          ↻ Refresh
+        </button>
         <div className="flex gap-1 bg-gray-900 rounded-lg p-1">
           {['overview', 'users'].map(t => (
             <button key={t} onClick={() => setTab(t)}
@@ -163,6 +173,7 @@ export default function AdminPage() {
               {t}
             </button>
           ))}
+        </div>
         </div>
       </div>
 

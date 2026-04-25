@@ -23,3 +23,15 @@ export async function GET(req) {
   if (!pitch) return Response.json({ error: 'Not found' }, { status: 404 });
   return Response.json(pitch);
 }
+
+export async function PATCH(req) {
+  try {
+    const { id, rates } = await req.json();
+    const existing = await getPitch(id);
+    if (!existing) return Response.json({ error: 'Not found' }, { status: 404 });
+    await savePitch(id, { ...existing, pitch: { ...existing.pitch, rates } });
+    return Response.json({ ok: true });
+  } catch {
+    return Response.json({ error: 'Failed to update' }, { status: 500 });
+  }
+}
