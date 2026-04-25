@@ -203,10 +203,10 @@ export default function AdminPage() {
                 </div>
 
                 <div className="bg-gray-900 rounded-2xl p-6 border border-gray-800">
-                  <p className="text-xs text-gray-500 uppercase tracking-widest mb-2">30-day Trial Conversion</p>
+                  <p className="text-xs text-gray-500 uppercase tracking-widest mb-2">30-day Free → Paid Conversion</p>
                   <p className="text-5xl font-black mb-2">{overview.conversionRate}%</p>
                   <p className="text-sm text-gray-600">
-                    {overview.converted} of {overview.recentTrialUsers} users who started a trial in the last 30 days converted to a paid plan.
+                    {overview.converted} of {overview.recentTrialUsers + overview.converted} users who signed up free in the last 30 days converted to a paid plan.
                   </p>
                 </div>
               </>
