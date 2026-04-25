@@ -244,14 +244,16 @@ export default function Home() {
               <p className="text-xs font-bold uppercase tracking-widest text-gray-400 mb-2">No concept</p>
               <p className="text-xl font-black text-gray-900 mb-5">You make brands do the thinking</p>
 
-              {/* Visual: brand question + blank creator reply */}
+              {/* Visual: brand questions + blank creator reply */}
               <div className="flex-1 flex flex-col justify-center gap-3 mb-5">
-                <div className="flex items-end gap-2">
-                  <div className="w-7 h-7 rounded-full bg-gray-800 flex-shrink-0 flex items-center justify-center text-white text-xs font-bold">B</div>
-                  <div className="bg-gray-900 text-white text-sm font-medium px-4 py-3 rounded-2xl rounded-bl-sm max-w-[210px]">
-                    "What's your vision for this?"
+                {["What's your vision for this?", "Do you have any hook ideas?", "What would the script look like?"].map((q, i) => (
+                  <div key={i} className="flex items-end gap-2">
+                    <div className="w-7 h-7 rounded-full bg-gray-800 flex-shrink-0 flex items-center justify-center text-white text-xs font-bold">B</div>
+                    <div className="bg-gray-900 text-white text-sm font-medium px-4 py-3 rounded-2xl rounded-bl-sm max-w-[210px]">
+                      "{q}"
+                    </div>
                   </div>
-                </div>
+                ))}
                 <div className="flex items-end gap-2 justify-end">
                   <div className="bg-white border border-gray-200 text-sm px-4 py-3 rounded-2xl rounded-br-sm max-w-[160px] shadow-sm">
                     <div className="flex gap-1 items-center">
