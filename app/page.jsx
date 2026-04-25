@@ -263,21 +263,30 @@ export default function Home() {
             {/* Card 2 — No pricing */}
             <div className="rounded-2xl border border-gray-100 bg-gray-50 p-6 flex flex-col">
               <p className="text-red-500 font-black text-lg mb-1">❌</p>
-              <p className="text-xs font-bold uppercase tracking-widest text-gray-400 mb-2">No pricing</p>
-              <p className="text-xl font-black text-gray-900 mb-5">You make brands do extra work</p>
+              <p className="text-xs font-bold uppercase tracking-widest text-gray-400 mb-2">No concept</p>
+              <p className="text-xl font-black text-gray-900 mb-5">You make brands do the thinking</p>
 
-              {/* Visual: brand chat bubble */}
-              <div className="flex-1 flex flex-col justify-center mb-5">
+              {/* Visual: brand question + blank creator reply */}
+              <div className="flex-1 flex flex-col justify-center gap-3 mb-5">
                 <div className="flex items-end gap-2">
                   <div className="w-7 h-7 rounded-full bg-gray-800 flex-shrink-0 flex items-center justify-center text-white text-xs font-bold">B</div>
-                  <div className="bg-gray-900 text-white text-sm font-medium px-4 py-3 rounded-2xl rounded-bl-sm max-w-[200px]">
-                    "What are your rates?"
+                  <div className="bg-gray-900 text-white text-sm font-medium px-4 py-3 rounded-2xl rounded-bl-sm max-w-[210px]">
+                    "What's your vision for this?"
                   </div>
                 </div>
-                <div className="ml-9 mt-3 h-3 w-8 bg-gray-200 rounded-full opacity-50 animate-pulse" />
+                <div className="flex items-end gap-2 justify-end">
+                  <div className="bg-white border border-gray-200 text-sm px-4 py-3 rounded-2xl rounded-br-sm max-w-[160px] shadow-sm">
+                    <div className="flex gap-1 items-center">
+                      <div className="w-1.5 h-1.5 rounded-full bg-gray-300 animate-pulse" />
+                      <div className="w-1.5 h-1.5 rounded-full bg-gray-300 animate-pulse [animation-delay:150ms]" />
+                      <div className="w-1.5 h-1.5 rounded-full bg-gray-300 animate-pulse [animation-delay:300ms]" />
+                    </div>
+                  </div>
+                  <div className="w-7 h-7 rounded-full bg-gray-200 flex-shrink-0" />
+                </div>
               </div>
 
-              <p className="text-xs text-gray-400 border-t border-gray-200 pt-4">If your pricing isn't clear, you lose momentum</p>
+              <p className="text-xs text-gray-400 border-t border-gray-200 pt-4">If you don't bring the strategy, you're just another task on their to-do list</p>
             </div>
 
             {/* Card 3 — Irrelevant portfolios */}
