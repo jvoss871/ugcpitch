@@ -23,6 +23,7 @@ function planBadge(plan, trialStartedAt, trialEndsAt) {
 export default function AdminPage() {
   const [password, setPassword]       = useState('');
   const [authed, setAuthed]           = useState(false);
+  const [refreshing, setRefreshing]   = useState(false);
 
   useEffect(() => {
     const stored = sessionStorage.getItem('admin_pw');
@@ -158,9 +159,14 @@ export default function AdminPage() {
       <div className="border-b border-gray-800 px-8 py-4 flex items-center justify-between">
         <h1 className="font-black text-lg tracking-tight">Admin</h1>
         <div className="flex items-center gap-3">
-        <button onClick={() => { fetchOverview(); fetchUsers(); }}
-          className="text-xs font-semibold text-gray-400 hover:text-white transition px-3 py-1.5 rounded-lg border border-gray-700 hover:border-gray-500">
-          ↻ Refresh
+        <button
+          onClick={async () => { setRefreshing(true); await Promise.all([fetchOverview(), fetchUsers()]); setRefreshing(false); }}
+          disabled={refreshing}
+          className="text-xs font-semibold text-gray-400 hover:text-white transition px-3 py-1.5 rounded-lg border border-gray-700 hover:border-gray-500 flex items-center gap-1.5 disabled:opacity-50">
+          <svg className={`w-3 h-3 ${refreshing ? 'animate-spin' : ''}`} fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+          </svg>
+          {refreshing ? 'Refreshing…' : 'Refresh'}
         </button>
         <div className="flex gap-1 bg-gray-900 rounded-lg p-1">
           {['overview', 'users'].map(t => (
