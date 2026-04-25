@@ -290,47 +290,89 @@ export default function Profile() {
         </div>
 
         {/* Rates */}
-        <div className="card space-y-3">
+        <div className="card space-y-4">
           <div>
             <p className="text-sm font-semibold text-gray-700 mb-1">Rates</p>
-            <p className="text-xs text-gray-400">Save your packages here. You can choose to include them per pitch.</p>
+            <p className="text-xs text-gray-400">Build your packages. Add multiple deliverables to create bundles.</p>
           </div>
           {(profile.rates || []).map((rate, i) => (
-            <div key={i} className="flex gap-2 items-center">
-              <input
-                type="text"
-                value={rate.label}
-                onChange={e => setProfile(p => { const r = [...(p.rates||[])]; r[i] = { ...r[i], label: e.target.value }; return { ...p, rates: r }; })}
-                placeholder="e.g. 1 UGC Video"
-                className="flex-1 px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-teal-500"
-              />
-              <input
-                type="text"
-                value={rate.price}
-                onChange={e => setProfile(p => { const r = [...(p.rates||[])]; r[i] = { ...r[i], price: e.target.value }; return { ...p, rates: r }; })}
-                placeholder="$300"
-                className="w-24 px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-teal-500"
-              />
-              <input
-                type="text"
-                value={rate.notes}
-                onChange={e => setProfile(p => { const r = [...(p.rates||[])]; r[i] = { ...r[i], notes: e.target.value }; return { ...p, rates: r }; })}
-                placeholder="Notes (optional)"
-                className="flex-1 px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-teal-500"
-              />
-              <button
-                type="button"
-                onClick={() => setProfile(p => ({ ...p, rates: (p.rates||[]).filter((_, j) => j !== i) }))}
-                className="text-gray-300 hover:text-red-400 transition text-lg leading-none flex-shrink-0"
-              >×</button>
+            <div key={i} className="border border-gray-200 rounded-xl p-4 space-y-2.5">
+              {(rate.lines || [{ qty: '1', item: '' }]).map((line, j) => (
+                <div key={j} className="flex items-center gap-2">
+                  <span className="text-xs text-gray-400 font-bold w-5 text-center flex-shrink-0">
+                    {j === 0 ? '' : '+'}
+                  </span>
+                  <input
+                    type="number" min="1" value={line.qty}
+                    onChange={e => setProfile(p => {
+                      const r = p.rates.map((rt, ri) => ri !== i ? rt : {
+                        ...rt, lines: rt.lines.map((l, li) => li !== j ? l : { ...l, qty: e.target.value })
+                      });
+                      return { ...p, rates: r };
+                    })}
+                    className="w-14 px-2 py-1.5 border border-gray-300 rounded-lg text-sm text-center focus:outline-none focus:ring-2 focus:ring-teal-500"
+                  />
+                  <input
+                    type="text" value={line.item}
+                    onChange={e => setProfile(p => {
+                      const r = p.rates.map((rt, ri) => ri !== i ? rt : {
+                        ...rt, lines: rt.lines.map((l, li) => li !== j ? l : { ...l, item: e.target.value })
+                      });
+                      return { ...p, rates: r };
+                    })}
+                    placeholder="Video, Image, Reel…"
+                    className="flex-1 px-3 py-1.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-teal-500"
+                  />
+                  {(rate.lines || []).length > 1 && (
+                    <button type="button"
+                      onClick={() => setProfile(p => ({
+                        ...p, rates: p.rates.map((rt, ri) => ri !== i ? rt : { ...rt, lines: rt.lines.filter((_, li) => li !== j) })
+                      }))}
+                      className="text-gray-300 hover:text-red-400 transition text-base leading-none flex-shrink-0">×</button>
+                  )}
+                </div>
+              ))}
+
+              <div className="flex items-center gap-2 pt-1">
+                <span className="w-5 flex-shrink-0" />
+                <button type="button"
+                  onClick={() => setProfile(p => ({
+                    ...p, rates: p.rates.map((rt, ri) => ri !== i ? rt : { ...rt, lines: [...(rt.lines || []), { qty: '1', item: '' }] })
+                  }))}
+                  className="text-xs text-teal-600 hover:text-teal-700 font-semibold transition">
+                  + Add deliverable
+                </button>
+                <div className="flex-1" />
+                <input
+                  type="text" value={rate.price}
+                  onChange={e => setProfile(p => ({ ...p, rates: p.rates.map((rt, ri) => ri !== i ? rt : { ...rt, price: e.target.value }) }))}
+                  placeholder="$300"
+                  className="w-24 px-3 py-1.5 border border-gray-300 rounded-lg text-sm font-semibold text-center focus:outline-none focus:ring-2 focus:ring-teal-500"
+                />
+              </div>
+
+              <div className="flex items-center gap-2">
+                <span className="w-5 flex-shrink-0" />
+                <input
+                  type="text" value={rate.notes || ''}
+                  onChange={e => setProfile(p => ({ ...p, rates: p.rates.map((rt, ri) => ri !== i ? rt : { ...rt, notes: e.target.value }) }))}
+                  placeholder="Notes (optional)"
+                  className="flex-1 px-3 py-1.5 border border-gray-200 bg-gray-50 rounded-lg text-xs focus:outline-none focus:ring-2 focus:ring-teal-500"
+                />
+                <button type="button"
+                  onClick={() => setProfile(p => ({ ...p, rates: (p.rates||[]).filter((_, ri) => ri !== i) }))}
+                  className="text-xs text-gray-400 hover:text-red-500 transition flex-shrink-0">
+                  Remove
+                </button>
+              </div>
             </div>
           ))}
           <button
             type="button"
-            onClick={() => setProfile(p => ({ ...p, rates: [...(p.rates||[]), { label: '', price: '', notes: '' }] }))}
+            onClick={() => setProfile(p => ({ ...p, rates: [...(p.rates||[]), { lines: [{ qty: '1', item: '' }], price: '', notes: '' }] }))}
             className="text-sm text-teal-600 hover:text-teal-700 font-semibold transition"
           >
-            + Add rate
+            + Add package
           </button>
         </div>
 

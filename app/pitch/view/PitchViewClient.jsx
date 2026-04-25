@@ -298,15 +298,20 @@ function PitchView({ pitchId: propId }) {
         {open && (
           <div className="px-8 pb-6 border-t" style={{ borderColor: T.cardBorder?.replace('1px solid ', '') || '#e5e7eb' }}>
             <div className="pt-5 space-y-3">
-              {pitch.rates.map((rate, i) => (
-                <div key={i} className="flex items-baseline justify-between gap-4 py-3 border-b last:border-0" style={{ borderColor: T.cardBorder?.replace('1px solid ', '') || '#f3f4f6' }}>
-                  <div className="flex-1">
-                    <p className="text-sm font-semibold" style={{ color: T.textColor }}>{rate.label}</p>
-                    {rate.notes && <p className="text-xs text-gray-400 mt-0.5">{rate.notes}</p>}
+              {pitch.rates.map((rate, i) => {
+                const label = rate.lines?.length
+                  ? rate.lines.map(l => `${l.qty} ${l.item}`).join(' + ')
+                  : (rate.label || '');
+                return (
+                  <div key={i} className="flex items-baseline justify-between gap-4 py-3 border-b last:border-0" style={{ borderColor: T.cardBorder?.replace('1px solid ', '') || '#f3f4f6' }}>
+                    <div className="flex-1">
+                      <p className="text-sm font-semibold" style={{ color: T.textColor }}>{label}</p>
+                      {rate.notes && <p className="text-xs text-gray-400 mt-0.5">{rate.notes}</p>}
+                    </div>
+                    <p className="text-base font-black flex-shrink-0" style={{ color: T.primaryColor }}>{rate.price}</p>
                   </div>
-                  <p className="text-base font-black flex-shrink-0" style={{ color: T.primaryColor }}>{rate.price}</p>
-                </div>
-              ))}
+                );
+              })}
             </div>
           </div>
         )}
