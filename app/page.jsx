@@ -278,6 +278,7 @@ export default function Home() {
                 {[
                   { label: 'drive.google.com/folder/...', muted: true },
                   { label: 'linktr.ee/mycontent123',      muted: true },
+                  { label: 'canva.com/design/DAFx9k2...',  muted: true },
                   { label: 'instagram.com/p/xK9mZ...',   muted: true },
                 ].map((item, i) => (
                   <div key={i} className="flex items-center gap-2 bg-white border border-dashed border-gray-300 rounded-lg px-3 py-2">
