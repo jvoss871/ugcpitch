@@ -20,7 +20,7 @@ const PLANS = [
       'Full AI pitch generation',
       'Branded pitch pages',
       'Content library',
-      'Response generation',
+      'AI-generated ad replies',
       '"Made with UGC Edge" badge',
     ],
   },
@@ -292,7 +292,7 @@ export default function Home() {
                 ))}
               </div>
 
-              <p className="text-xs text-gray-400 border-t border-gray-200 pt-4">Brands want relevant work + actual ideas</p>
+              <p className="text-xs text-gray-400 border-t border-gray-200 pt-4">Dumping links isn't a pitch. It's homework for them.</p>
             </div>
 
           </div>
@@ -508,7 +508,7 @@ export default function Home() {
           <a href="/terms" className="text-gray-600 hover:text-gray-400 text-sm transition">Terms</a>
           <a href="/privacy" className="text-gray-600 hover:text-gray-400 text-sm transition">Privacy</a>
         </div>
-        <p className="text-gray-700 text-sm">© 2025 UGC Edge. Stop blending in.</p>
+        <p className="text-gray-700 text-sm">© 2026 UGC Edge. Stop blending in.</p>
       </div>
 
     </div>
