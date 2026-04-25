@@ -156,13 +156,14 @@ function MediaCard({ item, T, onTrackClick }) {
 }
 
 // ── PitchView ─────────────────────────────────────────────────────────────────
-function PitchView() {
+function PitchView({ pitchId: propId }) {
   const searchParams = useSearchParams();
+  const resolvedId = propId ?? searchParams.get('id');
   const [data, setData] = useState(null);
   const [error, setError] = useState(false);
 
   useEffect(() => {
-    const id = searchParams.get('id');
+    const id = resolvedId;
     if (!id) { setError(true); return; }
     fetch(`/api/share-pitch?id=${id}`)
       .then(res => { if (!res.ok) throw new Error(); return res.json(); })
@@ -170,10 +171,10 @@ function PitchView() {
         setData(d);
       })
       .catch(() => setError(true));
-  }, [searchParams]);
+  }, [resolvedId]);
 
   useEffect(() => {
-    const shareId = searchParams.get('id');
+    const shareId = resolvedId;
     if (!shareId || !data) return;
     const sessionId = sessionStorage.getItem('ugcp_sid') || (() => {
       const id = Math.random().toString(36).slice(2);
@@ -187,7 +188,7 @@ function PitchView() {
     document.addEventListener('visibilitychange', onVisibility);
     window.addEventListener('beforeunload', sendDuration);
     return () => { document.removeEventListener('visibilitychange', onVisibility); window.removeEventListener('beforeunload', sendDuration); };
-  }, [data, searchParams]);
+  }, [data, resolvedId]);
 
   const fontName = data?.profile?.brand?.font ?? 'Inter';
   useEffect(() => {
@@ -216,7 +217,7 @@ function PitchView() {
   if (!data) return <div className="min-h-screen flex items-center justify-center bg-gray-50"><div className="w-6 h-6 border-2 border-teal-500 border-t-transparent rounded-full animate-spin" /></div>;
 
   const { profile, pitch } = data;
-  const shareId = searchParams.get('id');
+  const shareId = resolvedId;
   const trackClick = (contentTitle) => {
     const sessionId = sessionStorage.getItem('ugcp_sid') || 'unknown';
     fetch('/api/analytics', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ shareId, type: 'content_click', sessionId, contentTitle, timestamp: new Date().toISOString() }) }).catch(() => {});
@@ -528,10 +529,10 @@ function PitchView() {
   );
 }
 
-export default function PitchViewClient() {
+export default function PitchViewClient({ pitchId } = {}) {
   return (
     <Suspense fallback={<div className="min-h-screen flex items-center justify-center bg-gray-50"><div className="w-6 h-6 border-2 border-teal-500 border-t-transparent rounded-full animate-spin" /></div>}>
-      <PitchView />
+      <PitchView pitchId={pitchId} />
     </Suspense>
   );
 }

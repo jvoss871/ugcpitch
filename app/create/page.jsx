@@ -223,8 +223,6 @@ export default function CreatePitch() {
           </div>
         </div>
 
-        <p className="text-center text-xs text-gray-400">
-        </p>
       </div>
     );
   }
