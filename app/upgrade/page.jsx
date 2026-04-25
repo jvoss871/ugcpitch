@@ -4,36 +4,17 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useRouter } from 'next/navigation';
 
-const PLANS = [
-  {
-    id: 'starter',
-    name: 'Starter',
-    price: '$9',
-    period: '/mo',
-    tagline: 'Great for active creators',
-    features: [
-      '50 pitches per month',
-      'Open tracking',
-      'All 4 templates',
-      'Content library',
-    ],
-    dark: false,
-  },
-  {
-    id: 'pro',
-    name: 'Pro',
-    price: '$19',
-    period: '/mo',
-    tagline: 'For serious creators',
-    features: [
-      'Unlimited pitches',
-      'Advanced analytics',
-      'Custom URL',
-      'Remove UGC Edge branding',
-    ],
-    dark: true,
-  },
-];
+const PLAN_META = {
+  free:    { name: 'Free',    price: '$0',  period: '/mo', tagline: 'Core features',           features: ['10 pitches/month', 'All templates', 'Content library'] },
+  starter: { name: 'Starter', price: '$9',  period: '/mo', tagline: 'Great for active creators', features: ['50 pitches/month', 'Open tracking', 'All 4 templates', 'Content library'] },
+  pro:     { name: 'Pro',     price: '$19', period: '/mo', tagline: 'For serious creators',      features: ['Unlimited pitches', 'Advanced analytics', 'Custom URL', 'Remove UGC Edge branding'] },
+};
+
+const OTHER_PLAN_META = {
+  free:    { name: 'Free',    price: '$0',  tagline: '10 pitches/month',    dark: false },
+  starter: { name: 'Starter', price: '$9',  tagline: '50 pitches/month',    dark: false },
+  pro:     { name: 'Pro',     price: '$19', tagline: 'Unlimited pitches',   dark: true  },
+};
 
 export default function UpgradePage() {
   const { user: authUser } = useAuth();
@@ -111,6 +92,14 @@ export default function UpgradePage() {
 
   const currentPlan = planStatus?.status ?? 'free';
   const isPaying = currentPlan === 'starter' || currentPlan === 'pro';
+  const current = PLAN_META[currentPlan] ?? PLAN_META.free;
+
+  // Other plans to show condensed
+  const otherPlanIds = currentPlan === 'free'
+    ? ['starter', 'pro']
+    : currentPlan === 'starter'
+    ? ['pro', 'free']
+    : ['starter', 'free']; // pro
 
   if (cancelledUntil) {
     return (
@@ -134,135 +123,149 @@ export default function UpgradePage() {
 
   return (
     <div className="max-w-2xl mx-auto animate-fade-in-up">
-      <div className="text-center mb-10">
+      <div className="text-center mb-8">
         <h1 className="text-4xl font-black text-gray-900 mb-2 font-display">
           {isPaying ? 'Your plan' : 'Upgrade your plan'}
         </h1>
         <p className="text-gray-500">
           {isPaying
-            ? `You're on the ${currentPlan.charAt(0).toUpperCase() + currentPlan.slice(1)} plan.`
+            ? `You're on the ${current.name} plan.`
             : 'More pitches, more data, more deals.'}
         </p>
       </div>
 
-      <div className="space-y-4">
-        {PLANS.map(plan => {
-          const isCurrentPlan = currentPlan === plan.id;
+      {/* Current plan — full width */}
+      <div
+        className="rounded-2xl p-6 mb-4"
+        style={{
+          backgroundColor: currentPlan === 'pro' ? '#0f1117' : '#fff',
+          border: currentPlan === 'pro' ? '2px solid #0d9488' : '2px solid #0d9488',
+        }}
+      >
+        <div className="flex justify-center mb-4">
+          <span className="text-xs font-bold bg-teal-500 text-white px-3 py-1 rounded-full">
+            Current plan
+          </span>
+        </div>
+        <div className="flex items-start justify-between mb-4">
+          <div>
+            <p className="font-black text-2xl leading-none" style={{ color: currentPlan === 'pro' ? '#fff' : '#111' }}>
+              {current.name}
+            </p>
+            <p className="text-xs mt-1" style={{ color: currentPlan === 'pro' ? '#34d399' : '#6b7280' }}>
+              {current.tagline}
+            </p>
+          </div>
+          <p className="text-4xl font-black" style={{ color: currentPlan === 'pro' ? '#fff' : '#111' }}>
+            {current.price}
+            <span className="text-sm font-normal" style={{ color: currentPlan === 'pro' ? '#6b7280' : '#9ca3af' }}>
+              {current.period}
+            </span>
+          </p>
+        </div>
+        <ul className="space-y-2 mb-5">
+          {current.features.map(f => (
+            <li key={f} className="flex items-center gap-2 text-sm" style={{ color: currentPlan === 'pro' ? '#d1d5db' : '#374151' }}>
+              <svg className="w-4 h-4 flex-shrink-0" style={{ color: '#0d9488' }} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                <polyline points="20 6 9 17 4 12"/>
+              </svg>
+              {f}
+            </li>
+          ))}
+        </ul>
+        {isPaying && (
+          <button
+            onClick={openBillingPortal}
+            disabled={managingBilling}
+            className="w-full py-3 rounded-xl font-bold text-sm transition disabled:opacity-60"
+            style={{
+              backgroundColor: currentPlan === 'pro' ? 'rgba(255,255,255,0.08)' : '#f3f4f6',
+              color: currentPlan === 'pro' ? '#fff' : '#374151',
+              border: currentPlan === 'pro' ? 'none' : '1px solid #e5e7eb',
+            }}
+          >
+            {managingBilling ? 'Redirecting…' : 'Manage subscription'}
+          </button>
+        )}
+      </div>
+
+      {/* Other options — condensed side by side */}
+      <div className="grid grid-cols-2 gap-3">
+        {otherPlanIds.map(planId => {
+          const meta = OTHER_PLAN_META[planId];
+          const isDowngradeToFree = planId === 'free';
+          const isUpgrade = planId === 'pro' || (planId === 'starter' && currentPlan === 'free');
+          const isProDowngrade = planId === 'starter' && currentPlan === 'pro';
+
           return (
             <div
-              key={plan.id}
-              className="rounded-2xl p-6"
+              key={planId}
+              className="rounded-2xl p-4 flex flex-col"
               style={{
-                backgroundColor: plan.dark ? '#0f1117' : '#fff',
-                border: isCurrentPlan
-                  ? '2px solid #0d9488'
-                  : plan.dark ? 'none' : '1px solid #e5e7eb',
+                backgroundColor: meta.dark ? '#0f1117' : '#f9fafb',
+                border: meta.dark ? 'none' : '1px solid #e5e7eb',
               }}
             >
-              {isCurrentPlan && (
-                <div className="flex justify-center mb-4">
-                  <span className="text-xs font-bold bg-teal-500 text-white px-3 py-1 rounded-full">
-                    Current plan
-                  </span>
-                </div>
-              )}
-              <div className="flex items-start justify-between mb-4">
-                <div>
-                  <p className="font-black text-xl leading-none" style={{ color: plan.dark ? '#fff' : '#111' }}>
-                    {plan.name}
-                  </p>
-                  <p className="text-xs mt-0.5" style={{ color: plan.dark ? '#34d399' : '#6b7280' }}>
-                    {plan.tagline}
-                  </p>
-                </div>
-                <p className="text-3xl font-black" style={{ color: plan.dark ? '#fff' : '#111' }}>
-                  {plan.price}
-                  <span className="text-sm font-normal" style={{ color: plan.dark ? '#6b7280' : '#9ca3af' }}>
-                    {plan.period}
-                  </span>
+              <div className="flex items-baseline justify-between mb-1">
+                <p className="font-black text-base" style={{ color: meta.dark ? '#fff' : '#111' }}>
+                  {meta.name}
+                </p>
+                <p className="font-black text-lg" style={{ color: meta.dark ? '#fff' : '#111' }}>
+                  {meta.price}
+                  <span className="text-xs font-normal" style={{ color: meta.dark ? '#6b7280' : '#9ca3af' }}>/mo</span>
                 </p>
               </div>
-              <ul className="space-y-2 mb-5">
-                {plan.features.map(f => (
-                  <li key={f} className="flex items-center gap-2 text-sm" style={{ color: plan.dark ? '#d1d5db' : '#374151' }}>
-                    <svg className="w-4 h-4 flex-shrink-0" style={{ color: '#0d9488' }} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-                      <polyline points="20 6 9 17 4 12"/>
-                    </svg>
-                    {f}
-                  </li>
-                ))}
-              </ul>
-              {isCurrentPlan ? (
-                <button
-                  onClick={openBillingPortal}
-                  disabled={managingBilling}
-                  className="w-full py-3 rounded-xl font-bold text-sm transition disabled:opacity-60"
-                  style={{ backgroundColor: plan.dark ? 'rgba(255,255,255,0.08)' : '#f3f4f6', color: plan.dark ? '#fff' : '#374151', border: plan.dark ? 'none' : '1px solid #e5e7eb' }}
-                >
-                  {managingBilling ? 'Redirecting…' : 'Manage subscription'}
-                </button>
+              <p className="text-xs mb-4" style={{ color: meta.dark ? '#6b7280' : '#9ca3af' }}>
+                {meta.tagline}
+              </p>
+
+              {isDowngradeToFree ? (
+                !cancelConfirm ? (
+                  <button
+                    onClick={() => setCancelConfirm(true)}
+                    className="mt-auto w-full py-2 rounded-xl text-xs font-bold transition border border-gray-200 text-gray-400 hover:text-red-500 hover:border-red-200 hover:bg-red-50"
+                  >
+                    Downgrade to Free
+                  </button>
+                ) : (
+                  <div className="mt-auto space-y-2">
+                    <p className="text-xs text-gray-500 text-center">Keep access until billing ends.</p>
+                    <div className="flex gap-1.5">
+                      <button
+                        onClick={() => setCancelConfirm(false)}
+                        className="flex-1 py-2 rounded-lg text-xs font-semibold border border-gray-200 text-gray-500 hover:bg-gray-100 transition"
+                      >
+                        Keep
+                      </button>
+                      <button
+                        onClick={confirmCancel}
+                        disabled={cancelling}
+                        className="flex-1 py-2 rounded-lg text-xs font-semibold bg-red-500 hover:bg-red-600 text-white transition disabled:opacity-60"
+                      >
+                        {cancelling ? '…' : 'Cancel'}
+                      </button>
+                    </div>
+                  </div>
+                )
               ) : (
                 <button
-                  onClick={() => startCheckout(plan.id)}
-                  disabled={!!upgrading || (currentPlan === 'pro' && plan.id === 'starter')}
-                  className="w-full py-3 rounded-xl font-bold text-sm transition disabled:opacity-60"
-                  style={plan.dark
+                  onClick={() => isProDowngrade ? openBillingPortal() : startCheckout(planId)}
+                  disabled={!!upgrading || managingBilling}
+                  className="mt-auto w-full py-2 rounded-xl text-xs font-bold transition disabled:opacity-60"
+                  style={meta.dark
                     ? { backgroundColor: '#0d9488', color: '#fff' }
-                    : { backgroundColor: '#f9fafb', color: '#111', border: '1px solid #e5e7eb' }}
+                    : { backgroundColor: '#fff', color: '#111', border: '1px solid #e5e7eb' }}
                 >
-                  {upgrading === plan.id
-                    ? 'Redirecting…'
-                    : currentPlan === 'pro' && plan.id === 'starter'
-                    ? 'Downgrade via Manage subscription'
-                    : `Upgrade to ${plan.name}`}
+                  {upgrading === planId || (managingBilling && isProDowngrade)
+                    ? '…'
+                    : isUpgrade
+                    ? `Upgrade to ${meta.name}`
+                    : `Downgrade to ${meta.name}`}
                 </button>
               )}
             </div>
           );
         })}
-
-        {/* Downgrade to free */}
-        {isPaying && (
-          <div className="rounded-2xl p-6 border border-dashed border-gray-200">
-            <div className="flex items-start justify-between mb-3">
-              <div>
-                <p className="font-black text-xl leading-none text-gray-900">Free</p>
-                <p className="text-xs mt-0.5 text-gray-400">10 pitches/month, core features</p>
-              </div>
-              <p className="text-3xl font-black text-gray-900">$0</p>
-            </div>
-
-            {!cancelConfirm ? (
-              <button
-                onClick={() => setCancelConfirm(true)}
-                className="w-full py-3 rounded-xl font-bold text-sm text-gray-500 hover:text-red-500 transition border border-gray-200 hover:border-red-200 hover:bg-red-50"
-              >
-                Downgrade to Free
-              </button>
-            ) : (
-              <div className="space-y-3">
-                <p className="text-sm text-gray-600 text-center">
-                  You'll keep access until your billing period ends, then drop to 10 pitches/month.
-                </p>
-                <div className="flex gap-2">
-                  <button
-                    onClick={() => setCancelConfirm(false)}
-                    className="flex-1 py-2.5 rounded-xl text-sm font-semibold border border-gray-200 text-gray-600 hover:bg-gray-50 transition"
-                  >
-                    Keep my plan
-                  </button>
-                  <button
-                    onClick={confirmCancel}
-                    disabled={cancelling}
-                    className="flex-1 py-2.5 rounded-xl text-sm font-semibold bg-red-500 hover:bg-red-600 text-white transition disabled:opacity-60"
-                  >
-                    {cancelling ? 'Cancelling…' : 'Yes, cancel'}
-                  </button>
-                </div>
-              </div>
-            )}
-          </div>
-        )}
       </div>
 
       {portalError && (
