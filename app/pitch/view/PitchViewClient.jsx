@@ -276,6 +276,44 @@ function PitchView({ pitchId: propId }) {
     </div>
   ) : null;
 
+  const RatesSection = () => {
+    const [open, setOpen] = useState(false);
+    if (!pitch.rates?.length) return null;
+    return (
+      <div style={{ backgroundColor: T.cardBg, borderRadius: T.cardRadius, boxShadow: T.cardShadow, border: T.cardBorder, overflow: 'hidden' }}>
+        <button
+          onClick={() => setOpen(o => !o)}
+          className="w-full flex items-center justify-between px-8 py-5 text-left transition hover:opacity-80"
+        >
+          <div className="flex items-center gap-3">
+            <p className="text-xs font-bold uppercase tracking-widest text-gray-400">Rates</p>
+            <span className="text-xs px-2 py-0.5 rounded-full font-semibold" style={{ backgroundColor: `${T.primaryColor}15`, color: T.primaryColor }}>
+              {pitch.rates.length} package{pitch.rates.length !== 1 ? 's' : ''}
+            </span>
+          </div>
+          <svg className={`w-4 h-4 text-gray-400 transition-transform ${open ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+          </svg>
+        </button>
+        {open && (
+          <div className="px-8 pb-6 border-t" style={{ borderColor: T.cardBorder?.replace('1px solid ', '') || '#e5e7eb' }}>
+            <div className="pt-5 space-y-3">
+              {pitch.rates.map((rate, i) => (
+                <div key={i} className="flex items-baseline justify-between gap-4 py-3 border-b last:border-0" style={{ borderColor: T.cardBorder?.replace('1px solid ', '') || '#f3f4f6' }}>
+                  <div className="flex-1">
+                    <p className="text-sm font-semibold" style={{ color: T.textColor }}>{rate.label}</p>
+                    {rate.notes && <p className="text-xs text-gray-400 mt-0.5">{rate.notes}</p>}
+                  </div>
+                  <p className="text-base font-black flex-shrink-0" style={{ color: T.primaryColor }}>{rate.price}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
+    );
+  };
+
   const Footer = () => !pitch.removeBranding ? (
     <div className="py-10 text-center">
       <p className="text-xs" style={{ color: T.bodyBg === '#0f1117' || T.bodyBg === '#111827' ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.2)' }}>
@@ -332,6 +370,7 @@ function PitchView({ pitchId: propId }) {
           </div>
           <CustomCard />
           <ContentGrid cols={3} />
+          <RatesSection />
         </div>
         <Footer />
       </div>
@@ -386,6 +425,7 @@ function PitchView({ pitchId: propId }) {
             </div>
             <CustomCard />
             <ContentGrid cols={4} />
+            <RatesSection />
           </div>
         </div>
         <Footer />
@@ -463,6 +503,7 @@ function PitchView({ pitchId: propId }) {
               </div>
               <CustomCard />
               <ContentGrid cols={3} />
+              <RatesSection />
             </div>
           </div>
         </div>
@@ -526,6 +567,7 @@ function PitchView({ pitchId: propId }) {
         </div>
         <CustomCard />
         <ContentGrid cols={4} />
+        <RatesSection />
       </div>
       <Footer />
     </div>

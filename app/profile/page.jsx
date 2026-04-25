@@ -289,6 +289,51 @@ export default function Profile() {
           ))}
         </div>
 
+        {/* Rates */}
+        <div className="card space-y-3">
+          <div>
+            <p className="text-sm font-semibold text-gray-700 mb-1">Rates</p>
+            <p className="text-xs text-gray-400">Save your packages here. You can choose to include them per pitch.</p>
+          </div>
+          {(profile.rates || []).map((rate, i) => (
+            <div key={i} className="flex gap-2 items-center">
+              <input
+                type="text"
+                value={rate.label}
+                onChange={e => setProfile(p => { const r = [...(p.rates||[])]; r[i] = { ...r[i], label: e.target.value }; return { ...p, rates: r }; })}
+                placeholder="e.g. 1 UGC Video"
+                className="flex-1 px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-teal-500"
+              />
+              <input
+                type="text"
+                value={rate.price}
+                onChange={e => setProfile(p => { const r = [...(p.rates||[])]; r[i] = { ...r[i], price: e.target.value }; return { ...p, rates: r }; })}
+                placeholder="$300"
+                className="w-24 px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-teal-500"
+              />
+              <input
+                type="text"
+                value={rate.notes}
+                onChange={e => setProfile(p => { const r = [...(p.rates||[])]; r[i] = { ...r[i], notes: e.target.value }; return { ...p, rates: r }; })}
+                placeholder="Notes (optional)"
+                className="flex-1 px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-teal-500"
+              />
+              <button
+                type="button"
+                onClick={() => setProfile(p => ({ ...p, rates: (p.rates||[]).filter((_, j) => j !== i) }))}
+                className="text-gray-300 hover:text-red-400 transition text-lg leading-none flex-shrink-0"
+              >×</button>
+            </div>
+          ))}
+          <button
+            type="button"
+            onClick={() => setProfile(p => ({ ...p, rates: [...(p.rates||[]), { label: '', price: '', notes: '' }] }))}
+            className="text-sm text-teal-600 hover:text-teal-700 font-semibold transition"
+          >
+            + Add rate
+          </button>
+        </div>
+
         {/* Niches */}
         <div className="card">
           <label className="block text-sm font-semibold text-gray-700 mb-3">Your Niches</label>

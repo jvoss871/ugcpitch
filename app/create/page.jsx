@@ -18,6 +18,7 @@ export default function CreatePitch() {
   const [customEnabled, setCustomEnabled] = useState(false);
   const [customUrl, setCustomUrl] = useState('');
   const [customLabel, setCustomLabel] = useState('');
+  const [includeRates, setIncludeRates] = useState(false);
   const [planStatus, setPlanStatus] = useState(null);
 
   useEffect(() => {
@@ -109,6 +110,7 @@ export default function CreatePitch() {
           customContent: customEnabled && customUrl.trim()
             ? { url: customUrl.trim(), label: customLabel.trim() }
             : null,
+          rates: includeRates && profile.rates?.length > 0 ? profile.rates : null,
         }),
       });
       const pitch = await pitchRes.json();
@@ -319,6 +321,21 @@ export default function CreatePitch() {
             </div>
           )}
         </div>
+
+        {/* Rates */}
+        {profile?.rates?.length > 0 && (
+          <div className="card">
+            <label className="flex items-start gap-3 cursor-pointer">
+              <input type="checkbox" checked={includeRates}
+                onChange={e => setIncludeRates(e.target.checked)}
+                className="w-4 h-4 mt-0.5 rounded border-gray-300 text-teal-600 focus:ring-teal-500" />
+              <div>
+                <p className="text-sm font-semibold text-gray-900">Include my rates</p>
+                <p className="text-xs text-gray-500 mt-0.5">Adds a collapsible rates section to the pitch page. Good for proactive outreach — leave off when responding to fixed-rate ads.</p>
+              </div>
+            </label>
+          </div>
+        )}
 
         {error && (
           <div className="card bg-red-50 border border-red-200">
