@@ -253,7 +253,7 @@ export default function Home() {
                 <img
                   src="/images/ad-thread-competition.png"
                   alt="Creators competing in an ad thread"
-                  className="w-full h-40 object-cover object-top block"
+                  className="w-full h-auto block"
                 />
               </div>
 
