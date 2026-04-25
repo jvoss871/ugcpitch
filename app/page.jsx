@@ -249,11 +249,11 @@ export default function Home() {
               <p className="text-xl font-black text-gray-900 mb-5">You sound like everyone else</p>
 
               {/* Visual: ad thread competition image */}
-              <div className="flex-1 flex items-center justify-center mb-5 rounded-xl overflow-hidden">
+              <div className="mb-5 rounded-xl overflow-hidden">
                 <img
                   src="/images/ad-thread-competition.png"
                   alt="Creators competing in an ad thread"
-                  className="w-full h-auto block rounded-xl"
+                  className="w-full h-40 object-cover object-top block"
                 />
               </div>
 
