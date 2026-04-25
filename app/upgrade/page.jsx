@@ -41,6 +41,7 @@ export default function UpgradePage() {
   const [planStatus, setPlanStatus] = useState(null);
   const [upgrading, setUpgrading] = useState(null);
   const [managingBilling, setManagingBilling] = useState(false);
+  const [portalError, setPortalError] = useState('');
 
   useEffect(() => {
     if (!authUser) return;
@@ -69,16 +70,18 @@ export default function UpgradePage() {
 
   const openBillingPortal = async () => {
     setManagingBilling(true);
+    setPortalError('');
     try {
       const res = await fetch('/api/stripe/portal', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ username: authUser.username }),
       });
-      const { url, error } = await res.json();
-      if (error) throw new Error(error);
-      window.location.href = url;
-    } catch {
+      const data = await res.json();
+      if (!res.ok || data.error) throw new Error(data.error || 'Portal unavailable');
+      window.location.href = data.url;
+    } catch (err) {
+      setPortalError(err.message || 'Could not open billing portal');
       setManagingBilling(false);
     }
   };
@@ -173,6 +176,14 @@ export default function UpgradePage() {
           );
         })}
       </div>
+
+      {portalError && (
+        <div className="mt-4 px-4 py-3 bg-red-50 border border-red-200 rounded-xl text-sm text-red-700">
+          {portalError === 'No billing account found'
+            ? 'No billing account linked. If you subscribed recently, wait a moment and try again — or email support@ugcedge.com.'
+            : `Billing portal error: ${portalError}. Email support@ugcedge.com and we'll sort it.`}
+        </div>
+      )}
 
       {isPaying && (
         <p className="text-center text-xs text-gray-400 mt-6">
