@@ -119,7 +119,7 @@ export default function LayoutContent({ children }) {
         </div>
       </nav>
 
-      <main className={`max-w-7xl mx-auto px-6 ${pathname === '/' ? 'pt-12' : 'py-12'}`}>
+      <main key={pathname} className={`max-w-7xl mx-auto px-6 animate-fade-in-up ${pathname === '/' ? 'pt-12' : 'py-12'}`}>
         {children}
       </main>
 
