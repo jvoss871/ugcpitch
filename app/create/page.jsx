@@ -65,7 +65,7 @@ export default function CreatePitch() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          profile,
+          profile: { ...profile, username: authUser.username },
           content,
           jobDescription,
           messageType,
