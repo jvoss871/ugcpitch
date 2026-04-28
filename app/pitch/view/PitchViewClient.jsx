@@ -300,7 +300,6 @@ function PitchView({ pitchId: propId }) {
       tt && { href: ttHref, label: 'Message on TikTok', icon: <TtIcon /> },
       yt && { href: ytHref, label: 'YouTube', icon: <YtIcon /> },
     ].filter(Boolean);
-    if (contacts.length === 0) return null;
     return (
       <div className="p-10 relative overflow-hidden" style={{ backgroundColor: T.darkColor, borderRadius: T.cardRadius }}>
         <div className="absolute top-0 right-0 w-72 h-72 rounded-full opacity-5 pointer-events-none" style={{ backgroundColor: T.primaryColor, transform: 'translate(35%,-35%)' }} />
@@ -309,17 +308,19 @@ function PitchView({ pitchId: propId }) {
           <p className="text-2xl font-bold mb-8" style={{ color: T.whyText }}>
             {profile.name ? `Ready to work with ${profile.name}?` : 'Interested? Let\'s connect.'}
           </p>
-          <div className="flex flex-wrap gap-3">
-            {contacts.map((c, i) => (
-              <a key={i} href={c.href} target={c.href.startsWith('mailto') ? undefined : '_blank'} rel="noopener noreferrer"
-                className="inline-flex items-center gap-2.5 px-5 py-3 rounded-xl font-semibold text-sm transition hover:opacity-80"
-                style={i === 0
-                  ? { backgroundColor: T.primaryColor, color: '#fff' }
-                  : { backgroundColor: 'rgba(255,255,255,0.08)', color: T.whyText, border: '1px solid rgba(255,255,255,0.12)' }}>
-                {c.icon}{c.label}
-              </a>
-            ))}
-          </div>
+          {contacts.length > 0 && (
+            <div className="flex flex-wrap gap-3">
+              {contacts.map((c, i) => (
+                <a key={i} href={c.href} target={c.href.startsWith('mailto') ? undefined : '_blank'} rel="noopener noreferrer"
+                  className="inline-flex items-center gap-2.5 px-5 py-3 rounded-xl font-semibold text-sm transition hover:opacity-80"
+                  style={i === 0
+                    ? { backgroundColor: T.primaryColor, color: '#fff' }
+                    : { backgroundColor: 'rgba(255,255,255,0.08)', color: T.whyText, border: '1px solid rgba(255,255,255,0.12)' }}>
+                  {c.icon}{c.label}
+                </a>
+              ))}
+            </div>
+          )}
         </div>
       </div>
     );
@@ -435,7 +436,7 @@ function PitchView({ pitchId: propId }) {
           {pitch.customContent?.url && <div data-reveal className="reveal"><CustomCard /></div>}
           {pitch.selectedContent?.length > 0 && <div data-reveal className="reveal"><ContentGrid cols={3} /></div>}
           {!!pitch.rates?.length && <div data-reveal className="reveal"><RatesSection /></div>}
-          {Object.values(profile.socials ?? {}).some(Boolean) && <div data-reveal className="reveal"><CtaSection /></div>}
+          <div data-reveal className="reveal"><CtaSection /></div>
         </div>
         <Footer />
       </div>
@@ -488,7 +489,7 @@ function PitchView({ pitchId: propId }) {
             {pitch.customContent?.url && <div data-reveal className="reveal"><CustomCard /></div>}
             {pitch.selectedContent?.length > 0 && <div data-reveal className="reveal"><ContentGrid cols={4} /></div>}
             {!!pitch.rates?.length && <div data-reveal className="reveal"><RatesSection /></div>}
-            {Object.values(profile.socials ?? {}).some(Boolean) && <div data-reveal className="reveal"><CtaSection /></div>}
+            <div data-reveal className="reveal"><CtaSection /></div>
           </div>
         </div>
         <Footer />
@@ -566,7 +567,7 @@ function PitchView({ pitchId: propId }) {
               {pitch.customContent?.url && <div data-reveal className="reveal"><CustomCard /></div>}
               {pitch.selectedContent?.length > 0 && <div data-reveal className="reveal"><ContentGrid cols={3} /></div>}
               {!!pitch.rates?.length && <div data-reveal className="reveal"><RatesSection /></div>}
-              {Object.values(profile.socials ?? {}).some(Boolean) && <div data-reveal className="reveal"><CtaSection /></div>}
+              <div data-reveal className="reveal"><CtaSection /></div>
             </div>
           </div>
         </div>

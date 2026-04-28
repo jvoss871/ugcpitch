@@ -397,7 +397,7 @@ export default function BrandSetup() {
                 <>
                   <div style={{ backgroundColor: T.heroBannerBg, borderBottom: `1px solid ${T.heroBannerBorder}` }}
                     className="px-5 py-2 flex items-baseline gap-3">
-                    <p className="text-xs font-bold uppercase tracking-widest" style={{ color: primary }}>Pitched for</p>
+                    <p className="text-xs font-bold uppercase tracking-widest" style={{ color: primary }}>Created for</p>
                     <p className="text-sm font-black" style={{ fontFamily: fontObj.stack, color: T.heroText }}>Brand Name</p>
                   </div>
                   <div className="px-5 py-5 flex flex-col items-center text-center"
@@ -406,7 +406,7 @@ export default function BrandSetup() {
                       style={{ backgroundColor: primary, borderRadius: T.avatarRadius, color: '#fff' }}>
                       {authUser.username?.[0]?.toUpperCase()}
                     </div>
-                    <p className="text-xs font-semibold uppercase tracking-widest mb-0.5" style={{ color: T.heroText, opacity: 0.6 }}>UGC Creator</p>
+                    <p className="text-xs font-semibold uppercase tracking-widest mb-0.5" style={{ color: T.heroText, opacity: 0.6 }}>Content Creator</p>
                     {profile?.name && (
                       <p className="font-black text-xl leading-none" style={{ fontFamily: fontObj.stack, color: T.heroText }}>
                         {profile.name}
@@ -436,7 +436,7 @@ export default function BrandSetup() {
                   <div style={{ backgroundColor: T.heroBg, paddingBottom: '2rem' }}
                     className="px-5 pt-4">
                     <div className="flex items-baseline gap-2 mb-4">
-                      <p className="text-xs font-bold uppercase tracking-widest" style={{ color: T.heroText, opacity: 0.6 }}>Pitched for</p>
+                      <p className="text-xs font-bold uppercase tracking-widest" style={{ color: T.heroText, opacity: 0.6 }}>Created for</p>
                       <p className="text-sm font-black" style={{ fontFamily: fontObj.stack, color: T.heroText }}>Brand Name</p>
                     </div>
                     <div className="flex items-center gap-3">
@@ -445,7 +445,7 @@ export default function BrandSetup() {
                         {authUser.username?.[0]?.toUpperCase()}
                       </div>
                       <div>
-                        <p className="text-xs font-semibold uppercase tracking-widest mb-0.5" style={{ color: T.heroText, opacity: 0.65 }}>UGC Creator</p>
+                        <p className="text-xs font-semibold uppercase tracking-widest mb-0.5" style={{ color: T.heroText, opacity: 0.65 }}>Content Creator</p>
                         {profile?.name && (
                           <p className="font-black text-xl leading-none" style={{ fontFamily: fontObj.stack, color: T.heroText }}>
                             {profile.name}
@@ -489,7 +489,7 @@ export default function BrandSetup() {
                   </div>
                   <div className="flex-1 px-3 py-4" style={{ backgroundColor: T.bodyBg }}>
                     <div className="px-2 py-2 mb-2 text-[9px] text-gray-400 font-bold uppercase tracking-widest flex items-baseline gap-2">
-                      <span style={{ color: primary }}>Pitched for</span>
+                      <span style={{ color: primary }}>Created for</span>
                       <span className="font-black text-gray-700" style={{ fontFamily: fontObj.stack }}>Brand Name</span>
                     </div>
                     <div className="px-3 py-2.5"
@@ -508,7 +508,7 @@ export default function BrandSetup() {
                 <>
                   <div style={{ backgroundColor: T.heroBannerBg, borderBottom: `1px solid ${T.heroBannerBorder}` }}
                     className="px-5 py-2.5 flex items-baseline gap-3">
-                    <p className="text-xs font-bold uppercase tracking-widest" style={{ color: primary }}>Pitched for</p>
+                    <p className="text-xs font-bold uppercase tracking-widest" style={{ color: primary }}>Created for</p>
                     <p className="text-sm font-black" style={{ fontFamily: fontObj.stack, color: T.heroText }}>Brand Name</p>
                   </div>
                   <div className="px-5 py-5 flex items-center gap-4"
@@ -518,7 +518,7 @@ export default function BrandSetup() {
                       {authUser.username?.[0]?.toUpperCase()}
                     </div>
                     <div>
-                      <p className="text-xs font-semibold uppercase tracking-widest mb-0.5" style={{ color: primary }}>UGC Creator</p>
+                      <p className="text-xs font-semibold uppercase tracking-widest mb-0.5" style={{ color: primary }}>Content Creator</p>
                       {profile?.name && (
                         <p className="font-black text-xl leading-none" style={{ fontFamily: fontObj.stack, color: T.heroText }}>
                           {profile.name}
