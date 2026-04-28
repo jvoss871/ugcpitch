@@ -464,7 +464,14 @@ export default function PitchPage() {
             {!pitch?.shareId ? (
               <p className="text-sm text-gray-400">Copy the share link first — analytics will appear once someone views it.</p>
             ) : !analytics ? (
-              <p className="text-sm text-gray-400">No views yet.</p>
+              <div className="flex items-center justify-between">
+                <p className="text-sm text-gray-400">No views yet — share your link to start tracking.</p>
+                <button
+                  onClick={handleCopyShareLink}
+                  className="text-xs font-semibold text-teal-400 hover:text-teal-300 transition whitespace-nowrap ml-4">
+                  {copiedLink ? '✓ Copied!' : 'Copy link →'}
+                </button>
+              </div>
             ) : (
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
                 <div className="bg-gray-900 rounded-xl px-4 py-3">

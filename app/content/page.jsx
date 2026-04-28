@@ -254,7 +254,11 @@ export default function Content() {
               <button onClick={() => setShowPanel(true)} className="btn-primary">+ Add your first piece</button>
             </>
           ) : (
-            <p className="text-sm">No content matches the selected filters.</p>
+            <p className="text-sm mb-3">No content matches the selected filters.</p>
+            <button onClick={() => { setActiveType('all'); setActiveTags([]); }}
+              className="text-xs font-semibold text-teal-600 hover:text-teal-700 transition">
+              Clear filters
+            </button>
           )}
         </div>
       ) : (
