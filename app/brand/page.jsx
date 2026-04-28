@@ -93,6 +93,7 @@ export default function BrandSetup() {
         body: JSON.stringify({ username: authUser.username, handle: handle.trim() }),
       }).catch(() => {});
     }
+    router.refresh();
     setSaved(true);
     setTimeout(() => setSaved(false), 2000);
   };

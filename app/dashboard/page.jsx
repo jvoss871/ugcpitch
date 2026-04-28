@@ -92,7 +92,7 @@ export default function Dashboard() {
       .then(p => setProfile(p?.name ? p : storage.getProfile(user.username)))
       .catch(() => setProfile(storage.getProfile(user.username)));
 
-    fetch(`/api/brand?username=${encodeURIComponent(user.username)}`)
+    fetch(`/api/brand?username=${encodeURIComponent(user.username)}`, { cache: 'no-store' })
       .then(r => r.json())
       .then(setBrand)
       .catch(() => setBrand(storage.getBrand(user.username)));
