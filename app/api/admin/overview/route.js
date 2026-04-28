@@ -30,13 +30,14 @@ export async function GET(req) {
     }
 
     const mrr = starter * 9 + pro * 19;
+    const totalPitches = users.reduce((sum, u) => sum + (u.pitchCount ?? 0), 0);
     const recentFreeUsers = users.filter(u => new Date(u.createdAt).getTime() > thirtyDaysAgo && (u.plan === 'free' || u.plan === 'trial'));
     const converted = users.filter(u => new Date(u.createdAt).getTime() > thirtyDaysAgo && (u.plan === 'starter' || u.plan === 'pro')).length;
     const conversionRate = (recentFreeUsers.length + converted) > 0
       ? Math.round(converted / (recentFreeUsers.length + converted) * 100)
       : 0;
 
-    return Response.json({ total: users.length, free, starter, pro, expired, mrr, conversionRate, recentTrialUsers: recentFreeUsers.length, converted });
+    return Response.json({ total: users.length, free, starter, pro, expired, mrr, totalPitches, conversionRate, recentTrialUsers: recentFreeUsers.length, converted });
   } catch {
     return Response.json({ total: 0, trial: 0, starter: 0, pro: 0, expired: 0, mrr: 0, conversionRate: 0, recentTrialUsers: 0, converted: 0 });
   }

@@ -187,33 +187,67 @@ export default function AdminPage() {
 
         {/* ── OVERVIEW ────────────────────────────────────────────────── */}
         {tab === 'overview' && (
-          <div className="space-y-6">
+          <div className="space-y-4">
             {!overview ? (
               <div className="text-gray-600 text-sm">Loading…</div>
             ) : (
               <>
-                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
+                {/* Conversion bar */}
+                <div className="bg-gray-900 rounded-2xl p-6 border border-gray-800">
+                  <div className="flex items-end justify-between mb-3">
+                    <div>
+                      <p className="text-xs text-gray-500 uppercase tracking-widest mb-1">30-day Free → Paid Conversion</p>
+                      <p className="text-4xl font-black text-white">{overview.conversionRate}<span className="text-2xl text-gray-500">%</span></p>
+                    </div>
+                    <p className="text-sm text-gray-600 text-right">
+                      {overview.converted} paid<br />
+                      <span className="text-gray-700">of {overview.recentTrialUsers + overview.converted} signups</span>
+                    </p>
+                  </div>
+                  <div className="h-2 bg-gray-800 rounded-full overflow-hidden">
+                    <div
+                      className="h-full rounded-full transition-all duration-700"
+                      style={{
+                        width: `${overview.conversionRate}%`,
+                        background: overview.conversionRate >= 20 ? '#0d9488' : overview.conversionRate >= 10 ? '#f59e0b' : '#6b7280',
+                      }}
+                    />
+                  </div>
+                </div>
+
+                {/* Row 1 — key metrics */}
+                <div className="grid grid-cols-3 gap-4">
                   {[
-                    { label: 'Total Users', value: overview.total },
-                    { label: 'Free',        value: overview.free },
-                    { label: 'Starter',     value: overview.starter },
-                    { label: 'Pro',         value: overview.pro },
-                    { label: 'Expired',     value: overview.expired },
-                    { label: 'MRR',         value: `$${overview.mrr}` },
+                    { label: 'MRR', value: `$${overview.mrr}`, sub: 'monthly recurring', accent: '#0d9488' },
+                    { label: 'Total Users', value: overview.total, sub: 'all time', accent: '#ffffff' },
+                    { label: 'Pitches Created', value: overview.totalPitches, sub: 'across all users', accent: '#a78bfa' },
                   ].map(s => (
                     <div key={s.label} className="bg-gray-900 rounded-2xl p-5 border border-gray-800">
-                      <p className="text-xs text-gray-500 mb-2 uppercase tracking-widest">{s.label}</p>
-                      <p className="text-3xl font-black">{s.value}</p>
+                      <p className="text-xs text-gray-500 uppercase tracking-widest mb-3">{s.label}</p>
+                      <p className="text-4xl font-black" style={{ color: s.accent }}>{s.value}</p>
+                      <p className="text-xs text-gray-700 mt-1">{s.sub}</p>
                     </div>
                   ))}
                 </div>
 
-                <div className="bg-gray-900 rounded-2xl p-6 border border-gray-800">
-                  <p className="text-xs text-gray-500 uppercase tracking-widest mb-2">30-day Free → Paid Conversion</p>
-                  <p className="text-5xl font-black mb-2">{overview.conversionRate}%</p>
-                  <p className="text-sm text-gray-600">
-                    {overview.converted} of {overview.recentTrialUsers + overview.converted} users who signed up free in the last 30 days converted to a paid plan.
-                  </p>
+                {/* Row 2 — plan breakdown */}
+                <div className="grid grid-cols-3 gap-4">
+                  {[
+                    { label: 'Free', value: overview.free, color: '#6b7280', bg: 'rgba(107,114,128,0.08)', border: 'rgba(107,114,128,0.2)' },
+                    { label: 'Starter', value: overview.starter, color: '#3b82f6', bg: 'rgba(59,130,246,0.08)', border: 'rgba(59,130,246,0.2)' },
+                    { label: 'Pro', value: overview.pro, color: '#0d9488', bg: 'rgba(13,148,136,0.08)', border: 'rgba(13,148,136,0.25)' },
+                  ].map(s => (
+                    <div key={s.label} className="rounded-2xl p-5 border" style={{ backgroundColor: s.bg, borderColor: s.border }}>
+                      <div className="flex items-center justify-between mb-3">
+                        <p className="text-xs font-bold uppercase tracking-widest" style={{ color: s.color }}>{s.label}</p>
+                        <span className="text-xs font-semibold px-2 py-0.5 rounded-full" style={{ color: s.color, backgroundColor: s.bg }}>
+                          {overview.total > 0 ? Math.round(s.value / overview.total * 100) : 0}%
+                        </span>
+                      </div>
+                      <p className="text-4xl font-black text-white">{s.value}</p>
+                      <p className="text-xs text-gray-700 mt-1">users</p>
+                    </div>
+                  ))}
                 </div>
               </>
             )}
