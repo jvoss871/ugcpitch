@@ -381,6 +381,11 @@ export default function Dashboard() {
 
         {/* Pitch list */}
         {(() => {
+          // Wait for brand to load before deciding which view to show.
+          // brand is null pre-fetch and an object post-fetch — without this guard,
+          // brand.configured reads as false and the onboarding flashes on every refresh.
+          if (brand === null) return null;
+
           const step1Done = !!(profile?.name?.trim());
           const step2Done = !!brand?.configured;
           const step3Done = (contentCount ?? 0) > 0;
