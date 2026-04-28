@@ -84,7 +84,7 @@ export default function BrandSetup() {
     await fetch('/api/brand', {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ username: authUser.username, ...brand }),
+      body: JSON.stringify({ username: authUser.username, ...brand, configured: true }),
     }).catch(() => {});
     if (planStatus?.features?.custom_url && handle.trim() && handleStatus === 'available') {
       await fetch('/api/handle', {

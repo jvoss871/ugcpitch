@@ -383,11 +383,7 @@ export default function Dashboard() {
         {visiblePitches.length === 0 ? (
           (() => {
             const step1Done = !!(profile?.name?.trim());
-            const step2Done = !!(brand && (
-              brand.colors?.[0] !== '#0d9488' ||
-              brand.font !== 'Inter' ||
-              brand.templateId !== 'modern'
-            ));
+            const step2Done = !!brand?.configured;
             const step3Done = (contentCount ?? 0) > 0;
             const step4Done = pitches.length > 0;
             const allDone = step1Done && step2Done && step3Done && step4Done;
