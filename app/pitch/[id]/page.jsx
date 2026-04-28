@@ -620,6 +620,43 @@ export default function PitchPage() {
         const hasWhy = !!(profile.why_work_with_me || profile.positioning_statement);
         const whyText = profile.why_work_with_me || profile.positioning_statement;
 
+        const CtaSection = () => {
+          const { instagram: ig, tiktok: tt, youtube: yt, email: em } = profile.socials ?? {};
+          const igHref = ig ? `https://instagram.com/${ig.replace('@', '')}` : null;
+          const ttHref = tt ? `https://tiktok.com/@${tt.replace('@', '')}` : null;
+          const ytHref = yt ? `https://youtube.com/@${yt.replace('@', '')}` : null;
+          const contacts = [
+            em && { href: `mailto:${em}`, label: 'Send an Email', icon: <EmIcon /> },
+            ig && { href: igHref, label: 'DM on Instagram', icon: <IgIcon /> },
+            tt && { href: ttHref, label: 'Message on TikTok', icon: <TtIcon /> },
+            yt && { href: ytHref, label: 'YouTube', icon: <YtIcon /> },
+          ].filter(Boolean);
+          return (
+            <div className="p-10 relative overflow-hidden" style={{ backgroundColor: T.darkColor, borderRadius: T.cardRadius }}>
+              <div className="absolute top-0 right-0 w-72 h-72 rounded-full opacity-5 pointer-events-none" style={{ backgroundColor: primary, transform: 'translate(35%,-35%)' }} />
+              <div className="relative z-10">
+                <p className="text-xs font-bold uppercase tracking-widest mb-3" style={{ color: primary }}>Let's work together</p>
+                <p className="text-2xl font-bold mb-8" style={{ color: T.whyText }}>
+                  {profile.name ? `Ready to work with ${profile.name}?` : "Interested? Let's connect."}
+                </p>
+                {contacts.length > 0 && (
+                  <div className="flex flex-wrap gap-3">
+                    {contacts.map((c, i) => (
+                      <a key={i} href={c.href} target={c.href.startsWith('mailto') ? undefined : '_blank'} rel="noopener noreferrer"
+                        className="inline-flex items-center gap-2.5 px-5 py-3 rounded-xl font-semibold text-sm transition hover:opacity-80"
+                        style={i === 0
+                          ? { backgroundColor: primary, color: '#fff' }
+                          : { backgroundColor: 'rgba(255,255,255,0.08)', color: T.whyText, border: '1px solid rgba(255,255,255,0.12)' }}>
+                        {c.icon}{c.label}
+                      </a>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+          );
+        };
+
         // ── CENTERED ────────────────────────────────────────────────────────
         if (T.layout === 'centered') return (
           <div style={{ backgroundColor: T.bodyBg }}>
@@ -656,6 +693,7 @@ export default function PitchPage() {
               <CustomCard />
               <ContentExamples />
               <RatesSection pitch={pitch} T={T} primary={primary} />
+              <CtaSection />
             </div>
             <div className="py-8 text-center"><p className="text-xs text-gray-300 tracking-widest uppercase">Made with UGC Edge</p></div>
           </div>
@@ -702,6 +740,7 @@ export default function PitchPage() {
                 <CustomCard />
                 <ContentExamples />
                 <RatesSection pitch={pitch} T={T} primary={primary} />
+                <CtaSection />
               </div>
             </div>
             <div className="py-8 text-center"><p className="text-xs text-gray-300 tracking-widest uppercase">Made with UGC Edge</p></div>
@@ -754,6 +793,7 @@ export default function PitchPage() {
                   <CustomCard />
                   <ContentExamples />
                   <RatesSection pitch={pitch} T={T} primary={primary} />
+                  <CtaSection />
                 </div>
               </div>
             </div>
@@ -812,6 +852,7 @@ export default function PitchPage() {
               <CustomCard />
               <ContentExamples />
               <RatesSection pitch={pitch} T={T} primary={primary} />
+              <CtaSection />
             </div>
             <div className="py-8 text-center"><p className="text-xs text-gray-300 tracking-widest uppercase">Made with UGC Edge</p></div>
           </div>
