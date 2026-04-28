@@ -131,7 +131,21 @@ export default function CreatePitch() {
     }
   };
 
-  if (loading) return <div className="text-center py-12">Loading...</div>;
+  if (loading) return (
+    <div className="max-w-2xl mx-auto animate-pulse space-y-6 py-4">
+      <div className="h-9 w-44 bg-gray-100 rounded-lg" />
+      <div className="bg-white rounded-2xl border border-gray-200 p-6">
+        <div className="h-4 w-40 bg-gray-100 rounded mb-3" />
+        <div className="h-44 bg-gray-100 rounded-lg" />
+      </div>
+      <div className="bg-white rounded-2xl border border-gray-200 p-6 space-y-3">
+        <div className="h-4 w-28 bg-gray-100 rounded mb-1" />
+        <div className="h-16 bg-gray-100 rounded-xl" />
+        <div className="h-16 bg-gray-100 rounded-xl" />
+      </div>
+      <div className="h-12 bg-gray-100 rounded-xl" />
+    </div>
+  );
   if (!authUser) return null;
 
   const status = planStatus?.status;
@@ -234,17 +248,17 @@ export default function CreatePitch() {
     <div className="max-w-2xl mx-auto animate-fade-in-up">
       <div className="mb-8">
         <h1 className="text-4xl font-bold text-gray-900 mb-2 font-display">
-          Create a Pitch
+          Build a Pitch
         </h1>
         <p className="text-gray-600">
-          Paste the job description, and we'll generate a targeted pitch.
+          Drop in the brand brief and we'll build a pitch tailored to you.
         </p>
       </div>
 
       <form onSubmit={handleGenerate} className="space-y-6">
         <div className="card">
           <label className="block text-sm font-semibold text-gray-700 mb-2">
-            Job Description / Opportunity
+            Brand Brief / Opportunity
           </label>
           <textarea
             value={jobDescription}
@@ -252,7 +266,7 @@ export default function CreatePitch() {
               setJobDescription(e.target.value);
               setError('');
             }}
-            placeholder="Paste the full job description, brand request, or opportunity here. More detail = better pitch."
+            placeholder="Paste the brand brief, job post, or opportunity. The more detail you give, the sharper the pitch."
             rows={8}
             className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 font-mono text-sm"
           />
@@ -349,13 +363,15 @@ export default function CreatePitch() {
           disabled={generating}
           className="w-full btn-primary"
         >
-          {generating ? 'Generating pitch...' : 'Generate Pitch'}
+          {generating ? (
+            <span className="flex items-center justify-center gap-2">
+              <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+              Building your pitch…
+            </span>
+          ) : 'Build My Pitch'}
         </button>
       </form>
 
-      <p className="text-xs text-gray-500 mt-8 text-center">
-        We'll analyze the opportunity and create a targeted pitch based on your profile and content.
-      </p>
     </div>
   );
 }

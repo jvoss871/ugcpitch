@@ -173,7 +173,17 @@ export default function Content() {
     return true;
   });
 
-  if (loading) return <div className="text-center py-12">Loading...</div>;
+  if (loading) return (
+    <div className="animate-pulse space-y-6 py-4">
+      <div className="flex items-center justify-between">
+        <div className="h-9 w-44 bg-gray-100 rounded-lg" />
+        <div className="h-9 w-28 bg-gray-100 rounded-lg" />
+      </div>
+      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
+        {[...Array(10)].map((_, i) => <div key={i} className="aspect-square bg-gray-100 rounded-xl" />)}
+      </div>
+    </div>
+  );
   if (!authUser) return null;
 
   return (
@@ -240,8 +250,8 @@ export default function Content() {
           {content.length === 0 ? (
             <>
               <p className="text-4xl mb-3 opacity-20">—</p>
-              <p className="text-sm mb-4">No content yet. Add your best UGC work.</p>
-              <button onClick={() => setShowPanel(true)} className="btn-primary">+ Add Your First Piece</button>
+              <p className="text-sm mb-4">Nothing here yet. Add your best work — the AI matches it to brands automatically.</p>
+              <button onClick={() => setShowPanel(true)} className="btn-primary">+ Add your first piece</button>
             </>
           ) : (
             <p className="text-sm">No content matches the selected filters.</p>

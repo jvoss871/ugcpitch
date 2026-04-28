@@ -212,7 +212,27 @@ export default function Dashboard() {
     ...folders,
   ];
 
-  if (loading) return <div className="text-center py-12">Loading...</div>;
+  if (loading) return (
+    <div className="flex flex-col -mx-6 -my-12 min-h-[calc(100vh-80px)] animate-pulse">
+      <div className="flex flex-1">
+        <aside className="w-52 flex-shrink-0 border-r border-gray-200 bg-white px-3 py-6 space-y-2">
+          <div className="h-3 w-16 bg-gray-100 rounded mb-4 mx-2" />
+          {[...Array(5)].map((_, i) => <div key={i} className="h-8 bg-gray-100 rounded-lg" />)}
+        </aside>
+        <div className="flex-1 px-8 py-6 space-y-4">
+          <div className="flex items-center justify-between">
+            <div className="h-8 w-32 bg-gray-100 rounded-lg" />
+            <div className="h-9 w-24 bg-gray-100 rounded-lg" />
+          </div>
+          <div className="h-10 bg-gray-100 rounded-xl" />
+          <div className="bg-white rounded-2xl border border-gray-100 overflow-hidden">
+            <div className="h-10 bg-gray-50 border-b border-gray-100" />
+            {[...Array(4)].map((_, i) => <div key={i} className="h-14 border-b border-gray-100 last:border-0 mx-5 my-3 bg-gray-100 rounded-lg" />)}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
   if (!user) return null;
 
   const startCheckout = async (plan) => {
@@ -312,7 +332,7 @@ export default function Dashboard() {
           </div>
           <Link href="/create"
             className="text-sm font-medium text-white bg-teal-600 px-4 py-2 rounded-lg hover:bg-teal-700 transition">
-            + Create Pitch
+            + New Pitch
           </Link>
         </div>
 
@@ -397,31 +417,31 @@ export default function Dashboard() {
             const steps = [
               {
                 done: step1Done,
-                title: 'Complete your profile',
-                desc: 'Add your name, bio, niche tags, and social links.',
+                title: 'Tell brands who you are',
+                desc: 'Your name, niche, and story — this is the first thing brands read.',
                 href: '/profile',
-                cta: 'Go to Profile',
+                cta: 'Set up profile',
               },
               {
                 done: step2Done,
-                title: 'Set your brand',
-                desc: 'Choose your colors, font, and pitch page template.',
+                title: 'Make it yours',
+                desc: 'A pitch page that looks like you. Colors, font, and layout.',
                 href: '/brand',
-                cta: 'Go to Brand',
+                cta: 'Set up brand',
               },
               {
                 done: step3Done,
-                title: 'Add content to your library',
-                desc: 'Upload videos and images — the AI uses these to match you to brands.',
+                title: 'Show your work',
+                desc: 'Your past work does the selling. Add it once, it shows up in every pitch.',
                 href: '/content',
-                cta: 'Add Content',
+                cta: 'Add your work',
               },
             ];
             return (
               <div className="max-w-lg mx-auto py-12">
                 <div className="mb-6">
-                  <h2 className="text-xl font-black text-gray-900 mb-1">Get set up in 3 steps</h2>
-                  <p className="text-sm text-gray-500">{doneCount} of 3 complete</p>
+                  <h2 className="text-xl font-black text-gray-900 mb-1">Let's get you ready</h2>
+                  <p className="text-sm text-gray-500">{doneCount} of 3 done</p>
                   <div className="mt-3 h-1.5 rounded-full bg-gray-100 overflow-hidden">
                     <div className="h-full rounded-full bg-teal-500 transition-all duration-500"
                       style={{ width: `${(doneCount / 3) * 100}%` }} />
@@ -493,10 +513,10 @@ export default function Dashboard() {
 
               {visiblePitches.length === 0 ? (
                 <div className="flex flex-col items-center justify-center py-16 text-center">
-                  <p className="text-gray-400 text-sm mb-4">No pitches yet. Create your first one to get started.</p>
+                  <p className="text-gray-400 text-sm mb-4">Ready when you are.</p>
                   <Link href="/create"
                     className="inline-flex items-center gap-2 text-sm font-semibold text-white bg-teal-600 hover:bg-teal-700 px-5 py-2.5 rounded-xl transition">
-                    Create your first pitch
+                    Build your first pitch
                   </Link>
                 </div>
               ) : (

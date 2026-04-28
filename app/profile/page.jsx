@@ -119,7 +119,18 @@ export default function Profile() {
       return { ...p, languages: langs.includes(lang) ? langs.filter(l => l !== lang) : [...langs, lang] };
     });
 
-  if (!authUser || !profile) return <div className="text-center py-12">Loading...</div>;
+  if (!authUser || !profile) return (
+    <div className="max-w-2xl mx-auto animate-pulse space-y-6 py-4">
+      <div className="h-9 w-36 bg-gray-100 rounded-lg" />
+      {[...Array(4)].map((_, i) => (
+        <div key={i} className="bg-white rounded-2xl border border-gray-200 p-6 space-y-4">
+          <div className="h-4 w-32 bg-gray-100 rounded" />
+          <div className="h-10 bg-gray-100 rounded-lg" />
+          <div className="h-10 bg-gray-100 rounded-lg" />
+        </div>
+      ))}
+    </div>
+  );
 
   return (
     <div className="max-w-2xl mx-auto animate-fade-in-up">

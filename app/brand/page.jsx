@@ -106,7 +106,18 @@ export default function BrandSetup() {
     });
   };
 
-  if (!authUser || !brand) return <div className="text-center py-12">Loading...</div>;
+  if (!authUser || !brand) return (
+    <div className="max-w-2xl mx-auto animate-pulse space-y-6 py-4">
+      <div className="h-9 w-36 bg-gray-100 rounded-lg" />
+      {[...Array(3)].map((_, i) => (
+        <div key={i} className="bg-white rounded-2xl border border-gray-200 p-6 space-y-4">
+          <div className="h-4 w-28 bg-gray-100 rounded" />
+          <div className="h-12 bg-gray-100 rounded-lg" />
+          <div className="h-12 bg-gray-100 rounded-lg" />
+        </div>
+      ))}
+    </div>
+  );
 
   const fontObj = FONTS.find(f => f.name === brand.font) ?? FONTS[0];
   const [primary, dark, bg, textColor = '#111111'] = brand.colors;
