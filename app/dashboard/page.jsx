@@ -46,6 +46,7 @@ export default function Dashboard() {
   const [planStatus, setPlanStatus] = useState(null);
   const [profile, setProfile] = useState(null);
   const [brand, setBrand] = useState(null);
+  const [contentCount, setContentCount] = useState(null);
   const [bannerUpgrading, setBannerUpgrading] = useState(false);
   const newFolderInputRef = useRef(null);
 
@@ -95,6 +96,11 @@ export default function Dashboard() {
       .then(r => r.json())
       .then(setBrand)
       .catch(() => setBrand(storage.getBrand(user.username)));
+
+    fetch(`/api/content?username=${encodeURIComponent(user.username)}`)
+      .then(r => r.json())
+      .then(c => setContentCount(Array.isArray(c) ? c.length : 0))
+      .catch(() => setContentCount(storage.getContent(user.username).length));
   }, [user]);
 
   useEffect(() => {
@@ -382,9 +388,10 @@ export default function Dashboard() {
               brand.font !== 'Inter' ||
               brand.templateId !== 'modern'
             ));
-            const step3Done = pitches.length > 0;
-            const allDone = step1Done && step2Done && step3Done;
-            const doneCount = [step1Done, step2Done, step3Done].filter(Boolean).length;
+            const step3Done = (contentCount ?? 0) > 0;
+            const step4Done = pitches.length > 0;
+            const allDone = step1Done && step2Done && step3Done && step4Done;
+            const doneCount = [step1Done, step2Done, step3Done, step4Done].filter(Boolean).length;
 
             const steps = [
               {
@@ -403,6 +410,13 @@ export default function Dashboard() {
               },
               {
                 done: step3Done,
+                title: 'Add content to your library',
+                desc: 'Upload videos and images — the AI uses these to match you to brands.',
+                href: '/content',
+                cta: 'Add Content',
+              },
+              {
+                done: step4Done,
                 title: 'Create your first pitch',
                 desc: 'Paste a job description and generate a tailored pitch in seconds.',
                 href: '/create',
@@ -439,11 +453,11 @@ export default function Dashboard() {
             return (
               <div className="max-w-lg mx-auto py-12">
                 <div className="mb-6">
-                  <h2 className="text-xl font-black text-gray-900 mb-1">Get set up in 3 steps</h2>
-                  <p className="text-sm text-gray-500">{doneCount} of 3 complete</p>
+                  <h2 className="text-xl font-black text-gray-900 mb-1">Get set up in 4 steps</h2>
+                  <p className="text-sm text-gray-500">{doneCount} of 4 complete</p>
                   <div className="mt-3 h-1.5 rounded-full bg-gray-100 overflow-hidden">
                     <div className="h-full rounded-full bg-teal-500 transition-all duration-500"
-                      style={{ width: `${(doneCount / 3) * 100}%` }} />
+                      style={{ width: `${(doneCount / 4) * 100}%` }} />
                   </div>
                 </div>
 

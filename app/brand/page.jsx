@@ -114,14 +114,9 @@ export default function BrandSetup() {
 
   return (
     <div className="max-w-2xl mx-auto animate-fade-in-up">
-      <div className="mb-8 flex items-start justify-between">
-        <div>
-          <h1 className="text-4xl font-bold text-gray-900 mb-1 font-display">Brand Setup</h1>
-          <p className="text-gray-500 text-sm">Colors and font used on your shareable pitch pages.</p>
-        </div>
-        <button onClick={handleSave} className="btn-primary">
-          {saved ? '✓ Saved!' : 'Save Changes'}
-        </button>
+      <div className="mb-8">
+        <h1 className="text-4xl font-bold text-gray-900 mb-1 font-display">Brand Setup</h1>
+        <p className="text-gray-500 text-sm">Colors and font used on your shareable pitch pages.</p>
       </div>
 
       <div className="space-y-6">
@@ -545,6 +540,10 @@ export default function BrandSetup() {
         </div>
 
       </div>
+
+      <button onClick={handleSave} className="btn-primary mt-6 w-full">
+        {saved ? '✓ Saved!' : 'Save Changes'}
+      </button>
     </div>
   );
 }

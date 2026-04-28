@@ -123,14 +123,9 @@ export default function Profile() {
 
   return (
     <div className="max-w-2xl mx-auto animate-fade-in-up">
-      <div className="mb-8 flex items-start justify-between">
-        <div>
-          <h1 className="text-4xl font-bold text-gray-900 mb-1 font-display">Profile</h1>
-          <p className="text-gray-500 text-sm">This info shapes your pitch pages and AI output.</p>
-        </div>
-        <button onClick={handleSave} className="btn-primary">
-          {saved ? '✓ Saved!' : 'Save Changes'}
-        </button>
+      <div className="mb-8">
+        <h1 className="text-4xl font-bold text-gray-900 mb-1 font-display">Profile</h1>
+        <p className="text-gray-500 text-sm">This info shapes your pitch pages and AI output.</p>
       </div>
 
       <div className="space-y-4">
@@ -396,6 +391,10 @@ export default function Profile() {
         </div>
 
       </div>
+
+      <button onClick={handleSave} className="btn-primary mt-6 w-full">
+        {saved ? '✓ Saved!' : 'Save Changes'}
+      </button>
     </div>
   );
 }
