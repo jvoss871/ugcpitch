@@ -591,7 +591,7 @@ export default function PitchPage() {
         const ContentExamples = () => (editMode ? pitchContent.length > 0 || allContent.length > 0 : pitchContent.length > 0) ? (
           <div>
             <div className="flex items-baseline justify-between mb-6">
-              <p className="text-xs font-bold uppercase tracking-widest text-gray-400">Content Examples</p>
+              <p className="text-xs font-bold uppercase tracking-widest text-gray-400">Past Work</p>
               {editMode && <span className="text-xs text-teal-600 font-semibold">Select pieces to include</span>}
             </div>
             {editMode ? (
@@ -628,7 +628,6 @@ export default function PitchPage() {
                 <div className="mx-auto mb-5 overflow-hidden shadow-xl" style={{ width: 96, height: 96, borderRadius: T.avatarRadius, backgroundColor: primary }}>
                   <AvatarEl size={96} />
                 </div>
-                <p className="text-xs font-bold uppercase tracking-widest mb-2" style={{ color: primary }}>UGC Creator</p>
                 {profile.name && <h1 className="text-5xl font-black tracking-tight mb-4" style={{ fontFamily: fontStack, color: T.heroText }}>{profile.name}</h1>}
                 <div className="flex flex-wrap gap-2 justify-center mb-2">
                   {profile.niche_tags?.map(t => <span key={t} className="text-xs font-semibold uppercase tracking-wider px-3 py-1 rounded-full" style={{ border: `1px solid ${T.tagBorder}`, color: T.tagText }}>{t}</span>)}
@@ -638,7 +637,7 @@ export default function PitchPage() {
             </div>
             <div style={{ borderBottom: `1px solid #e5e7eb`, backgroundColor: T.heroBannerBg }}>
               <div className="max-w-3xl mx-auto px-8 py-4 flex items-baseline gap-3 justify-center">
-                <p className="text-xs font-bold uppercase tracking-widest" style={{ color: primary }}>Pitched for</p>
+                <p className="text-xs font-bold uppercase tracking-widest" style={{ color: primary }}>Created for</p>
                 <h2 className="text-2xl font-black" style={{ fontFamily: fontStack, color: T.heroText }}>{pitch.title}</h2>
               </div>
             </div>
@@ -667,14 +666,13 @@ export default function PitchPage() {
           <div style={{ backgroundColor: T.bodyBg }}>
             <div style={{ backgroundColor: primary, paddingTop: '3.5rem', paddingBottom: '5rem' }}>
               <div className="max-w-5xl mx-auto px-8">
-                <p className="text-sm font-bold uppercase tracking-widest mb-1" style={{ color: 'rgba(255,255,255,0.55)' }}>Pitched for</p>
+                <p className="text-sm font-bold uppercase tracking-widest mb-1" style={{ color: 'rgba(255,255,255,0.55)' }}>Created for</p>
                 <h2 className="text-4xl font-black tracking-tight mb-10" style={{ fontFamily: fontStack, color: '#fff' }}>{pitch.title}</h2>
                 <div className="flex flex-col sm:flex-row items-start sm:items-end gap-8">
                   <div className="w-44 h-44 flex-shrink-0 overflow-hidden shadow-2xl" style={{ borderRadius: T.avatarRadius, backgroundColor: 'rgba(255,255,255,0.15)', border: '4px solid rgba(255,255,255,0.3)' }}>
                     <AvatarEl size={176} />
                   </div>
                   <div className="flex-1 sm:pb-2">
-                    <p className="text-sm font-bold uppercase tracking-widest mb-2" style={{ color: 'rgba(255,255,255,0.55)' }}>UGC Creator</p>
                     {profile.name && <h1 className="text-5xl font-black tracking-tight leading-none mb-4" style={{ fontFamily: fontStack, color: '#fff' }}>{profile.name}</h1>}
                     <NicheTags borderColor="rgba(255,255,255,0.3)" color="rgba(255,255,255,0.8)" />
                     <div className="mt-4">
@@ -716,7 +714,7 @@ export default function PitchPage() {
           <div style={{ backgroundColor: T.bodyBg, minHeight: '100vh' }}>
             <div style={{ backgroundColor: T.heroBannerBg, borderBottom: `1px solid ${T.heroBannerBorder}` }}>
               <div className="px-8 py-4 flex items-baseline gap-3">
-                <p className="text-xs font-bold uppercase tracking-widest flex-shrink-0" style={{ color: primary }}>Pitched for</p>
+                <p className="text-xs font-bold uppercase tracking-widest flex-shrink-0" style={{ color: primary }}>Created for</p>
                 <h2 className="text-2xl font-black truncate" style={{ fontFamily: fontStack, color: T.heroText }}>{pitch.title}</h2>
               </div>
             </div>
@@ -726,7 +724,6 @@ export default function PitchPage() {
                 <div className="overflow-hidden mb-4" style={{ width: 68, height: 68, borderRadius: T.avatarRadius, backgroundColor: primary }}>
                   <AvatarEl size={68} />
                 </div>
-                <p className="text-xs font-bold uppercase tracking-widest mb-1" style={{ color: primary }}>UGC Creator</p>
                 {profile.name && <h1 className="text-2xl font-black leading-tight mb-5" style={{ fontFamily: fontStack }}>{profile.name}</h1>}
                 {profile.niche_tags?.length > 0 && (
                   <div className="mb-5">
@@ -771,7 +768,7 @@ export default function PitchPage() {
             <div style={{ backgroundColor: T.heroBg, color: T.heroText }}>
               <div style={{ borderBottom: `1px solid ${T.heroBannerBorder}`, backgroundColor: T.heroBannerBg }}>
                 <div className="max-w-5xl mx-auto px-8 py-5 flex items-baseline gap-4">
-                  <p className="text-xs font-bold uppercase tracking-widest" style={{ color: primary }}>Pitched for</p>
+                  <p className="text-xs font-bold uppercase tracking-widest" style={{ color: primary }}>Created for</p>
                   <h2 className="text-3xl font-black tracking-tight" style={{ fontFamily: fontStack, color: T.heroText }}>{pitch.title}</h2>
                 </div>
               </div>
@@ -781,7 +778,6 @@ export default function PitchPage() {
                     <AvatarEl size={160} />
                   </div>
                   <div className="flex-1">
-                    <p className="text-sm font-semibold tracking-widest uppercase mb-1" style={{ color: primary }}>UGC Creator</p>
                     {profile.name && <h1 className="text-5xl font-black tracking-tight leading-none mb-4" style={{ fontFamily: fontStack, color: T.heroText }}>{profile.name}</h1>}
                     <NicheTags borderColor={T.tagBorder} color={T.tagText} />
                     <div className="flex flex-wrap gap-3 mt-3">

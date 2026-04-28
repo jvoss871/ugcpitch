@@ -267,7 +267,7 @@ function PitchView({ pitchId: propId }) {
   const ContentGrid = ({ cols = 4 }) => pitch.selectedContent?.length > 0 ? (
     <div>
       <div className="flex items-baseline justify-between mb-6">
-        <p className="text-xs font-bold uppercase tracking-widest text-gray-400">Content Examples</p>
+        <p className="text-xs font-bold uppercase tracking-widest text-gray-400">Past Work</p>
         <p className="text-xs text-gray-400">{pitch.selectedContent.length} piece{pitch.selectedContent.length !== 1 ? 's' : ''}</p>
       </div>
       <div className={`grid gap-4 grid-cols-2 sm:grid-cols-${Math.min(cols, 3)} md:grid-cols-${cols}`}>
@@ -275,6 +275,42 @@ function PitchView({ pitchId: propId }) {
       </div>
     </div>
   ) : null;
+
+  const CtaSection = () => {
+    const { instagram: ig, tiktok: tt, youtube: yt, email: em } = profile.socials ?? {};
+    const igHref = ig ? `https://instagram.com/${ig.replace('@', '')}` : null;
+    const ttHref = tt ? `https://tiktok.com/@${tt.replace('@', '')}` : null;
+    const ytHref = yt ? `https://youtube.com/@${yt.replace('@', '')}` : null;
+    const contacts = [
+      em && { href: `mailto:${em}`, label: 'Send an Email', icon: <EmIcon /> },
+      ig && { href: igHref, label: 'DM on Instagram', icon: <IgIcon /> },
+      tt && { href: ttHref, label: 'Message on TikTok', icon: <TtIcon /> },
+      yt && { href: ytHref, label: 'YouTube', icon: <YtIcon /> },
+    ].filter(Boolean);
+    if (contacts.length === 0) return null;
+    return (
+      <div className="p-10 relative overflow-hidden" style={{ backgroundColor: T.darkColor, borderRadius: T.cardRadius }}>
+        <div className="absolute top-0 right-0 w-72 h-72 rounded-full opacity-5 pointer-events-none" style={{ backgroundColor: T.primaryColor, transform: 'translate(35%,-35%)' }} />
+        <div className="relative z-10">
+          <p className="text-xs font-bold uppercase tracking-widest mb-3" style={{ color: T.primaryColor }}>Let's work together</p>
+          <p className="text-2xl font-bold mb-8" style={{ color: T.whyText }}>
+            {profile.name ? `Ready to work with ${profile.name}?` : 'Interested? Let\'s connect.'}
+          </p>
+          <div className="flex flex-wrap gap-3">
+            {contacts.map((c, i) => (
+              <a key={i} href={c.href} target={c.href.startsWith('mailto') ? undefined : '_blank'} rel="noopener noreferrer"
+                className="inline-flex items-center gap-2.5 px-5 py-3 rounded-xl font-semibold text-sm transition hover:opacity-80"
+                style={i === 0
+                  ? { backgroundColor: T.primaryColor, color: '#fff' }
+                  : { backgroundColor: 'rgba(255,255,255,0.08)', color: T.whyText, border: '1px solid rgba(255,255,255,0.12)' }}>
+                {c.icon}{c.label}
+              </a>
+            ))}
+          </div>
+        </div>
+      </div>
+    );
+  };
 
   const RatesSection = () => {
     const [open, setOpen] = useState(false);
@@ -350,7 +386,6 @@ function PitchView({ pitchId: propId }) {
               style={{ width: 104, height: 104, borderRadius: T.avatarRadius, backgroundColor: primary, outline: `3px solid ${primary}`, outlineOffset: '3px' }}>
               <AvatarImg size={104} />
             </div>
-            <p className="text-xs font-bold uppercase tracking-widest mb-2" style={{ color: primary }}>UGC Creator</p>
             {profile.name && <h1 className="text-5xl font-black tracking-tight mb-4" style={{ fontFamily: fontStack, color: T.heroText }}>{profile.name}</h1>}
             <div className="flex flex-wrap gap-2 justify-center mb-3">
               {niche_tags.map(t => <span key={t} className="text-xs font-semibold uppercase tracking-wider px-3 py-1 rounded-full" style={{ border: `1px solid ${T.tagBorder}`, color: T.tagText }}>{t}</span>)}
@@ -364,14 +399,14 @@ function PitchView({ pitchId: propId }) {
 
         <div style={{ borderBottom: `1px solid ${T.cardBorder || '#e5e7eb'}`, backgroundColor: T.heroBannerBg }}>
           <div className="max-w-3xl mx-auto px-8 py-6 flex items-baseline gap-3 justify-center">
-            <p className="text-xs font-bold uppercase tracking-widest" style={{ color: primary }}>Pitched for</p>
+            <p className="text-xs font-bold uppercase tracking-widest" style={{ color: primary }}>Created for</p>
             <h2 className="text-4xl font-black tracking-tight" style={{ fontFamily: fontStack, color: T.heroText }}>{pitch.title}</h2>
           </div>
         </div>
 
         <div className="max-w-3xl mx-auto px-8 py-16 space-y-12">
           <div>
-            <p className="text-xs font-bold uppercase tracking-widest mb-4" style={{ color: primary }}>Creator Bio</p>
+            <p className="text-xs font-bold uppercase tracking-widest mb-4" style={{ color: primary }}>About Me</p>
             <p className="text-xl leading-relaxed" style={{ color: T.textColor }}>{profile.bio}</p>
           </div>
           {hasWhy && (
@@ -389,6 +424,7 @@ function PitchView({ pitchId: propId }) {
           <CustomCard />
           <ContentGrid cols={3} />
           <RatesSection />
+          <CtaSection />
         </div>
         <Footer />
       </div>
@@ -401,7 +437,7 @@ function PitchView({ pitchId: propId }) {
       <div className="min-h-screen font-sans animate-fade-in-up" style={{ backgroundColor: T.bodyBg, paddingBottom: pitch.removeBranding ? 0 : 52 }}>
         <div style={{ backgroundColor: primary, paddingTop: '3.5rem', paddingBottom: '5rem' }}>
           <div className="max-w-5xl mx-auto px-8">
-            <p className="text-sm font-bold uppercase tracking-widest mb-1" style={{ color: 'rgba(255,255,255,0.55)' }}>Pitched for</p>
+            <p className="text-sm font-bold uppercase tracking-widest mb-1" style={{ color: 'rgba(255,255,255,0.55)' }}>Created for</p>
             <h2 className="text-4xl font-black tracking-tight mb-10" style={{ fontFamily: fontStack, color: '#fff' }}>{pitch.title}</h2>
             <div className="flex flex-col sm:flex-row items-start sm:items-end gap-8">
               <div className="w-44 h-44 flex-shrink-0 overflow-hidden shadow-2xl"
@@ -409,7 +445,6 @@ function PitchView({ pitchId: propId }) {
                 <AvatarImg size={176} />
               </div>
               <div className="flex-1 sm:pb-2">
-                <p className="text-sm font-bold uppercase tracking-widest mb-2" style={{ color: 'rgba(255,255,255,0.55)' }}>UGC Creator</p>
                 {profile.name && <h1 className="text-5xl font-black tracking-tight leading-none mb-4" style={{ fontFamily: fontStack, color: '#fff' }}>{profile.name}</h1>}
                 <NicheTags borderColor="rgba(255,255,255,0.3)" textColorVal="rgba(255,255,255,0.8)" />
                 {(profile.location || profile.languages?.length > 0) && (
@@ -433,7 +468,7 @@ function PitchView({ pitchId: propId }) {
             )}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               <div className="p-8" style={{ backgroundColor: T.cardBg, borderRadius: T.cardRadius, boxShadow: T.cardShadow, border: T.cardBorder }}>
-                <p className="text-xs font-bold uppercase tracking-widest text-gray-400 mb-4">Creator Bio</p>
+                <p className="text-xs font-bold uppercase tracking-widest text-gray-400 mb-4">About Me</p>
                 <p className="text-lg leading-relaxed" style={{ color: T.textColor }}>{profile.bio}</p>
               </div>
               <div className="p-8" style={{ backgroundColor: T.cardBg, borderRadius: T.cardRadius, boxShadow: T.cardShadow, borderLeft: T.accentBar, border: T.cardBorder }}>
@@ -444,6 +479,7 @@ function PitchView({ pitchId: propId }) {
             <CustomCard />
             <ContentGrid cols={4} />
             <RatesSection />
+            <CtaSection />
           </div>
         </div>
         <Footer />
@@ -457,7 +493,7 @@ function PitchView({ pitchId: propId }) {
       <div className="min-h-screen font-sans animate-fade-in-up" style={{ backgroundColor: T.bodyBg, paddingBottom: pitch.removeBranding ? 0 : 52 }}>
         <div style={{ backgroundColor: T.heroBannerBg, borderBottom: `1px solid ${T.heroBannerBorder}` }}>
           <div className="px-8 py-5 flex items-baseline gap-3">
-            <p className="text-xs font-bold uppercase tracking-widest flex-shrink-0" style={{ color: primary }}>Pitched for</p>
+            <p className="text-xs font-bold uppercase tracking-widest flex-shrink-0" style={{ color: primary }}>Created for</p>
             <h2 className="text-3xl font-black tracking-tight truncate" style={{ fontFamily: fontStack, color: T.heroText }}>{pitch.title}</h2>
           </div>
         </div>
@@ -470,7 +506,6 @@ function PitchView({ pitchId: propId }) {
               style={{ width: 68, height: 68, borderRadius: T.avatarRadius, backgroundColor: primary, outline: `3px solid ${primary}`, outlineOffset: '3px' }}>
               <AvatarImg size={68} />
             </div>
-            <p className="text-xs font-bold uppercase tracking-widest mb-1" style={{ color: primary }}>UGC Creator</p>
             {profile.name && <h1 className="text-2xl font-black leading-tight mb-6" style={{ fontFamily: fontStack }}>{profile.name}</h1>}
 
             {niche_tags.length > 0 && (
@@ -506,7 +541,7 @@ function PitchView({ pitchId: propId }) {
 
             <div className="max-w-2xl space-y-10">
               <div>
-                <p className="text-xs font-bold uppercase tracking-widest mb-3 text-gray-400">Creator Bio</p>
+                <p className="text-xs font-bold uppercase tracking-widest mb-3 text-gray-400">About Me</p>
                 <p className="text-xl leading-relaxed" style={{ color: T.textColor }}>{profile.bio}</p>
               </div>
               {hasWhy && (
@@ -522,6 +557,7 @@ function PitchView({ pitchId: propId }) {
               <CustomCard />
               <ContentGrid cols={3} />
               <RatesSection />
+              <CtaSection />
             </div>
           </div>
         </div>
@@ -536,7 +572,7 @@ function PitchView({ pitchId: propId }) {
       <div style={{ backgroundColor: T.heroBg, color: T.heroText }}>
         <div style={{ borderBottom: `1px solid ${T.heroBannerBorder}`, backgroundColor: T.heroBannerBg }}>
           <div className="max-w-5xl mx-auto px-8 py-6 flex items-baseline gap-4">
-            <p className="text-xs font-bold uppercase tracking-widest" style={{ color: primary }}>Pitched for</p>
+            <p className="text-xs font-bold uppercase tracking-widest" style={{ color: primary }}>Created for</p>
             <h2 className="text-4xl font-black tracking-tight" style={{ fontFamily: fontStack, color: T.heroText }}>{pitch.title}</h2>
           </div>
         </div>
@@ -546,7 +582,6 @@ function PitchView({ pitchId: propId }) {
               <AvatarImg size={160} />
             </div>
             <div className="flex-1">
-              <p className="text-sm font-semibold tracking-widest uppercase mb-1" style={{ color: primary }}>UGC Creator</p>
               {profile.name && <h1 className="text-5xl font-black tracking-tight leading-none mb-4" style={{ fontFamily: fontStack, color: T.heroText }}>{profile.name}</h1>}
               <NicheTags borderColor={T.tagBorder} textColorVal={T.tagText} />
               <div className="flex flex-wrap gap-3 mt-3">
@@ -567,7 +602,7 @@ function PitchView({ pitchId: propId }) {
       <div className="max-w-5xl mx-auto px-8 py-16 space-y-12">
         <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
           <div className="lg:col-span-3 p-8" style={{ backgroundColor: T.cardBg, borderRadius: T.cardRadius, boxShadow: T.cardShadow, border: T.cardBorder }}>
-            <p className="text-xs font-bold uppercase tracking-widest text-gray-400 mb-4">Creator Bio</p>
+            <p className="text-xs font-bold uppercase tracking-widest text-gray-400 mb-4">About Me</p>
             <p className="text-lg leading-relaxed" style={{ color: T.textColor }}>{profile.bio}</p>
           </div>
           {hasWhy && (
@@ -586,6 +621,7 @@ function PitchView({ pitchId: propId }) {
         <CustomCard />
         <ContentGrid cols={4} />
         <RatesSection />
+        <CtaSection />
       </div>
       <Footer />
     </div>
