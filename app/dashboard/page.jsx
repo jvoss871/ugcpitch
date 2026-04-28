@@ -60,7 +60,7 @@ export default function Dashboard() {
 
     const sorted = ps => [...ps].sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
 
-    fetch(`/api/pitches?username=${encodeURIComponent(user.username)}`)
+    fetch(`/api/pitches?username=${encodeURIComponent(user.username)}`, { cache: 'no-store' })
       .then(r => r.json())
       .then(async serverPitches => {
         if (serverPitches.length === 0) {

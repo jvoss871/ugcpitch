@@ -122,6 +122,7 @@ export default function CreatePitch() {
           .catch(() => {});
       }
 
+      router.refresh();
       router.push(`/pitch/${pitch.id}`);
     } catch {
       setError('Failed to generate pitch. Make sure you have a GROQ_API_KEY set.');
