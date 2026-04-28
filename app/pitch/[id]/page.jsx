@@ -649,7 +649,7 @@ export default function PitchPage() {
               {hasWhy && (
                 <div className="py-10 border-t border-b text-center" style={{ borderColor: '#e5e7eb' }}>
                   <p className="text-xs font-bold uppercase tracking-widest mb-6 text-gray-400">Why Work With Me</p>
-                  <blockquote className="text-2xl font-semibold italic leading-relaxed" style={{ color: primary }}>&ldquo;{whyText}&rdquo;</blockquote>
+                  <p className="text-2xl leading-relaxed" style={{ color: primary, fontFamily: 'Georgia, "Times New Roman", serif', fontStyle: 'italic' }}>{whyText}</p>
                 </div>
               )}
               <IntroBlock />
@@ -685,10 +685,9 @@ export default function PitchPage() {
             <div style={{ backgroundColor: T.bodyBg, borderRadius: '2.5rem 2.5rem 0 0', marginTop: '-2rem', paddingTop: '4rem', paddingBottom: '4rem' }}>
               <div className="max-w-5xl mx-auto px-8 space-y-8">
                 {hasWhy && (
-                  <div className="p-8 relative overflow-hidden" style={{ backgroundColor: T.darkColor, borderRadius: T.cardRadius }}>
-                    <div className="absolute inset-0 flex items-center justify-center pointer-events-none select-none" style={{ color: primary, opacity: 0.05, fontSize: '16rem', lineHeight: 1, fontFamily: 'Georgia, serif' }}>&ldquo;</div>
-                    <p className="text-xs font-bold uppercase tracking-widest relative z-10 mb-4" style={{ color: primary }}>Why Work With Me</p>
-                    <blockquote className="text-2xl font-semibold leading-relaxed relative z-10" style={{ color: T.whyText }}>&ldquo;{whyText}&rdquo;</blockquote>
+                  <div className="p-8" style={{ backgroundColor: T.darkColor, borderRadius: T.cardRadius, borderLeft: `4px solid ${primary}` }}>
+                    <p className="text-xs font-bold uppercase tracking-widest mb-4" style={{ color: primary }}>Why Work With Me</p>
+                    <p className="text-2xl leading-relaxed" style={{ color: T.whyText, fontFamily: 'Georgia, "Times New Roman", serif', fontStyle: 'italic' }}>{whyText}</p>
                   </div>
                 )}
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -748,7 +747,7 @@ export default function PitchPage() {
                   {hasWhy && (
                     <div className="pl-6 py-1" style={{ borderLeft: `4px solid ${primary}` }}>
                       <p className="text-xs font-bold uppercase tracking-widest mb-3" style={{ color: primary }}>Why Work With Me</p>
-                      <blockquote className="text-xl font-semibold italic leading-relaxed" style={{ color: T.textColor }}>&ldquo;{whyText}&rdquo;</blockquote>
+                      <p className="text-xl leading-relaxed" style={{ color: T.textColor, fontFamily: 'Georgia, "Times New Roman", serif', fontStyle: 'italic' }}>{whyText}</p>
                     </div>
                   )}
                   <IntroBlock />
@@ -801,10 +800,9 @@ export default function PitchPage() {
                   <p className="text-lg leading-relaxed" style={{ color: T.textColor }}>{profile.bio}</p>
                 </div>
                 {hasWhy && (
-                  <div className="lg:col-span-2 p-8 flex flex-col justify-between relative overflow-hidden" style={{ backgroundColor: T.whyBg, borderRadius: T.cardRadius }}>
-                    <p className="text-xs font-bold uppercase tracking-widest relative z-10" style={{ color: primary }}>Why Work With Me</p>
-                    <div className="absolute inset-0 flex items-center justify-center pointer-events-none select-none" style={{ color: primary, opacity: 0.07, fontSize: '18rem', lineHeight: 1, fontFamily: 'Georgia, serif' }}>&ldquo;</div>
-                    <blockquote className="text-xl font-semibold leading-relaxed relative z-10 mt-6" style={{ color: T.whyText }}>&ldquo;{whyText}&rdquo;</blockquote>
+                  <div className="lg:col-span-2 p-8 flex flex-col gap-6" style={{ backgroundColor: T.whyBg, borderRadius: T.cardRadius, borderLeft: `4px solid ${primary}` }}>
+                    <p className="text-xs font-bold uppercase tracking-widest" style={{ color: primary }}>Why Work With Me</p>
+                    <p className="text-xl leading-relaxed" style={{ color: T.whyText, fontFamily: 'Georgia, "Times New Roman", serif', fontStyle: 'italic' }}>{whyText}</p>
                   </div>
                 )}
               </div>

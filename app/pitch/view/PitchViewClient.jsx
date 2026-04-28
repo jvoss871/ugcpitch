@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, Suspense } from 'react';
+import { useEffect, useState, useRef, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { getTemplate, buildTheme } from '@/lib/templates';
 
@@ -143,7 +143,7 @@ function MediaCard({ item, T, onTrackClick }) {
   const wrapperProps = item.type === 'video' ? { href: item.url, target: '_blank', rel: 'noopener noreferrer' } : {};
   return (
     <Wrapper {...wrapperProps} onClick={() => onTrackClick?.(item.title)}
-      className="group block overflow-hidden bg-gray-100 hover:shadow-xl transition-all duration-300 hover:-translate-y-1"
+      className="group block overflow-hidden bg-gray-100 hover:shadow-2xl transition-all duration-300 hover:scale-[1.03]"
       style={{ borderRadius: T.cardRadius, boxShadow: T.cardShadow, border: T.cardBorder }}>
       <div className="aspect-[4/5] relative overflow-hidden">
         {inner}
@@ -192,6 +192,19 @@ function PitchView({ pitchId: propId }) {
     window.addEventListener('beforeunload', sendDuration);
     return () => { document.removeEventListener('visibilitychange', onVisibility); window.removeEventListener('beforeunload', sendDuration); };
   }, [data, resolvedId]);
+
+  useEffect(() => {
+    if (!data) return;
+    const els = document.querySelectorAll('[data-reveal]');
+    const obs = new IntersectionObserver(
+      (entries) => entries.forEach(e => {
+        if (e.isIntersecting) { e.target.classList.add('visible'); obs.unobserve(e.target); }
+      }),
+      { threshold: 0.08 }
+    );
+    els.forEach(el => obs.observe(el));
+    return () => obs.disconnect();
+  }, [data]);
 
   const fontName = data?.profile?.brand?.font ?? 'Inter';
   useEffect(() => {
@@ -405,26 +418,24 @@ function PitchView({ pitchId: propId }) {
         </div>
 
         <div className="max-w-3xl mx-auto px-8 py-16 space-y-12">
-          <div>
+          <div data-reveal className="reveal">
             <p className="text-xs font-bold uppercase tracking-widest mb-4" style={{ color: primary }}>About Me</p>
             <p className="text-xl leading-relaxed" style={{ color: T.textColor }}>{profile.bio}</p>
           </div>
           {hasWhy && (
-            <div className="py-10 border-t border-b text-center" style={{ borderColor: T.cardBorder || '#e5e7eb' }}>
+            <div data-reveal className="reveal py-10 border-t border-b text-center" style={{ borderColor: T.cardBorder || '#e5e7eb' }}>
               <p className="text-xs font-bold uppercase tracking-widest mb-6 text-gray-400">Why Work With Me</p>
-              <blockquote className="text-2xl font-semibold italic leading-relaxed" style={{ color: primary }}>
-                &ldquo;{whyText}&rdquo;
-              </blockquote>
+              <p className="text-2xl leading-relaxed" style={{ color: primary, fontFamily: 'Georgia, "Times New Roman", serif', fontStyle: 'italic' }}>{whyText}</p>
             </div>
           )}
-          <div>
+          <div data-reveal className="reveal">
             <p className="text-xs font-bold uppercase tracking-widest mb-4 text-gray-400">Why {pitch.title}</p>
             <p className="text-xl leading-relaxed" style={{ color: T.textColor }}>{pitch.intro}</p>
           </div>
-          <CustomCard />
-          <ContentGrid cols={3} />
-          <RatesSection />
-          <CtaSection />
+          {pitch.customContent?.url && <div data-reveal className="reveal"><CustomCard /></div>}
+          {pitch.selectedContent?.length > 0 && <div data-reveal className="reveal"><ContentGrid cols={3} /></div>}
+          {!!pitch.rates?.length && <div data-reveal className="reveal"><RatesSection /></div>}
+          {Object.values(profile.socials ?? {}).some(Boolean) && <div data-reveal className="reveal"><CtaSection /></div>}
         </div>
         <Footer />
       </div>
@@ -459,14 +470,12 @@ function PitchView({ pitchId: propId }) {
         <div style={{ backgroundColor: T.bodyBg, borderRadius: '2.5rem 2.5rem 0 0', marginTop: '-2rem', paddingTop: '4rem', paddingBottom: '4rem' }}>
           <div className="max-w-5xl mx-auto px-8 space-y-8">
             {hasWhy && (
-              <div className="p-8 relative overflow-hidden" style={{ backgroundColor: T.darkColor, borderRadius: T.cardRadius }}>
-                <div className="absolute inset-0 flex items-center justify-center pointer-events-none select-none"
-                  style={{ color: primary, opacity: 0.05, fontSize: '16rem', lineHeight: 1, fontFamily: 'Georgia, serif' }}>&ldquo;</div>
-                <p className="text-xs font-bold uppercase tracking-widest relative z-10 mb-4" style={{ color: primary }}>Why Work With Me</p>
-                <blockquote className="text-2xl font-semibold leading-relaxed relative z-10" style={{ color: T.whyText }}>&ldquo;{whyText}&rdquo;</blockquote>
+              <div data-reveal className="reveal p-8" style={{ backgroundColor: T.darkColor, borderRadius: T.cardRadius, borderLeft: `4px solid ${primary}` }}>
+                <p className="text-xs font-bold uppercase tracking-widest mb-4" style={{ color: primary }}>Why Work With Me</p>
+                <p className="text-2xl leading-relaxed" style={{ color: T.whyText, fontFamily: 'Georgia, "Times New Roman", serif', fontStyle: 'italic' }}>{whyText}</p>
               </div>
             )}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div data-reveal className="reveal grid grid-cols-1 lg:grid-cols-2 gap-6">
               <div className="p-8" style={{ backgroundColor: T.cardBg, borderRadius: T.cardRadius, boxShadow: T.cardShadow, border: T.cardBorder }}>
                 <p className="text-xs font-bold uppercase tracking-widest text-gray-400 mb-4">About Me</p>
                 <p className="text-lg leading-relaxed" style={{ color: T.textColor }}>{profile.bio}</p>
@@ -476,10 +485,10 @@ function PitchView({ pitchId: propId }) {
                 <p className="text-lg leading-relaxed" style={{ color: T.textColor }}>{pitch.intro}</p>
               </div>
             </div>
-            <CustomCard />
-            <ContentGrid cols={4} />
-            <RatesSection />
-            <CtaSection />
+            {pitch.customContent?.url && <div data-reveal className="reveal"><CustomCard /></div>}
+            {pitch.selectedContent?.length > 0 && <div data-reveal className="reveal"><ContentGrid cols={4} /></div>}
+            {!!pitch.rates?.length && <div data-reveal className="reveal"><RatesSection /></div>}
+            {Object.values(profile.socials ?? {}).some(Boolean) && <div data-reveal className="reveal"><CtaSection /></div>}
           </div>
         </div>
         <Footer />
@@ -540,24 +549,24 @@ function PitchView({ pitchId: propId }) {
             </div>
 
             <div className="max-w-2xl space-y-10">
-              <div>
+              <div data-reveal className="reveal">
                 <p className="text-xs font-bold uppercase tracking-widest mb-3 text-gray-400">About Me</p>
                 <p className="text-xl leading-relaxed" style={{ color: T.textColor }}>{profile.bio}</p>
               </div>
               {hasWhy && (
-                <div className="pl-6 py-1" style={{ borderLeft: `4px solid ${primary}` }}>
+                <div data-reveal className="reveal pl-6 py-1" style={{ borderLeft: `4px solid ${primary}` }}>
                   <p className="text-xs font-bold uppercase tracking-widest mb-3" style={{ color: primary }}>Why Work With Me</p>
-                  <blockquote className="text-xl font-semibold italic leading-relaxed" style={{ color: T.textColor }}>&ldquo;{whyText}&rdquo;</blockquote>
+                  <p className="text-xl leading-relaxed" style={{ color: T.textColor, fontFamily: 'Georgia, "Times New Roman", serif', fontStyle: 'italic' }}>{whyText}</p>
                 </div>
               )}
-              <div>
+              <div data-reveal className="reveal">
                 <p className="text-xs font-bold uppercase tracking-widest mb-3 text-gray-400">Why {pitch.title}</p>
                 <p className="text-xl leading-relaxed" style={{ color: T.textColor }}>{pitch.intro}</p>
               </div>
-              <CustomCard />
-              <ContentGrid cols={3} />
-              <RatesSection />
-              <CtaSection />
+              {pitch.customContent?.url && <div data-reveal className="reveal"><CustomCard /></div>}
+              {pitch.selectedContent?.length > 0 && <div data-reveal className="reveal"><ContentGrid cols={3} /></div>}
+              {!!pitch.rates?.length && <div data-reveal className="reveal"><RatesSection /></div>}
+              {Object.values(profile.socials ?? {}).some(Boolean) && <div data-reveal className="reveal"><CtaSection /></div>}
             </div>
           </div>
         </div>
@@ -600,28 +609,26 @@ function PitchView({ pitchId: propId }) {
       </div>
 
       <div className="max-w-5xl mx-auto px-8 py-16 space-y-12">
-        <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
+        <div data-reveal className="reveal grid grid-cols-1 lg:grid-cols-5 gap-6">
           <div className="lg:col-span-3 p-8" style={{ backgroundColor: T.cardBg, borderRadius: T.cardRadius, boxShadow: T.cardShadow, border: T.cardBorder }}>
             <p className="text-xs font-bold uppercase tracking-widest text-gray-400 mb-4">About Me</p>
             <p className="text-lg leading-relaxed" style={{ color: T.textColor }}>{profile.bio}</p>
           </div>
           {hasWhy && (
-            <div className="lg:col-span-2 p-8 flex flex-col justify-between relative overflow-hidden" style={{ backgroundColor: T.whyBg, borderRadius: T.cardRadius }}>
-              <p className="text-xs font-bold uppercase tracking-widest relative z-10" style={{ color: primary }}>Why Work With Me</p>
-              <div className="absolute inset-0 flex items-center justify-center pointer-events-none select-none"
-                style={{ color: primary, opacity: 0.07, fontSize: '18rem', lineHeight: 1, fontFamily: 'Georgia, serif' }}>&ldquo;</div>
-              <blockquote className="text-xl font-semibold leading-relaxed relative z-10 mt-6" style={{ color: T.whyText }}>&ldquo;{whyText}&rdquo;</blockquote>
+            <div className="lg:col-span-2 p-8 flex flex-col gap-6" style={{ backgroundColor: T.whyBg, borderRadius: T.cardRadius, borderLeft: `4px solid ${primary}` }}>
+              <p className="text-xs font-bold uppercase tracking-widest" style={{ color: primary }}>Why Work With Me</p>
+              <p className="text-xl leading-relaxed" style={{ color: T.whyText, fontFamily: 'Georgia, "Times New Roman", serif', fontStyle: 'italic' }}>{whyText}</p>
             </div>
           )}
         </div>
-        <div className="p-8" style={{ backgroundColor: T.cardBg, borderRadius: T.cardRadius, boxShadow: T.cardShadow, borderLeft: T.accentBar, border: T.cardBorder }}>
+        <div data-reveal className="reveal p-8" style={{ backgroundColor: T.cardBg, borderRadius: T.cardRadius, boxShadow: T.cardShadow, borderLeft: T.accentBar, border: T.cardBorder }}>
           <p className="text-xs font-bold uppercase tracking-widest text-gray-400 mb-4">Why {pitch.title}</p>
           <p className="text-lg leading-relaxed" style={{ color: T.textColor }}>{pitch.intro}</p>
         </div>
-        <CustomCard />
-        <ContentGrid cols={4} />
-        <RatesSection />
-        <CtaSection />
+        {pitch.customContent?.url && <div data-reveal className="reveal"><CustomCard /></div>}
+        {pitch.selectedContent?.length > 0 && <div data-reveal className="reveal"><ContentGrid cols={4} /></div>}
+        {!!pitch.rates?.length && <div data-reveal className="reveal"><RatesSection /></div>}
+        {Object.values(profile.socials ?? {}).some(Boolean) && <div data-reveal className="reveal"><CtaSection /></div>}
       </div>
       <Footer />
     </div>
