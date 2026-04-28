@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 
-const DEMO_VIDEO_URL = ''; // paste a YouTube or Loom embed URL here
+const DEMO_VIDEO_URL = 'https://www.loom.com/embed/a6485eae6d9240d388f385273d5620e7';
 
 const FAQ = [
   {
