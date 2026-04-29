@@ -22,7 +22,6 @@ const PLAN_META = {
     price: '$9',
     period: '/mo',
     tagline: 'Great for active pitchers',
-    popular: true,
     features: [
       '50 pitches per month',
       'Open tracking — see who viewed your pitch',
@@ -46,8 +45,8 @@ const PLAN_META = {
 
 const OTHER_PLAN_META = {
   free:    { name: 'Free',    price: '$0',  dark: false, bullets: ['10 pitches/month', 'All templates', 'Content library'] },
-  starter: { name: 'Starter', price: '$9',  dark: false, popular: true, bullets: ['50 pitches/month', 'Open tracking', 'All 4 templates'] },
-  pro:     { name: 'Pro',     price: '$19', dark: true,  bullets: ['Unlimited pitches', 'Advanced analytics', 'Custom URL + no branding'] },
+  starter: { name: 'Starter', price: '$9',  dark: false, bullets: ['50 pitches/month', 'Open tracking', 'All 4 templates'] },
+  pro:     { name: 'Pro',     price: '$19', dark: true,  popular: true, bullets: ['Unlimited pitches', 'Advanced analytics', 'Custom URL + no branding'] },
 };
 
 function CheckIcon({ color = '#0d9488' }) {
