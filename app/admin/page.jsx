@@ -41,6 +41,8 @@ export default function AdminPage() {
   const [deleting, setDeleting]       = useState(false);
   const [testMode, setTestMode]       = useState(null);
   const [testLoading, setTestLoading] = useState(false);
+  const [demoCount, setDemoCount]     = useState(null);
+  const [cleaning, setCleaning]       = useState(false);
 
   const TEST_USERNAME = 'jvoss87@gmail.com';
 
@@ -73,7 +75,20 @@ export default function AdminPage() {
     if (!authed) return;
     fetchOverview();
     fetchUsers();
+    fetchDemoCount();
   }, [authed]);
+
+  const fetchDemoCount = async () => {
+    const res = await fetch('/api/admin/cleanup-demo', { headers: authHeaders });
+    if (res.ok) { const d = await res.json(); setDemoCount(d.count); }
+  };
+
+  const cleanupDemo = async () => {
+    setCleaning(true);
+    await fetch('/api/admin/cleanup-demo', { method: 'DELETE', headers: authHeaders });
+    await fetchDemoCount();
+    setCleaning(false);
+  };
 
   const fetchOverview = async () => {
     const res = await fetch('/api/admin/overview', { headers: authHeaders });
@@ -245,6 +260,25 @@ export default function AdminPage() {
                   ))}
                 </div>
 
+                {/* Demo pitch cleanup */}
+                <div className="bg-gray-900 rounded-2xl p-5 border border-gray-800 flex items-center justify-between">
+                  <div>
+                    <p className="text-xs text-gray-500 uppercase tracking-widest mb-1">Demo Pitches (welcome flow)</p>
+                    <p className="text-2xl font-black text-white">
+                      {demoCount === null ? '—' : demoCount}
+                      <span className="text-sm font-normal text-gray-600 ml-2">orphaned rows</span>
+                    </p>
+                  </div>
+                  <button
+                    onClick={cleanupDemo}
+                    disabled={cleaning || demoCount === 0}
+                    className="px-4 py-2 rounded-xl text-sm font-bold transition disabled:opacity-40"
+                    style={{ backgroundColor: demoCount > 0 ? '#dc2626' : '#1f2937', color: '#fff' }}
+                  >
+                    {cleaning ? 'Deleting…' : `Purge${demoCount > 0 ? ` ${demoCount}` : ''}`}
+                  </button>
+                </div>
+
                 {/* Row 2 — plan breakdown */}
                 <div className="grid grid-cols-3 gap-4">
                   {[
@@ -310,7 +344,12 @@ export default function AdminPage() {
                     </p>
                   </div>
                   {planBadge(u.plan, u.trialStartedAt, u.trialEndsAt)}
-                  <span className="text-xs text-gray-500">{u.pitchCount ?? 0} pitches</span>
+                  <span className="text-xs text-gray-500">
+                    {u.pitchCount ?? 0} total
+                    {u.monthlyPitchCount > 0 && (
+                      <span className="ml-1.5 text-gray-600">· {u.monthlyPitchCount} this mo.</span>
+                    )}
+                  </span>
                   <svg
                     className="w-4 h-4 text-gray-600 transition-transform flex-shrink-0"
                     style={{ transform: expandedUser === u.username ? 'rotate(180deg)' : 'none' }}
