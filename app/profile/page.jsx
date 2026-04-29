@@ -141,16 +141,10 @@ export default function Profile() {
 
       <div className="space-y-4">
 
-        {/* Avatar + handle */}
+        {/* Avatar + name */}
         <div className="card">
           <div className="flex items-start gap-6">
             <div className="flex-1 space-y-4">
-              <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">Email</label>
-                <input type="text" disabled value={profile.username || ''}
-                  className="w-full px-4 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-600 cursor-not-allowed text-sm" />
-                <p className="text-xs text-gray-400 mt-1">Your login email</p>
-              </div>
               <div>
                 <label className="block text-sm font-semibold text-gray-700 mb-2">Full Name</label>
                 <input
@@ -192,6 +186,138 @@ export default function Profile() {
           <input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={handleAvatarUpload} />
         </div>
 
+        {/* Niches */}
+        <div className="card">
+          <label className="block text-sm font-semibold text-gray-700 mb-3">Your Niches</label>
+          <div className="grid grid-cols-2 gap-2">
+            {NICHE_OPTIONS.map(niche => (
+              <label key={niche} className="flex items-center gap-2 cursor-pointer">
+                <input type="checkbox"
+                  checked={profile.niche_tags?.includes(niche) || false}
+                  onChange={e => {
+                    const tags = profile.niche_tags || [];
+                    setProfile({ ...profile, niche_tags: e.target.checked ? [...tags, niche] : tags.filter(t => t !== niche) });
+                  }}
+                  className="w-4 h-4 rounded border-gray-300 text-teal-600 focus:ring-teal-500" />
+                <span className="text-sm text-gray-700 capitalize">{niche}</span>
+              </label>
+            ))}
+          </div>
+        </div>
+
+        {/* Bio + positioning + why */}
+        <div className="card space-y-6">
+          <div>
+            <label className="block text-sm font-semibold text-gray-700 mb-2">Bio</label>
+            <textarea value={profile.bio}
+              onChange={e => setProfile({ ...profile, bio: e.target.value })}
+              placeholder="e.g., I create engaging product demos and UGC ads for SaaS brands"
+              rows={3}
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500" />
+          </div>
+
+          <div>
+            <label className="block text-sm font-semibold text-gray-700 mb-1">Your angle</label>
+            <p className="text-xs text-gray-400 mb-2">What makes you different from other creators in your niche?</p>
+            <textarea value={profile.positioning_statement}
+              onChange={e => setProfile({ ...profile, positioning_statement: e.target.value })}
+              placeholder="e.g., I specialize in authentic, high-converting UGC for B2B SaaS — no fluff, just demos that convert."
+              rows={3}
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500" />
+          </div>
+
+          <div>
+            <div className="flex items-center justify-between mb-2">
+              <div>
+                <label className="block text-sm font-semibold text-gray-700">Why Work With Me</label>
+                <p className="text-xs text-gray-400 mt-0.5">Shown on your public pitch page. AI drafts it — you refine it.</p>
+              </div>
+              <button
+                type="button"
+                onClick={handleGenerateWhy}
+                disabled={generatingWhy}
+                className="text-xs px-3 py-1.5 bg-teal-600 text-white rounded-lg hover:bg-teal-700 transition disabled:opacity-50 flex items-center gap-1.5"
+              >
+                {generatingWhy ? (
+                  <><span className="w-3 h-3 border border-white border-t-transparent rounded-full animate-spin inline-block" /> Generating…</>
+                ) : (
+                  'Generate'
+                )}
+              </button>
+            </div>
+            <textarea
+              value={profile.why_work_with_me || ''}
+              onChange={e => setProfile(p => ({ ...p, why_work_with_me: e.target.value }))}
+              placeholder="Click Generate to create this from your bio and angle, or write it yourself."
+              rows={3}
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 text-sm"
+            />
+          </div>
+        </div>
+
+        {/* Social links */}
+        <div className="card space-y-4">
+          <div>
+            <p className="text-sm font-semibold text-gray-700 mb-1">Social Links</p>
+            <p className="text-xs text-gray-400">Displayed on your public pitch page so brands can find you.</p>
+          </div>
+          {SOCIAL_FIELDS.map(({ key, label, placeholder }) => (
+            <div key={key} className="flex items-center gap-3">
+              <div className="flex-1">
+                <label className="block text-xs font-semibold text-gray-500 mb-1">{label}</label>
+                <input
+                  type={key === 'email' ? 'email' : 'text'}
+                  value={profile.socials?.[key] || ''}
+                  onChange={e => setSocial(key, e.target.value)}
+                  placeholder={placeholder}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-teal-500"
+                />
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* Stats */}
+        <div className="card space-y-4">
+          <div>
+            <p className="text-sm font-semibold text-gray-700 mb-1">Stats</p>
+            <p className="text-xs text-gray-400">Optional — shown as a highlight strip on your pitch pages.</p>
+          </div>
+          <div className="grid grid-cols-3 gap-3">
+            <div>
+              <label className="block text-xs font-semibold text-gray-500 mb-1">Total Followers</label>
+              <input
+                type="text"
+                value={profile.stats?.followers || ''}
+                onChange={e => setProfile(p => ({ ...p, stats: { ...p.stats, followers: e.target.value } }))}
+                placeholder="e.g. 42K"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-teal-500"
+              />
+            </div>
+            <div>
+              <label className="block text-xs font-semibold text-gray-500 mb-1">Avg. Engagement</label>
+              <input
+                type="text"
+                value={profile.stats?.engagement_rate || ''}
+                onChange={e => setProfile(p => ({ ...p, stats: { ...p.stats, engagement_rate: e.target.value } }))}
+                placeholder="e.g. 4.2%"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-teal-500"
+              />
+            </div>
+            <div>
+              <label className="block text-xs font-semibold text-gray-500 mb-1">Avg. Views</label>
+              <input
+                type="text"
+                value={profile.stats?.avg_views || ''}
+                onChange={e => setProfile(p => ({ ...p, stats: { ...p.stats, avg_views: e.target.value } }))}
+                placeholder="e.g. 85K"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-teal-500"
+              />
+            </div>
+          </div>
+        </div>
+
+        {/* Location + Languages */}
         <div className="card">
           <div className="grid grid-cols-2 gap-4">
             <div>
@@ -222,77 +348,6 @@ export default function Profile() {
               </div>
             </div>
           </div>
-        </div>
-
-        {/* Bio + positioning */}
-        <div className="card space-y-6">
-          <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-2">Bio</label>
-            <textarea value={profile.bio}
-              onChange={e => setProfile({ ...profile, bio: e.target.value })}
-              placeholder="e.g., I create engaging product demos and UGC ads for SaaS brands"
-              rows={3}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500" />
-          </div>
-
-          <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-2">Positioning Statement</label>
-            <textarea value={profile.positioning_statement}
-              onChange={e => setProfile({ ...profile, positioning_statement: e.target.value })}
-              placeholder="e.g., I specialize in creating authentic, high-converting UGC ads for B2B SaaS products."
-              rows={3}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500" />
-          </div>
-
-          <div>
-            <div className="flex items-center justify-between mb-2">
-              <div>
-                <label className="block text-sm font-semibold text-gray-700">Why Work With Me</label>
-                <p className="text-xs text-gray-400 mt-0.5">Shown on your public pitch page. AI drafts it — you refine it.</p>
-              </div>
-              <button
-                type="button"
-                onClick={handleGenerateWhy}
-                disabled={generatingWhy}
-                className="text-xs px-3 py-1.5 bg-teal-600 text-white rounded-lg hover:bg-teal-700 transition disabled:opacity-50 flex items-center gap-1.5"
-              >
-                {generatingWhy ? (
-                  <><span className="w-3 h-3 border border-white border-t-transparent rounded-full animate-spin inline-block" /> Generating…</>
-                ) : (
-                  'Generate'
-                )}
-              </button>
-            </div>
-            <textarea
-              value={profile.why_work_with_me || ''}
-              onChange={e => setProfile(p => ({ ...p, why_work_with_me: e.target.value }))}
-              placeholder="Click Generate to create this from your bio and positioning, or write it yourself."
-              rows={3}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 text-sm"
-            />
-          </div>
-        </div>
-
-        {/* Social links */}
-        <div className="card space-y-4">
-          <div>
-            <p className="text-sm font-semibold text-gray-700 mb-1">Social Links</p>
-            <p className="text-xs text-gray-400">Displayed on your public pitch page so brands can find you.</p>
-          </div>
-          {SOCIAL_FIELDS.map(({ key, label, placeholder }) => (
-            <div key={key} className="flex items-center gap-3">
-              <div className="flex-1">
-                <label className="block text-xs font-semibold text-gray-500 mb-1">{label}</label>
-                <input
-                  type={key === 'email' ? 'email' : 'text'}
-                  value={profile.socials?.[key] || ''}
-                  onChange={e => setSocial(key, e.target.value)}
-                  placeholder={placeholder}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-teal-500"
-                />
-              </div>
-            </div>
-          ))}
         </div>
 
         {/* Rates */}
@@ -380,65 +435,6 @@ export default function Profile() {
           >
             + Add package
           </button>
-        </div>
-
-        {/* Stats */}
-        <div className="card space-y-4">
-          <div>
-            <p className="text-sm font-semibold text-gray-700 mb-1">Stats</p>
-            <p className="text-xs text-gray-400">Optional — shown as a highlight strip on your pitch pages.</p>
-          </div>
-          <div className="grid grid-cols-3 gap-3">
-            <div>
-              <label className="block text-xs font-semibold text-gray-500 mb-1">Total Followers</label>
-              <input
-                type="text"
-                value={profile.stats?.followers || ''}
-                onChange={e => setProfile(p => ({ ...p, stats: { ...p.stats, followers: e.target.value } }))}
-                placeholder="e.g. 42K"
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-teal-500"
-              />
-            </div>
-            <div>
-              <label className="block text-xs font-semibold text-gray-500 mb-1">Avg. Engagement</label>
-              <input
-                type="text"
-                value={profile.stats?.engagement_rate || ''}
-                onChange={e => setProfile(p => ({ ...p, stats: { ...p.stats, engagement_rate: e.target.value } }))}
-                placeholder="e.g. 4.2%"
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-teal-500"
-              />
-            </div>
-            <div>
-              <label className="block text-xs font-semibold text-gray-500 mb-1">Avg. Views</label>
-              <input
-                type="text"
-                value={profile.stats?.avg_views || ''}
-                onChange={e => setProfile(p => ({ ...p, stats: { ...p.stats, avg_views: e.target.value } }))}
-                placeholder="e.g. 85K"
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-teal-500"
-              />
-            </div>
-          </div>
-        </div>
-
-        {/* Niches */}
-        <div className="card">
-          <label className="block text-sm font-semibold text-gray-700 mb-3">Your Niches</label>
-          <div className="grid grid-cols-2 gap-2">
-            {NICHE_OPTIONS.map(niche => (
-              <label key={niche} className="flex items-center gap-2 cursor-pointer">
-                <input type="checkbox"
-                  checked={profile.niche_tags?.includes(niche) || false}
-                  onChange={e => {
-                    const tags = profile.niche_tags || [];
-                    setProfile({ ...profile, niche_tags: e.target.checked ? [...tags, niche] : tags.filter(t => t !== niche) });
-                  }}
-                  className="w-4 h-4 rounded border-gray-300 text-teal-600 focus:ring-teal-500" />
-                <span className="text-sm text-gray-700 capitalize">{niche}</span>
-              </label>
-            ))}
-          </div>
         </div>
 
       </div>
