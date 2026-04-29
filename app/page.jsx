@@ -16,7 +16,7 @@ const PLANS = [
     cta: 'Get started free',
     highlight: false,
     features: [
-      '10 pitches per month',
+      '20 pitches per month',
       'Full AI pitch generation',
       'Branded pitch pages',
       'Content library',
@@ -458,7 +458,9 @@ export default function Home() {
                 <ul className="space-y-3 mb-8 flex-1">
                   {plan.features.map((f, i) => (
                     <li key={i} className="flex items-start gap-3">
-                      <span className={`mt-0.5 flex-shrink-0 ${plan.highlight ? 'text-white' : 'text-teal-500'}`}>✓</span>
+                      <svg className={`w-4 h-4 mt-0.5 flex-shrink-0 ${plan.highlight ? 'text-white' : 'text-teal-500'}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
+                        <polyline points="20 6 9 17 4 12" />
+                      </svg>
                       <span className={`text-sm ${plan.highlight ? 'text-white/90' : 'text-gray-300'}`}>{f}</span>
                     </li>
                   ))}
