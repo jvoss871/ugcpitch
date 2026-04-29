@@ -20,6 +20,16 @@ export default function CreatePitch() {
   const [customLabel, setCustomLabel] = useState('');
   const [includeRates, setIncludeRates] = useState(false);
   const [planStatus, setPlanStatus] = useState(null);
+  const [generatingStep, setGeneratingStep] = useState(0);
+  const [noContentWarning, setNoContentWarning] = useState(false);
+
+  const GENERATING_STEPS = ['Reading the brief…', 'Selecting your best content…', 'Writing your pitch…'];
+
+  useEffect(() => {
+    if (!generating) { setGeneratingStep(0); return; }
+    const interval = setInterval(() => setGeneratingStep(s => Math.min(s + 1, GENERATING_STEPS.length - 1)), 2200);
+    return () => clearInterval(interval);
+  }, [generating]);
 
   useEffect(() => {
     if (!loading && !authUser) {
@@ -43,19 +53,26 @@ export default function CreatePitch() {
       .catch(() => setContent(storage.getContent(authUser.username)));
   }, [authUser]);
 
+  const status = planStatus?.status;
+  const pitchLimit = planStatus?.pitchLimit ?? (status === 'free' ? 10 : 50);
+  const monthlyCount = planStatus?.monthlyPitchCount ?? 0;
+  const isAtLimit = status !== 'pro' && monthlyCount >= pitchLimit;
+  const oneTimePitches = planStatus?.oneTimePitches ?? 0;
+  const usingOneTime = isAtLimit && oneTimePitches > 0;
+  const blocked = isAtLimit && !usingOneTime;
+
   const handleGenerate = async (e) => {
     e.preventDefault();
     if (!jobDescription.trim()) {
-      setError('Please paste a job description');
+      setError('Please paste a brand listing or brief');
       return;
     }
 
-    if (content.length === 0) {
-      const proceed = window.confirm(
-        'You have no content in your library. Pitches work better with content. Continue anyway?'
-      );
-      if (!proceed) return;
+    if (content.length === 0 && !noContentWarning) {
+      setNoContentWarning(true);
+      return;
     }
+    setNoContentWarning(false);
 
     setGenerating(true);
     setError('');
@@ -147,14 +164,6 @@ export default function CreatePitch() {
     </div>
   );
   if (!authUser) return null;
-
-  const status = planStatus?.status;
-  const pitchLimit = planStatus?.pitchLimit ?? (status === 'free' ? 10 : 50);
-  const monthlyCount = planStatus?.monthlyPitchCount ?? 0;
-  const isAtLimit = status !== 'pro' && monthlyCount >= pitchLimit;
-  const oneTimePitches = planStatus?.oneTimePitches ?? 0;
-  const usingOneTime = isAtLimit && oneTimePitches > 0;
-  const blocked = isAtLimit && !usingOneTime;
 
   const startCheckout = async (plan) => {
     setUpgrading(plan);
@@ -258,19 +267,32 @@ export default function CreatePitch() {
       <form onSubmit={handleGenerate} className="space-y-6">
         <div className="card">
           <label className="block text-sm font-semibold text-gray-700 mb-2">
-            Brand Brief / Opportunity
+            Brand listing or brief
           </label>
           <textarea
             value={jobDescription}
             onChange={(e) => {
               setJobDescription(e.target.value);
               setError('');
+              setNoContentWarning(false);
             }}
-            placeholder="Paste the brand brief, job post, or opportunity. The more detail you give, the sharper the pitch."
+            placeholder="Paste the brand's ad listing, job post, or brief. The more detail you give, the sharper the pitch."
             rows={8}
-            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 font-mono text-sm"
+            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 text-sm"
           />
         </div>
+
+        {noContentWarning && (
+          <div className="rounded-xl bg-amber-50 border border-amber-200 px-4 py-3 flex items-start justify-between gap-4">
+            <p className="text-sm text-amber-800">Your content library is empty — pitches convert better with examples. Continue anyway?</p>
+            <div className="flex gap-2 flex-shrink-0">
+              <button type="button" onClick={() => router.push('/content')}
+                className="text-xs font-bold text-amber-700 hover:text-amber-900 transition whitespace-nowrap">Add content</button>
+              <button type="submit"
+                className="text-xs font-bold text-amber-700 hover:text-amber-900 transition whitespace-nowrap">Continue →</button>
+            </div>
+          </div>
+        )}
 
         <div className="card">
           <label className="block text-sm font-semibold text-gray-700 mb-4">
@@ -365,10 +387,10 @@ export default function CreatePitch() {
         >
           {generating ? (
             <span className="flex items-center justify-center gap-2">
-              <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-              Building your pitch…
+              <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin flex-shrink-0" />
+              {GENERATING_STEPS[generatingStep]}
             </span>
-          ) : 'Build My Pitch'}
+          ) : 'Generate pitch →'}
         </button>
       </form>
 
