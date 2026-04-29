@@ -271,7 +271,7 @@ function PitchView({ pitchId: propId }) {
       <div className="absolute top-0 right-0 w-64 h-64 rounded-full opacity-5 pointer-events-none" style={{ backgroundColor: T.primaryColor, transform: 'translate(30%,-30%)' }} />
       <div className="relative z-10">
         <div className="flex items-center gap-2 mb-4">
-          <span style={{ color: T.primaryColor }} className="text-lg">✦</span>
+          <svg className="w-3.5 h-3.5 flex-shrink-0" style={{ color: T.primaryColor }} viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l2.4 7.4H22l-6.2 4.5 2.4 7.4L12 17l-6.2 4.3 2.4-7.4L2 9.4h7.6z"/></svg>
           <p className="text-xs font-bold uppercase tracking-widest" style={{ color: T.primaryColor }}>Made for {pitch.title}</p>
         </div>
         {pitch.customContent.label && <p className="text-2xl font-bold mb-6" style={{ color: T.whyText }}>{pitch.customContent.label}</p>}
@@ -355,8 +355,12 @@ function PitchView({ pitchId: propId }) {
       <div className="relative max-w-4xl w-full" onClick={e => e.stopPropagation()}>
         <button
           onClick={() => setLightboxItem(null)}
-          className="absolute -top-10 right-0 text-white/60 hover:text-white text-4xl leading-none transition"
-        >×</button>
+          className="absolute -top-10 right-0 text-white/60 hover:text-white transition p-1"
+        >
+          <svg className="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
         <img
           src={lightboxItem.url}
           alt={lightboxItem.title}
