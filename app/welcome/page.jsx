@@ -1,18 +1,27 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import Link from 'next/link';
 import { STARTER_NICHES } from '@/lib/starter-profiles';
 
 export default function WelcomePage() {
   const router = useRouter();
+  const [step, setStep] = useState(null); // null = loading, then 'demo' | 'form' | 'generating' | 'result'
+  const [hasDemoStep, setHasDemoStep] = useState(false);
   const [niche, setNiche] = useState('');
   const [brandName, setBrandName] = useState('');
-  const [step, setStep] = useState('form'); // 'form' | 'generating' | 'result'
   const [shareId, setShareId] = useState(null);
   const [outreach, setOutreach] = useState('');
   const [copiedOutreach, setCopiedOutreach] = useState(false);
+
+  useEffect(() => {
+    fetch('/api/share-pitch?id=welcome-demo')
+      .then(r => {
+        if (r.ok) { setHasDemoStep(true); setStep('demo'); }
+        else setStep('form');
+      })
+      .catch(() => setStep('form'));
+  }, []);
 
   const selectedNiche = STARTER_NICHES.find(n => n.key === niche);
 
@@ -44,26 +53,89 @@ export default function WelcomePage() {
     setTimeout(() => setCopiedOutreach(false), 2000);
   };
 
+  const skipToDashboard = () => {
+    sessionStorage.setItem('welcomeSeen', 'true');
+    router.push('/dashboard');
+  };
+
   return (
     <div className="-mx-6 -my-12 min-h-screen relative" style={{ background: 'linear-gradient(160deg, #f0fdfa 0%, #ffffff 60%)' }}>
 
       {/* Skip link */}
-      <div className="absolute top-5 right-6 z-10">
-        <button
-          onClick={() => { sessionStorage.setItem('welcomeSeen', 'true'); router.push('/dashboard'); }}
-          className="text-xs text-gray-400 hover:text-gray-600 transition"
-        >
-          Skip for now →
-        </button>
-      </div>
+      {step && step !== 'generating' && (
+        <div className="absolute top-5 right-6 z-10">
+          <button onClick={skipToDashboard} className="text-xs text-gray-400 hover:text-gray-600 transition">
+            Skip for now →
+          </button>
+        </div>
+      )}
 
       <div className="max-w-2xl mx-auto px-6 py-16">
+
+        {/* ── LOADING ───────────────────────────────────────────────────────── */}
+        {step === null && (
+          <div className="flex items-center justify-center py-40">
+            <div className="w-8 h-8 border-2 border-teal-500 border-t-transparent rounded-full animate-spin" />
+          </div>
+        )}
+
+        {/* ── DEMO ──────────────────────────────────────────────────────────── */}
+        {step === 'demo' && (
+          <div className="animate-fade-in-up">
+            <div className="mb-6">
+              <p className="text-xs font-bold uppercase tracking-widest text-teal-600 mb-3">Welcome to UGC Edge</p>
+              <h1 className="text-4xl font-black text-gray-900 leading-tight mb-3">
+                This is what a pitch page looks like
+              </h1>
+              <p className="text-gray-500 text-base">
+                A sample creator pitching Glossier — scroll through, then we'll build one for you.
+              </p>
+            </div>
+
+            <div className="rounded-2xl overflow-hidden border border-gray-200 shadow-xl mb-4" style={{ height: 520 }}>
+              <iframe
+                src="/pitch/view?id=welcome-demo"
+                className="w-full h-full"
+                title="Sample pitch page"
+              />
+            </div>
+
+            <div className="text-center mb-6">
+              <a
+                href="/pitch/view?id=welcome-demo"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-xs text-gray-400 hover:text-gray-600 transition underline underline-offset-2"
+              >
+                Open full pitch in new tab ↗
+              </a>
+            </div>
+
+            <button
+              onClick={() => setStep('form')}
+              className="w-full py-4 bg-teal-600 hover:bg-teal-700 text-white font-bold text-base rounded-xl transition"
+            >
+              Create a sample pitch for your brand →
+            </button>
+          </div>
+        )}
 
         {/* ── FORM ──────────────────────────────────────────────────────────── */}
         {step === 'form' && (
           <div className="animate-fade-in-up">
+            {hasDemoStep && (
+              <button
+                onClick={() => setStep('demo')}
+                className="text-sm text-gray-500 hover:text-gray-700 transition flex items-center gap-1 mb-8"
+              >
+                ← Back
+              </button>
+            )}
+
             <div className="mb-10">
-              <p className="text-xs font-bold uppercase tracking-widest text-teal-600 mb-3">Welcome to UGC Edge</p>
+              {!hasDemoStep && (
+                <p className="text-xs font-bold uppercase tracking-widest text-teal-600 mb-3">Welcome to UGC Edge</p>
+              )}
               <h1 className="text-4xl font-black text-gray-900 leading-tight mb-3">
                 See your pitch before you set anything up
               </h1>
@@ -151,9 +223,7 @@ export default function WelcomePage() {
               </h2>
             </div>
 
-            {/* Pitch page iframe */}
-            <div className="rounded-2xl overflow-hidden border border-gray-200 shadow-xl mb-5"
-              style={{ height: 540 }}>
+            <div className="rounded-2xl overflow-hidden border border-gray-200 shadow-xl mb-5" style={{ height: 540 }}>
               <iframe
                 src={`/pitch/view?id=${shareId}`}
                 className="w-full h-full"
@@ -172,7 +242,6 @@ export default function WelcomePage() {
               </a>
             </div>
 
-            {/* Outreach message */}
             {outreach && (
               <div className="bg-gray-50 border border-gray-200 rounded-2xl p-5 mb-5">
                 <div className="flex items-center justify-between mb-3">
@@ -188,14 +257,13 @@ export default function WelcomePage() {
               </div>
             )}
 
-            {/* CTA */}
             <div className="rounded-2xl p-7 text-center" style={{ backgroundColor: '#0d9488' }}>
               <p className="text-xl font-black text-white mb-1">Ready to make it yours?</p>
               <p className="text-sm mb-5" style={{ color: 'rgba(255,255,255,0.75)' }}>
                 Replace the demo profile with your real info — takes less than 5 minutes.
               </p>
               <button
-                onClick={() => { sessionStorage.setItem('welcomeSeen', 'true'); router.push('/dashboard'); }}
+                onClick={skipToDashboard}
                 className="bg-white font-bold px-8 py-3 rounded-xl hover:bg-teal-50 transition text-sm"
                 style={{ color: '#0d9488' }}
               >

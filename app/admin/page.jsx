@@ -43,6 +43,8 @@ export default function AdminPage() {
   const [testLoading, setTestLoading] = useState(false);
   const [demoCount, setDemoCount]     = useState(null);
   const [cleaning, setCleaning]       = useState(false);
+  const [demoPitchExists, setDemoPitchExists] = useState(null);
+  const [seedingDemo, setSeedingDemo] = useState(false);
 
   const TEST_USERNAME = 'jvoss87@gmail.com';
 
@@ -76,6 +78,7 @@ export default function AdminPage() {
     fetchOverview();
     fetchUsers();
     fetchDemoCount();
+    fetchDemoPitchStatus();
   }, [authed]);
 
   const fetchDemoCount = async () => {
@@ -88,6 +91,18 @@ export default function AdminPage() {
     await fetch('/api/admin/cleanup-demo', { method: 'DELETE', headers: authHeaders });
     await fetchDemoCount();
     setCleaning(false);
+  };
+
+  const fetchDemoPitchStatus = async () => {
+    const res = await fetch('/api/admin/seed-welcome-demo', { headers: authHeaders });
+    if (res.ok) { const d = await res.json(); setDemoPitchExists(d.exists); }
+  };
+
+  const seedWelcomeDemo = async () => {
+    setSeedingDemo(true);
+    await fetch('/api/admin/seed-welcome-demo', { method: 'POST', headers: authHeaders });
+    await fetchDemoPitchStatus();
+    setSeedingDemo(false);
   };
 
   const fetchOverview = async () => {
@@ -276,6 +291,27 @@ export default function AdminPage() {
                     style={{ backgroundColor: demoCount > 0 ? '#dc2626' : '#1f2937', color: '#fff' }}
                   >
                     {cleaning ? 'Deleting…' : `Purge${demoCount > 0 ? ` ${demoCount}` : ''}`}
+                  </button>
+                </div>
+
+                {/* Seed welcome demo */}
+                <div className="bg-gray-900 rounded-2xl p-5 border border-gray-800 flex items-center justify-between">
+                  <div>
+                    <p className="text-xs text-gray-500 uppercase tracking-widest mb-1">Welcome Demo Pitch</p>
+                    <p className="text-2xl font-black" style={{ color: demoPitchExists ? '#0d9488' : '#6b7280' }}>
+                      {demoPitchExists === null ? '—' : demoPitchExists ? 'Seeded' : 'Not seeded'}
+                      <span className="text-sm font-normal text-gray-600 ml-2">
+                        {demoPitchExists ? 'Sofia Reyes / Glossier demo is live' : 'new users will skip the demo step'}
+                      </span>
+                    </p>
+                  </div>
+                  <button
+                    onClick={seedWelcomeDemo}
+                    disabled={seedingDemo}
+                    className="px-4 py-2 rounded-xl text-sm font-bold transition disabled:opacity-40"
+                    style={{ backgroundColor: '#0d9488', color: '#fff' }}
+                  >
+                    {seedingDemo ? 'Seeding…' : demoPitchExists ? 'Re-seed' : 'Seed Now'}
                   </button>
                 </div>
 
