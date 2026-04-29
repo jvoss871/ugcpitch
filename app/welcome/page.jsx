@@ -92,12 +92,23 @@ export default function WelcomePage() {
               </p>
             </div>
 
-            <div className="rounded-2xl overflow-hidden border border-gray-200 shadow-xl mb-4" style={{ height: 620 }}>
-              <iframe
-                src="/pitch/view?id=welcome-demo"
-                className="w-full h-full"
-                title="Sample pitch page"
-              />
+            <div
+              className="rounded-2xl border border-gray-200 shadow-xl mb-4"
+              style={{ height: 680, overflow: 'hidden', position: 'relative' }}
+            >
+              <div style={{
+                position: 'absolute', top: 0, left: 0,
+                width: 1280, height: 1388,
+                transform: 'scale(0.49)',
+                transformOrigin: 'top left',
+                pointerEvents: 'none',
+              }}>
+                <iframe
+                  src="/pitch/view?id=welcome-demo"
+                  style={{ width: '100%', height: '100%', border: 'none', display: 'block' }}
+                  title="Sample pitch page"
+                />
+              </div>
             </div>
 
             <div className="text-center mb-6">
@@ -228,12 +239,23 @@ export default function WelcomePage() {
               </p>
             </div>
 
-            <div className="rounded-2xl overflow-hidden border border-gray-200 shadow-xl mb-5" style={{ height: 620 }}>
-              <iframe
-                src={`/pitch/view?id=${shareId}`}
-                className="w-full h-full"
-                title="Sample pitch page"
-              />
+            <div
+              className="rounded-2xl border border-gray-200 shadow-xl mb-5"
+              style={{ height: 720, overflow: 'hidden', position: 'relative' }}
+            >
+              <div style={{
+                position: 'absolute', top: 0, left: 0,
+                width: 1280, height: 1469,
+                transform: 'scale(0.49)',
+                transformOrigin: 'top left',
+                pointerEvents: 'none',
+              }}>
+                <iframe
+                  src={`/pitch/view?id=${shareId}`}
+                  style={{ width: '100%', height: '100%', border: 'none', display: 'block' }}
+                  title="Sample pitch page"
+                />
+              </div>
             </div>
 
             <div className="text-center mb-6">
