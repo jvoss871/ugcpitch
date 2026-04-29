@@ -264,6 +264,12 @@ export default function PitchPage() {
     });
   }, [authUser, pitchId]);
 
+  useEffect(() => {
+    if (pitch && window.location.hash === '#analytics' && !showAnalytics) {
+      fetchAnalytics();
+    }
+  }, [pitch]);
+
   const handleSaveEdits = () => {
     const updatedContent = allContent.filter(c => selectedContentIds.includes(c.id));
     // Clear shareId so the next copy regenerates with updated content

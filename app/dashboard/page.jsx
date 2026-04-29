@@ -50,7 +50,20 @@ export default function Dashboard() {
   const [contentCount, setContentCount] = useState(null);
   const [bannerUpgrading, setBannerUpgrading] = useState(false);
   const [confirmDialog, setConfirmDialog] = useState({ open: false, message: '', onConfirm: null });
+  const [copiedLinkId, setCopiedLinkId] = useState(null);
   const newFolderInputRef = useRef(null);
+
+  const copyPitchLink = (e, pitch) => {
+    e.stopPropagation();
+    if (!pitch.shareId) { router.push(`/pitch/${pitch.id}`); return; }
+    const proHandle = planStatus?.handle ?? null;
+    const url = proHandle
+      ? `${window.location.origin}/${proHandle}/${pitch.shareId}`
+      : `${window.location.origin}/pitch/view?id=${pitch.shareId}`;
+    navigator.clipboard.writeText(url);
+    setCopiedLinkId(pitch.id);
+    setTimeout(() => setCopiedLinkId(null), 2000);
+  };
 
   useEffect(() => {
     if (!loading && !user) router.push('/');
@@ -570,7 +583,7 @@ export default function Dashboard() {
                       draggable
                       onDragStart={e => handleDragStart(e, pitch.id)}
                       onClick={() => router.push(`/pitch/${pitch.id}`)}
-                      className="group grid grid-cols-[24px_1fr_90px_110px_52px] gap-4 items-center pr-4 py-3 cursor-pointer transition-colors hover:bg-gray-50 border-b border-gray-100 last:border-0 pl-4"
+                      className="group grid grid-cols-[24px_1fr_90px_110px_78px] gap-4 items-center pr-4 py-3 cursor-pointer transition-colors hover:bg-gray-50 border-b border-gray-100 last:border-0 pl-4"
                       style={{
                         backgroundColor: isSelected ? '#f0fdfa' : undefined,
                         borderLeft: `3px solid ${rowBorderColor(pitch)}`,
@@ -614,6 +627,17 @@ export default function Dashboard() {
                       </div>
 
                       <div className="flex items-center justify-end gap-1.5">
+                        <button
+                          onClick={e => copyPitchLink(e, pitch)}
+                          title={pitch.shareId ? 'Copy link' : 'Open pitch to generate link'}
+                          className={`opacity-0 group-hover:opacity-100 w-6 h-6 flex items-center justify-center rounded-md transition ${copiedLinkId === pitch.id ? 'text-teal-600 bg-teal-50' : 'text-gray-400 hover:text-teal-600 hover:bg-teal-50'}`}
+                        >
+                          {copiedLinkId === pitch.id ? (
+                            <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><polyline points="20 6 9 17 4 12"/></svg>
+                          ) : (
+                            <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
+                          )}
+                        </button>
                         <button
                           onClick={e => { e.stopPropagation(); router.push(`/pitch/${pitch.id}#analytics`); }}
                           title="View analytics"
