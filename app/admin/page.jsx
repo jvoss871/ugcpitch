@@ -45,6 +45,7 @@ export default function AdminPage() {
   const [cleaning, setCleaning]       = useState(false);
   const [demoPitchExists, setDemoPitchExists] = useState(null);
   const [seedingDemo, setSeedingDemo] = useState(false);
+  const [demoSeedOpen, setDemoSeedOpen] = useState(false);
 
   const TEST_USERNAME = 'jvoss87@gmail.com';
 
@@ -295,24 +296,40 @@ export default function AdminPage() {
                 </div>
 
                 {/* Seed welcome demo */}
-                <div className="bg-gray-900 rounded-2xl p-5 border border-gray-800 flex items-center justify-between">
-                  <div>
-                    <p className="text-xs text-gray-500 uppercase tracking-widest mb-1">Welcome Demo Pitch</p>
-                    <p className="text-2xl font-black" style={{ color: demoPitchExists ? '#0d9488' : '#6b7280' }}>
-                      {demoPitchExists === null ? '—' : demoPitchExists ? 'Seeded' : 'Not seeded'}
-                      <span className="text-sm font-normal text-gray-600 ml-2">
-                        {demoPitchExists ? 'Sofia Reyes / Glossier demo is live' : 'new users will skip the demo step'}
-                      </span>
-                    </p>
-                  </div>
+                <div className="bg-gray-900 rounded-2xl border border-gray-800 overflow-hidden">
                   <button
-                    onClick={seedWelcomeDemo}
-                    disabled={seedingDemo}
-                    className="px-4 py-2 rounded-xl text-sm font-bold transition disabled:opacity-40"
-                    style={{ backgroundColor: '#0d9488', color: '#fff' }}
+                    onClick={() => setDemoSeedOpen(o => !o)}
+                    className="w-full flex items-center justify-between px-5 py-4 hover:bg-gray-800/60 transition"
                   >
-                    {seedingDemo ? 'Seeding…' : demoPitchExists ? 'Re-seed' : 'Seed Now'}
+                    <div className="text-left">
+                      <p className="text-xs text-gray-500 uppercase tracking-widest mb-1">Welcome Demo Pitch</p>
+                      <p className="text-2xl font-black" style={{ color: demoPitchExists ? '#0d9488' : '#6b7280' }}>
+                        {demoPitchExists === null ? '—' : demoPitchExists ? 'Seeded' : 'Not seeded'}
+                        <span className="text-sm font-normal text-gray-600 ml-2">
+                          {demoPitchExists ? 'Sofia Reyes / Glossier demo is live' : 'new users will skip the demo step'}
+                        </span>
+                      </p>
+                    </div>
+                    <svg
+                      className="w-4 h-4 text-gray-600 transition-transform flex-shrink-0"
+                      style={{ transform: demoSeedOpen ? 'rotate(180deg)' : 'none' }}
+                      viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <polyline points="6 9 12 15 18 9" />
+                    </svg>
                   </button>
+                  {demoSeedOpen && (
+                    <div className="px-5 pb-5 border-t border-gray-800 pt-4 flex items-center justify-between">
+                      <p className="text-sm text-gray-500">Overwrites the welcome-demo pitch record in the database.</p>
+                      <button
+                        onClick={seedWelcomeDemo}
+                        disabled={seedingDemo}
+                        className="px-4 py-2 rounded-xl text-sm font-bold transition disabled:opacity-40 ml-4 flex-shrink-0"
+                        style={{ backgroundColor: '#0d9488', color: '#fff' }}
+                      >
+                        {seedingDemo ? 'Seeding…' : demoPitchExists ? 'Re-seed' : 'Seed Now'}
+                      </button>
+                    </div>
+                  )}
                 </div>
 
                 {/* Row 2 — plan breakdown */}
