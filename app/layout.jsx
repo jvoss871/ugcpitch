@@ -15,11 +15,13 @@ export const metadata = {
     url: 'https://ugc-edge.com',
     siteName: 'UGC Edge',
     type: 'website',
+    images: [{ url: '/og-image.png', width: 1200, height: 630, alt: 'UGC Edge sample pitch page' }],
   },
   twitter: {
     card: 'summary_large_image',
     title: 'UGC Edge — The pitch page that gets you picked',
     description: 'Paste any brand listing. Get a custom pitch page with tailored copy, your best content, and your brand — ready to send in 30 seconds.',
+    images: ['/og-image.png'],
   },
   icons: { icon: '/logo.svg' },
 };
