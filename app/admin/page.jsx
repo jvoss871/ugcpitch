@@ -46,6 +46,7 @@ export default function AdminPage() {
   const [demoPitchExists, setDemoPitchExists] = useState(null);
   const [seedingDemo, setSeedingDemo] = useState(false);
   const [demoSeedOpen, setDemoSeedOpen] = useState(false);
+  const [cleanupOpen, setCleanupOpen] = useState(false);
 
   const TEST_USERNAME = 'jvoss87@gmail.com';
 
@@ -276,62 +277,6 @@ export default function AdminPage() {
                   ))}
                 </div>
 
-                {/* Demo pitch cleanup */}
-                <div className="bg-gray-900 rounded-2xl p-5 border border-gray-800 flex items-center justify-between">
-                  <div>
-                    <p className="text-xs text-gray-500 uppercase tracking-widest mb-1">Demo Pitches (welcome flow)</p>
-                    <p className="text-2xl font-black text-white">
-                      {demoCount === null ? '—' : demoCount}
-                      <span className="text-sm font-normal text-gray-600 ml-2">orphaned rows</span>
-                    </p>
-                  </div>
-                  <button
-                    onClick={cleanupDemo}
-                    disabled={cleaning || demoCount === 0}
-                    className="px-4 py-2 rounded-xl text-sm font-bold transition disabled:opacity-40"
-                    style={{ backgroundColor: demoCount > 0 ? '#dc2626' : '#1f2937', color: '#fff' }}
-                  >
-                    {cleaning ? 'Deleting…' : `Purge${demoCount > 0 ? ` ${demoCount}` : ''}`}
-                  </button>
-                </div>
-
-                {/* Seed welcome demo */}
-                <div className="bg-gray-900 rounded-2xl border border-gray-800 overflow-hidden">
-                  <button
-                    onClick={() => setDemoSeedOpen(o => !o)}
-                    className="w-full flex items-center justify-between px-5 py-4 hover:bg-gray-800/60 transition"
-                  >
-                    <div className="text-left">
-                      <p className="text-xs text-gray-500 uppercase tracking-widest mb-1">Welcome Demo Pitch</p>
-                      <p className="text-2xl font-black" style={{ color: demoPitchExists ? '#0d9488' : '#6b7280' }}>
-                        {demoPitchExists === null ? '—' : demoPitchExists ? 'Seeded' : 'Not seeded'}
-                        <span className="text-sm font-normal text-gray-600 ml-2">
-                          {demoPitchExists ? 'Sofia Reyes / Glossier demo is live' : 'new users will skip the demo step'}
-                        </span>
-                      </p>
-                    </div>
-                    <svg
-                      className="w-4 h-4 text-gray-600 transition-transform flex-shrink-0"
-                      style={{ transform: demoSeedOpen ? 'rotate(180deg)' : 'none' }}
-                      viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                      <polyline points="6 9 12 15 18 9" />
-                    </svg>
-                  </button>
-                  {demoSeedOpen && (
-                    <div className="px-5 pb-5 border-t border-gray-800 pt-4 flex items-center justify-between">
-                      <p className="text-sm text-gray-500">Overwrites the welcome-demo pitch record in the database.</p>
-                      <button
-                        onClick={seedWelcomeDemo}
-                        disabled={seedingDemo}
-                        className="px-4 py-2 rounded-xl text-sm font-bold transition disabled:opacity-40 ml-4 flex-shrink-0"
-                        style={{ backgroundColor: '#0d9488', color: '#fff' }}
-                      >
-                        {seedingDemo ? 'Seeding…' : demoPitchExists ? 'Re-seed' : 'Seed Now'}
-                      </button>
-                    </div>
-                  )}
-                </div>
-
                 {/* Row 2 — plan breakdown */}
                 <div className="grid grid-cols-3 gap-4">
                   {[
@@ -350,6 +295,80 @@ export default function AdminPage() {
                       <p className="text-xs text-gray-700 mt-1">users</p>
                     </div>
                   ))}
+                </div>
+                {/* Maintenance tools */}
+                <div className="grid grid-cols-2 gap-4">
+
+                  {/* Cleanup orphaned sample pitches */}
+                  <div className="bg-gray-900 rounded-2xl border border-gray-800 overflow-hidden">
+                    <button
+                      onClick={() => setCleanupOpen(o => !o)}
+                      className="w-full flex items-center justify-between px-5 py-4 hover:bg-gray-800/60 transition"
+                    >
+                      <div className="text-left">
+                        <p className="text-xs text-gray-500 uppercase tracking-widest mb-1">Sample Pitch Cleanup</p>
+                        <p className="text-xl font-black text-white">
+                          {demoCount === null ? '—' : demoCount}
+                          <span className="text-sm font-normal text-gray-600 ml-2">unattached rows</span>
+                        </p>
+                      </div>
+                      <svg className="w-4 h-4 text-gray-600 transition-transform flex-shrink-0"
+                        style={{ transform: cleanupOpen ? 'rotate(180deg)' : 'none' }}
+                        viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                        <polyline points="6 9 12 15 18 9" />
+                      </svg>
+                    </button>
+                    {cleanupOpen && (
+                      <div className="px-5 pb-5 pt-4 border-t border-gray-800">
+                        <p className="text-xs text-gray-500 mb-3">Pitch records created by the welcome flow that were never claimed by a user account.</p>
+                        <button
+                          onClick={cleanupDemo}
+                          disabled={cleaning || demoCount === 0}
+                          className="w-full py-2 rounded-xl text-sm font-bold transition disabled:opacity-40"
+                          style={{ backgroundColor: demoCount > 0 ? '#dc2626' : '#1f2937', color: '#fff' }}
+                        >
+                          {cleaning ? 'Deleting…' : demoCount > 0 ? `Delete ${demoCount} rows` : 'Nothing to delete'}
+                        </button>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Seed welcome demo pitch */}
+                  <div className="bg-gray-900 rounded-2xl border border-gray-800 overflow-hidden">
+                    <button
+                      onClick={() => setDemoSeedOpen(o => !o)}
+                      className="w-full flex items-center justify-between px-5 py-4 hover:bg-gray-800/60 transition"
+                    >
+                      <div className="text-left">
+                        <p className="text-xs text-gray-500 uppercase tracking-widest mb-1">Welcome Page Demo</p>
+                        <p className="text-xl font-black" style={{ color: demoPitchExists ? '#0d9488' : '#6b7280' }}>
+                          {demoPitchExists === null ? '—' : demoPitchExists ? 'Live' : 'Not seeded'}
+                          <span className="text-sm font-normal text-gray-600 ml-2">
+                            {demoPitchExists ? 'showing to new users' : 'welcome skips to form'}
+                          </span>
+                        </p>
+                      </div>
+                      <svg className="w-4 h-4 text-gray-600 transition-transform flex-shrink-0"
+                        style={{ transform: demoSeedOpen ? 'rotate(180deg)' : 'none' }}
+                        viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                        <polyline points="6 9 12 15 18 9" />
+                      </svg>
+                    </button>
+                    {demoSeedOpen && (
+                      <div className="px-5 pb-5 pt-4 border-t border-gray-800">
+                        <p className="text-xs text-gray-500 mb-3">The Sofia Reyes / Glossier pitch shown in the welcome iframe. Re-seed to update it after code changes.</p>
+                        <button
+                          onClick={seedWelcomeDemo}
+                          disabled={seedingDemo}
+                          className="w-full py-2 rounded-xl text-sm font-bold transition disabled:opacity-40"
+                          style={{ backgroundColor: '#0d9488', color: '#fff' }}
+                        >
+                          {seedingDemo ? 'Seeding…' : demoPitchExists ? 'Re-seed demo' : 'Seed Now'}
+                        </button>
+                      </div>
+                    )}
+                  </div>
+
                 </div>
               </>
             )}
