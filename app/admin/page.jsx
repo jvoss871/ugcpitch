@@ -39,6 +39,21 @@ export default function AdminPage() {
   const [search, setSearch]           = useState('');
   const [confirmDelete, setConfirmDelete] = useState(null);
   const [deleting, setDeleting]       = useState(false);
+  const [testMode, setTestMode]       = useState(null);
+  const [testLoading, setTestLoading] = useState(false);
+
+  const TEST_USERNAME = 'jvoss87@gmail.com';
+
+  const applyTestMode = async (mode) => {
+    setTestLoading(true);
+    await fetch('/api/admin/test-mode', {
+      method: 'POST',
+      headers: authHeaders,
+      body: JSON.stringify({ username: TEST_USERNAME, mode }),
+    });
+    setTestMode(mode);
+    setTestLoading(false);
+  };
 
   const authHeaders = { 'Content-Type': 'application/json', 'x-admin-password': password };
 
@@ -413,6 +428,47 @@ export default function AdminPage() {
                         </div>
                       </label>
                     </div>
+
+                    {/* Dev test mode — jvoss87 only */}
+                    {u.username === TEST_USERNAME && (
+                      <div className="border-t border-gray-800 pt-5">
+                        <label className="block text-xs font-semibold text-gray-500 uppercase tracking-widest mb-3">Dev Test Mode</label>
+                        <p className="text-xs text-gray-600 mb-4">Toggle account state for testing onboarding vs pitch flow. Clear browser sessionStorage after switching to New User.</p>
+                        <div className="flex items-center gap-3">
+                          <button
+                            onClick={() => applyTestMode('new-user')}
+                            disabled={testLoading}
+                            className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold transition disabled:opacity-50"
+                            style={{
+                              backgroundColor: testMode === 'new-user' ? '#dc2626' : '#1f2937',
+                              color: testMode === 'new-user' ? '#fff' : '#9ca3af',
+                              border: testMode === 'new-user' ? 'none' : '1px solid #374151',
+                            }}
+                          >
+                            <span className={`w-2 h-2 rounded-full ${testMode === 'new-user' ? 'bg-white' : 'bg-gray-600'}`} />
+                            New User
+                          </button>
+                          <button
+                            onClick={() => applyTestMode('filled')}
+                            disabled={testLoading}
+                            className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold transition disabled:opacity-50"
+                            style={{
+                              backgroundColor: testMode === 'filled' ? '#0d9488' : '#1f2937',
+                              color: testMode === 'filled' ? '#fff' : '#9ca3af',
+                              border: testMode === 'filled' ? 'none' : '1px solid #374151',
+                            }}
+                          >
+                            <span className={`w-2 h-2 rounded-full ${testMode === 'filled' ? 'bg-white animate-pulse' : 'bg-gray-600'}`} />
+                            {testLoading ? 'Applying…' : 'Filled'}
+                          </button>
+                          {testMode && (
+                            <span className="text-xs text-gray-500 ml-1">
+                              {testMode === 'new-user' ? '— no data, welcome flow active' : '— profile + sample pitch seeded'}
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    )}
 
                     <div className="flex items-center justify-between pt-2">
                       <button
