@@ -39,7 +39,10 @@ export default function LayoutContent({ children }) {
   const planBadge = planStatus ? (PLAN_BADGE[planStatus] ?? PLAN_BADGE.free) : null;
 
   // Pages that render with no app chrome
-  if (pathname === '/pitch/view' || pathname === '/admin' || pathname === '/login') {
+  const KNOWN_SEGMENTS = new Set(['pitch','auth','api','admin','dashboard','profile','brand','content','create','upgrade','help','login','welcome','privacy','terms']);
+  const segments = pathname.split('/').filter(Boolean);
+  const isHandlePitch = segments.length === 2 && !KNOWN_SEGMENTS.has(segments[0]);
+  if (pathname === '/pitch/view' || pathname === '/admin' || pathname === '/login' || isHandlePitch) {
     return <>{children}</>;
   }
 
@@ -83,11 +86,11 @@ export default function LayoutContent({ children }) {
                     </Link>
                     <Link href="/brand" onClick={() => setMenuOpen(false)}
                       className="px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 block">
-                      Brand Setup
+                      Brand
                     </Link>
                     <Link href="/content" onClick={() => setMenuOpen(false)}
                       className="px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 block">
-                      Content Library
+                      Content
                     </Link>
                     <Link href="/help" onClick={() => setMenuOpen(false)}
                       className="px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 block">

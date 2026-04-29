@@ -7,7 +7,7 @@ const DEMO_VIDEO_URL = 'https://www.loom.com/embed/a6485eae6d9240d388f385273d562
 const FAQ = [
   {
     q: 'Why does my pitch sound generic?',
-    a: 'Fill out your Bio and Positioning Statement fully — the AI uses these as its primary signal. The more specific you are about your niche and style, the more targeted the pitch.',
+    a: 'Fill out your Bio and Your Angle fully — the AI uses these as its primary signal. The more specific you are about your niche and style, the more targeted the pitch.',
   },
   {
     q: "Why isn't my content showing up in pitches?",
@@ -121,7 +121,9 @@ export default function HelpPage() {
               'Keep your library updated. Old content from niches you no longer work in can dilute your pitches.',
             ].map((tip, i) => (
               <li key={i} className="flex items-start gap-3">
-                <span className="text-teal-500 mt-0.5 flex-shrink-0">✓</span>
+                <svg className="w-4 h-4 text-teal-500 mt-0.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
+                  <polyline points="20 6 9 17 4 12" />
+                </svg>
                 <p className="text-sm text-gray-600 leading-relaxed">{tip}</p>
               </li>
             ))}
