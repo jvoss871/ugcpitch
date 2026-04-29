@@ -17,7 +17,7 @@ export async function GET(req) {
   const monthlyPitchCount = await getMonthlyPitchCount(username);
 
   if (!user) {
-    return Response.json({ status: 'free', pitchLimit: 10, features: defaultFeatures(), oneTimePitches: 0, monthlyPitchCount });
+    return Response.json({ status: 'free', pitchLimit: 20, features: defaultFeatures(), oneTimePitches: 0, monthlyPitchCount });
   }
 
   const oneTimePitches = user.oneTimePitches ?? 0;
@@ -30,11 +30,11 @@ export async function GET(req) {
     return Response.json({ status: 'starter', features: defaultFeatures(user.features), pitchLimit, oneTimePitches, monthlyPitchCount });
   }
   if (user.plan === 'free') {
-    return Response.json({ status: 'free', pitchLimit: 10, features: defaultFeatures(), oneTimePitches, monthlyPitchCount });
+    return Response.json({ status: 'free', pitchLimit: 20, features: defaultFeatures(), oneTimePitches, monthlyPitchCount });
   }
 
   // Legacy trial/expired users → treat as free
-  return Response.json({ status: 'free', pitchLimit: 10, features: defaultFeatures(), oneTimePitches, monthlyPitchCount });
+  return Response.json({ status: 'free', pitchLimit: 20, features: defaultFeatures(), oneTimePitches, monthlyPitchCount });
 }
 
 export async function PATCH(req) {

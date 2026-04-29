@@ -4,7 +4,7 @@ import { getUser, getMonthlyPitchCount, incrementMonthlyPitchCount } from '@/lib
 function pitchLimit(user) {
   if (!user || user.plan === 'pro') return Infinity;
   if (user.plan === 'starter') return 50 + (user.bonusPitches ?? 0);
-  return 10;
+  return 20;
 }
 
 const groq = new Groq({

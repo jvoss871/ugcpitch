@@ -11,7 +11,7 @@ const PLAN_META = {
     period: '/mo',
     tagline: 'Get started for free',
     features: [
-      '10 pitches per month',
+      '20 pitches per month',
       'All templates',
       'Content library',
       'Made with UGC Edge footer',
@@ -44,7 +44,7 @@ const PLAN_META = {
 };
 
 const OTHER_PLAN_META = {
-  free:    { name: 'Free',    price: '$0',  dark: false, bullets: ['10 pitches/month', 'All templates', 'Content library'] },
+  free:    { name: 'Free',    price: '$0',  dark: false, bullets: ['20 pitches/month', 'All templates', 'Content library'] },
   starter: { name: 'Starter', price: '$9',  dark: false, bullets: ['50 pitches/month', 'Open tracking', 'All 4 templates'] },
   pro:     { name: 'Pro',     price: '$19', dark: true,  popular: true, bullets: ['Unlimited pitches', 'Advanced analytics', 'Custom URL + no branding'] },
 };
