@@ -85,14 +85,14 @@ export default function WelcomePage() {
             <div className="mb-6">
               <p className="text-xs font-bold uppercase tracking-widest text-teal-600 mb-3">Welcome to UGC Edge</p>
               <h1 className="text-4xl font-black text-gray-900 leading-tight mb-3">
-                This is what a pitch page looks like
+                This is how you stand out in a brand's inbox.
               </h1>
               <p className="text-gray-500 text-base">
-                A sample creator pitching Glossier — scroll through, then we'll build one for you.
+                Other creators send a cold DM. You send this. Scroll through — then we'll build one for you in 30 seconds.
               </p>
             </div>
 
-            <div className="rounded-2xl overflow-hidden border border-gray-200 shadow-xl mb-4" style={{ height: 520 }}>
+            <div className="rounded-2xl overflow-hidden border border-gray-200 shadow-xl mb-4" style={{ height: 620 }}>
               <iframe
                 src="/pitch/view?id=welcome-demo"
                 className="w-full h-full"
@@ -115,7 +115,7 @@ export default function WelcomePage() {
               onClick={() => setStep('form')}
               className="w-full py-4 bg-teal-600 hover:bg-teal-700 text-white font-bold text-base rounded-xl transition"
             >
-              Create a sample pitch for your brand →
+              Build mine in 30 seconds →
             </button>
           </div>
         )}
@@ -137,10 +137,10 @@ export default function WelcomePage() {
                 <p className="text-xs font-bold uppercase tracking-widest text-teal-600 mb-3">Welcome to UGC Edge</p>
               )}
               <h1 className="text-4xl font-black text-gray-900 leading-tight mb-3">
-                See your pitch before you set anything up
+                {hasDemoStep ? 'Now let\'s build yours.' : 'See your pitch before you set anything up.'}
               </h1>
               <p className="text-lg text-gray-500">
-                Pick your niche, enter a brand name — we'll generate a full pitch page in seconds.
+                Pick your niche and a brand you'd love to work with. Your pitch page goes live in 30 seconds.
               </p>
             </div>
 
@@ -182,11 +182,11 @@ export default function WelcomePage() {
                 disabled={!niche || !brandName.trim()}
                 className="w-full py-4 bg-teal-600 text-white font-bold text-base rounded-xl hover:bg-teal-700 transition disabled:opacity-40 disabled:cursor-not-allowed"
               >
-                Generate my sample pitch →
+                Build my pitch in 30 seconds →
               </button>
 
               <p className="text-xs text-center text-gray-400">
-                Uses a demo creator profile — you'll swap it with yours after.
+                Uses a demo creator profile — you'll add your real info after.
               </p>
             </div>
           </div>
@@ -196,8 +196,10 @@ export default function WelcomePage() {
         {step === 'generating' && (
           <div className="flex flex-col items-center justify-center py-36 animate-fade-in-up">
             <div className="w-10 h-10 border-2 border-teal-500 border-t-transparent rounded-full animate-spin mb-6" />
-            <p className="text-lg font-semibold text-gray-900 mb-1">Building your pitch page…</p>
-            <p className="text-sm text-gray-400">Takes about 5 seconds</p>
+            <p className="text-lg font-semibold text-gray-900 mb-1">
+              Crafting your {brandName} pitch…
+            </p>
+            <p className="text-sm text-gray-400">Usually done in about 30 seconds</p>
           </div>
         )}
 
@@ -217,13 +219,16 @@ export default function WelcomePage() {
             <div className="mb-5">
               <p className="text-xs font-bold uppercase tracking-widest text-teal-600 mb-2">Your sample pitch</p>
               <h2 className="text-2xl font-black text-gray-900 leading-snug">
-                Here's what pitching{' '}
+                Your{' '}
                 <span style={{ color: selectedNiche?.color ?? '#0d9488' }}>{brandName}</span>{' '}
-                could look like
+                pitch — ready to send.
               </h2>
+              <p className="text-gray-500 mt-2 text-sm">
+                This is what lands in a brand manager's inbox. No cold DM, no PDF, no guessing — just a page that does the talking.
+              </p>
             </div>
 
-            <div className="rounded-2xl overflow-hidden border border-gray-200 shadow-xl mb-5" style={{ height: 540 }}>
+            <div className="rounded-2xl overflow-hidden border border-gray-200 shadow-xl mb-5" style={{ height: 620 }}>
               <iframe
                 src={`/pitch/view?id=${shareId}`}
                 className="w-full h-full"
@@ -258,16 +263,16 @@ export default function WelcomePage() {
             )}
 
             <div className="rounded-2xl p-7 text-center" style={{ backgroundColor: '#0d9488' }}>
-              <p className="text-xl font-black text-white mb-1">Ready to make it yours?</p>
+              <p className="text-xl font-black text-white mb-1">Now put your face on it.</p>
               <p className="text-sm mb-5" style={{ color: 'rgba(255,255,255,0.75)' }}>
-                Replace the demo profile with your real info — takes less than 5 minutes.
+                Add your real stats, content, and photo — takes under 5 minutes. Then send it to every brand on your list.
               </p>
               <button
                 onClick={skipToDashboard}
                 className="bg-white font-bold px-8 py-3 rounded-xl hover:bg-teal-50 transition text-sm"
                 style={{ color: '#0d9488' }}
               >
-                Personalize my pitch →
+                Set up my profile →
               </button>
             </div>
 
