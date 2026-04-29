@@ -285,82 +285,95 @@ export default function Dashboard() {
       <div className="flex flex-1 gap-0">
 
       {/* ── LEFT SIDEBAR ─────────────────────────────────────────────── */}
-      <aside className="w-52 flex-shrink-0 border-r border-gray-200 bg-white px-3 py-6 flex flex-col gap-1">
-        <p className="text-xs font-bold uppercase tracking-widest text-gray-400 px-2 mb-3">Folders</p>
+      <aside className="w-52 flex-shrink-0 border-r border-gray-800 bg-gray-950 px-3 py-6 flex flex-col gap-0.5">
+        <p className="text-[10px] font-bold uppercase tracking-widest text-gray-600 px-2 mb-3">Folders</p>
 
-        {allFolders.map(folder => (
-          <div
-            key={folder.id}
-            onDragOver={e => { e.preventDefault(); setDragOverFolder(folder.id); }}
-            onDragLeave={() => setDragOverFolder(null)}
-            onDrop={e => handleDrop(e, folder.id)}
-            className="group relative"
-          >
-            <button
-              onClick={() => { setActiveFolder(folder.id); setSelected([]); }}
-              className="w-full flex items-center justify-between gap-2 px-3 py-2 rounded-lg text-sm transition-all"
-              style={{
-                backgroundColor: dragOverFolder === folder.id ? '#f0fdfa' :
-                  activeFolder === folder.id ? '#f0fdfa' : 'transparent',
-                color: activeFolder === folder.id ? '#0d9488' : '#374151',
-                fontWeight: activeFolder === folder.id ? 600 : 400,
-                outline: dragOverFolder === folder.id ? '2px dashed #0d9488' : 'none',
-              }}
+        {allFolders.map(folder => {
+          const folderIcon = {
+            all:      <svg className="w-3.5 h-3.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}><path strokeLinecap="round" strokeLinejoin="round" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0H4m8-4h.01"/></svg>,
+            sent:     <svg className="w-3.5 h-3.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}><path strokeLinecap="round" strokeLinejoin="round" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/></svg>,
+            accepted: <svg className="w-3.5 h-3.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}><path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>,
+            archived: <svg className="w-3.5 h-3.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}><path strokeLinecap="round" strokeLinejoin="round" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4"/></svg>,
+          }[folder.id] ?? <svg className="w-3.5 h-3.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}><path strokeLinecap="round" strokeLinejoin="round" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"/></svg>;
+          const isActive = activeFolder === folder.id;
+          const isDragOver = dragOverFolder === folder.id;
+          return (
+            <div
+              key={folder.id}
+              onDragOver={e => { e.preventDefault(); setDragOverFolder(folder.id); }}
+              onDragLeave={() => setDragOverFolder(null)}
+              onDrop={e => handleDrop(e, folder.id)}
+              className="group relative"
             >
-              <span className="truncate">{folder.name}</span>
-              <span className="text-xs text-gray-400 flex-shrink-0">{folderCount(folder.id) || ''}</span>
-            </button>
-
-            {/* Delete custom folder */}
-            {!['all', 'sent', 'accepted', 'archived'].includes(folder.id) && (
               <button
-                onClick={() => handleDeleteFolder(folder.id)}
-                className="absolute right-1 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 w-5 h-5 flex items-center justify-center text-gray-400 hover:text-red-500 transition"
+                onClick={() => { setActiveFolder(folder.id); setSelected([]); }}
+                className="w-full flex items-center justify-between gap-2 px-2.5 py-2 rounded-lg text-sm transition-all"
+                style={{
+                  backgroundColor: isDragOver ? 'rgba(13,148,136,0.2)' : isActive ? 'rgba(13,148,136,0.15)' : 'transparent',
+                  color: isActive ? '#2dd4bf' : '#9ca3af',
+                  fontWeight: isActive ? 600 : 400,
+                  outline: isDragOver ? '1.5px dashed #0d9488' : 'none',
+                }}
               >
-                ×
+                <span className="flex items-center gap-2.5 min-w-0" style={{ color: isActive ? '#2dd4bf' : '#6b7280' }}>
+                  {folderIcon}
+                  <span className="truncate" style={{ color: isActive ? '#2dd4bf' : '#9ca3af' }}>{folder.name}</span>
+                </span>
+                <span className="text-xs flex-shrink-0" style={{ color: isActive ? '#2dd4bf' : '#4b5563' }}>{folderCount(folder.id) || ''}</span>
               </button>
-            )}
-          </div>
-        ))}
+
+              {!['all', 'sent', 'accepted', 'archived'].includes(folder.id) && (
+                <button
+                  onClick={() => handleDeleteFolder(folder.id)}
+                  className="absolute right-1 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 w-5 h-5 flex items-center justify-center text-gray-600 hover:text-red-400 transition"
+                >
+                  ×
+                </button>
+              )}
+            </div>
+          );
+        })}
 
         {/* New folder */}
-        <div className="mt-2">
+        <div className="mt-3 border-t border-gray-800 pt-3">
           {newFolderMode ? (
-            <form onSubmit={handleAddFolder} className="px-2">
+            <form onSubmit={handleAddFolder} className="px-1">
               <input
                 ref={newFolderInputRef}
                 value={newFolderName}
                 onChange={e => setNewFolderName(e.target.value)}
                 onBlur={() => { setNewFolderMode(false); setNewFolderName(''); }}
                 placeholder="Folder name"
-                className="w-full text-sm px-2 py-1.5 border border-teal-400 rounded-lg outline-none focus:ring-2 focus:ring-teal-200"
+                className="w-full text-sm px-2 py-1.5 bg-gray-800 border border-teal-600 rounded-lg outline-none text-white placeholder-gray-600 focus:ring-1 focus:ring-teal-500"
               />
             </form>
           ) : (
             <button
               onClick={() => setNewFolderMode(true)}
-              className="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-sm text-gray-400 hover:text-teal-600 hover:bg-gray-50 transition"
+              className="w-full flex items-center gap-2 px-2.5 py-2 rounded-lg text-sm text-gray-600 hover:text-gray-300 transition"
             >
-              <span>+</span> New folder
+              <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4"/></svg>
+              New folder
             </button>
           )}
         </div>
       </aside>
 
       {/* ── MAIN CONTENT ─────────────────────────────────────────────── */}
-      <div className="flex-1 px-8 py-6 overflow-y-auto">
+      <div className="flex-1 px-8 py-6 overflow-y-auto bg-gray-50">
 
         {/* Header */}
-        <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center justify-between mb-5">
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">
+            <h1 className="text-xl font-bold text-gray-900">
               {allFolders.find(f => f.id === activeFolder)?.name ?? 'Pitches'}
             </h1>
-            <p className="text-sm text-gray-500 mt-0.5">{visiblePitches.length} pitch{visiblePitches.length !== 1 ? 'es' : ''}</p>
+            <p className="text-xs text-gray-400 mt-0.5">{visiblePitches.length} pitch{visiblePitches.length !== 1 ? 'es' : ''}</p>
           </div>
           <Link href="/create"
-            className="text-sm font-medium text-white bg-teal-600 px-4 py-2 rounded-lg hover:bg-teal-700 transition">
-            + New Pitch
+            className="flex items-center gap-1.5 text-sm font-semibold text-white bg-teal-600 px-4 py-2.5 rounded-xl hover:bg-teal-700 transition shadow-sm shadow-teal-600/20">
+            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4"/></svg>
+            New Pitch
           </Link>
         </div>
 
@@ -549,113 +562,122 @@ export default function Dashboard() {
 
           // Main pitch list view (setup complete or pitches exist)
           return (
-            <div className="bg-white rounded-2xl border border-gray-200 overflow-hidden">
-              {/* Column headers */}
-              <div className="grid grid-cols-[24px_1fr_90px_110px_52px] gap-4 items-center pl-5 pr-4 py-2 border-b border-gray-100 bg-gray-50">
-                <input type="checkbox"
-                  checked={selected.length === visiblePitches.length && visiblePitches.length > 0}
-                  onChange={toggleSelectAll}
-                  className="w-4 h-4 rounded border-gray-300 text-teal-600 cursor-pointer" />
-                <span className="text-xs font-semibold uppercase tracking-widest text-gray-400">Title</span>
-                <span className="text-xs font-semibold uppercase tracking-widest text-gray-400 text-right">Views</span>
-                <span className="text-xs font-semibold uppercase tracking-widest text-gray-400 text-right">Activity</span>
-                <span />
-              </div>
-
+            <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
               {visiblePitches.length === 0 ? (
-                <div className="flex flex-col items-center justify-center py-16 text-center">
-                  <p className="text-gray-400 text-sm mb-4">Ready when you are.</p>
+                <div className="flex flex-col items-center justify-center py-20 text-center">
+                  <div className="w-12 h-12 rounded-2xl bg-teal-50 flex items-center justify-center mb-4">
+                    <svg className="w-6 h-6 text-teal-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}><path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4"/></svg>
+                  </div>
+                  <p className="text-gray-500 font-medium mb-1">No pitches yet</p>
+                  <p className="text-sm text-gray-400 mb-5">Paste a brand listing and we'll build your first pitch.</p>
                   <Link href="/create"
-                    className="inline-flex items-center gap-2 text-sm font-semibold text-white bg-teal-600 hover:bg-teal-700 px-5 py-2.5 rounded-xl transition">
-                    Build your first pitch
+                    className="inline-flex items-center gap-2 text-sm font-semibold text-white bg-teal-600 hover:bg-teal-700 px-5 py-2.5 rounded-xl transition shadow-sm">
+                    Build your first pitch →
                   </Link>
                 </div>
               ) : (
-                visiblePitches.map((pitch) => {
-                  const isSelected = selected.includes(pitch.id);
-                  const folder = allFolders.find(f => f.id === pitch.folderId);
-                  const hasViews = pitch.opens?.length > 0;
-                  const lastOpen = hasViews ? pitch.opens[pitch.opens.length - 1]?.timestamp : null;
+                <>
+                  {visiblePitches.map((pitch) => {
+                    const isSelected = selected.includes(pitch.id);
+                    const folder = allFolders.find(f => f.id === pitch.folderId);
+                    const hasViews = pitch.opens?.length > 0;
+                    const lastOpen = hasViews ? pitch.opens[pitch.opens.length - 1]?.timestamp : null;
 
-                  return (
-                    <div
-                      key={pitch.id}
-                      draggable
-                      onDragStart={e => handleDragStart(e, pitch.id)}
-                      onClick={() => router.push(`/pitch/${pitch.id}`)}
-                      className="group grid grid-cols-[24px_1fr_90px_110px_78px] gap-4 items-center pr-4 py-3 cursor-pointer transition-colors hover:bg-gray-50 border-b border-gray-100 last:border-0 pl-4"
-                      style={{
-                        backgroundColor: isSelected ? '#f0fdfa' : undefined,
-                        borderLeft: `3px solid ${rowBorderColor(pitch)}`,
-                      }}
-                    >
-                      <input
-                        type="checkbox"
-                        checked={isSelected}
-                        onChange={e => toggleSelect(pitch.id, e)}
-                        onClick={e => e.stopPropagation()}
-                        className="w-4 h-4 rounded border-gray-300 text-teal-600 cursor-pointer"
-                      />
+                    const statusPill = (() => {
+                      if (pitch.folderId === 'accepted') return { label: 'Accepted', color: '#0d9488', bg: '#f0fdfa' };
+                      if (hasViews) return { label: `${pitch.opens.length} view${pitch.opens.length !== 1 ? 's' : ''}`, color: '#059669', bg: '#f0fdf4' };
+                      if (pitch.folderId === 'sent') return { label: 'Sent', color: '#d97706', bg: '#fffbeb' };
+                      return null;
+                    })();
 
-                      <div className="flex items-center gap-2 min-w-0">
-                        <span className="text-sm font-medium text-gray-900 truncate">
-                          {pitch.title || 'Untitled Pitch'}
-                        </span>
-                        {folder && activeFolder === 'all' && (
-                          <span className="text-xs bg-gray-100 text-gray-500 px-2 py-0.5 rounded-full flex-shrink-0">
-                            {folder.name}
+                    return (
+                      <div
+                        key={pitch.id}
+                        draggable
+                        onDragStart={e => handleDragStart(e, pitch.id)}
+                        onClick={() => router.push(`/pitch/${pitch.id}`)}
+                        className="group grid grid-cols-[20px_1fr_auto_100px_78px] gap-4 items-center pr-4 py-4 cursor-pointer transition-colors hover:bg-gray-50 border-b border-gray-50 last:border-0 pl-5"
+                        style={{
+                          backgroundColor: isSelected ? '#f0fdfa' : undefined,
+                          borderLeft: `3px solid ${rowBorderColor(pitch)}`,
+                        }}
+                      >
+                        <input
+                          type="checkbox"
+                          checked={isSelected}
+                          onChange={e => toggleSelect(pitch.id, e)}
+                          onClick={e => e.stopPropagation()}
+                          className="w-4 h-4 rounded border-gray-300 text-teal-600 cursor-pointer"
+                        />
+
+                        <div className="flex items-center gap-2.5 min-w-0">
+                          <span className="text-sm font-semibold text-gray-900 truncate">
+                            {pitch.title || 'Untitled Pitch'}
                           </span>
-                        )}
-                      </div>
-
-                      <div className="flex justify-end">
-                        {hasViews ? (
-                          <span className="text-xs font-semibold text-green-700 bg-green-50 px-2 py-0.5 rounded-full whitespace-nowrap">
-                            {pitch.opens.length} view{pitch.opens.length !== 1 ? 's' : ''}
-                          </span>
-                        ) : (
-                          <span className="text-xs text-gray-300">No views</span>
-                        )}
-                      </div>
-
-                      <div className="text-right">
-                        {lastOpen ? (
-                          <span className="text-xs text-green-600 font-medium">Last seen {timeAgo(lastOpen)}</span>
-                        ) : (
-                          <span className="text-xs text-gray-400">{utils.formatDate(pitch.created_at)}</span>
-                        )}
-                      </div>
-
-                      <div className="flex items-center justify-end gap-1.5">
-                        <button
-                          onClick={e => copyPitchLink(e, pitch)}
-                          title={pitch.shareId ? 'Copy link' : 'Open pitch to generate link'}
-                          className={`opacity-0 group-hover:opacity-100 w-6 h-6 flex items-center justify-center rounded-md transition ${copiedLinkId === pitch.id ? 'text-teal-600 bg-teal-50' : 'text-gray-400 hover:text-teal-600 hover:bg-teal-50'}`}
-                        >
-                          {copiedLinkId === pitch.id ? (
-                            <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><polyline points="20 6 9 17 4 12"/></svg>
-                          ) : (
-                            <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
+                          {statusPill && (
+                            <span className="text-[11px] font-semibold px-2 py-0.5 rounded-full flex-shrink-0"
+                              style={{ color: statusPill.color, backgroundColor: statusPill.bg }}>
+                              {statusPill.label}
+                            </span>
                           )}
-                        </button>
-                        <button
-                          onClick={e => { e.stopPropagation(); router.push(`/pitch/${pitch.id}#analytics`); }}
-                          title="View analytics"
-                          className="opacity-0 group-hover:opacity-100 w-6 h-6 flex items-center justify-center rounded-md text-gray-400 hover:text-teal-600 hover:bg-teal-50 transition"
-                        >
-                          <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M3 18h2v-6H3v6zm4 0h2V9H7v9zm4 0h2V5h-2v13zm4 0h2v-3h-2v3zm4 0h2v-9h-2v9z" />
-                          </svg>
-                        </button>
-                        <button
-                          onClick={e => deleteSingle(e, pitch.id)}
-                          title="Delete pitch"
-                          className="opacity-0 group-hover:opacity-100 w-6 h-6 flex items-center justify-center rounded-md text-gray-400 hover:text-red-500 hover:bg-red-50 transition text-base leading-none"
-                        >×</button>
+                          {folder && activeFolder === 'all' && (
+                            <span className="text-[11px] bg-gray-100 text-gray-400 px-2 py-0.5 rounded-full flex-shrink-0">
+                              {folder.name}
+                            </span>
+                          )}
+                        </div>
+
+                        <div className="text-right">
+                          {lastOpen ? (
+                            <span className="text-xs text-gray-400">Seen {timeAgo(lastOpen)}</span>
+                          ) : (
+                            <span className="text-xs text-gray-300">—</span>
+                          )}
+                        </div>
+
+                        <div className="text-right">
+                          <span className="text-xs text-gray-400">{utils.formatDate(pitch.created_at)}</span>
+                        </div>
+
+                        <div className="flex items-center justify-end gap-1.5">
+                          <button
+                            onClick={e => copyPitchLink(e, pitch)}
+                            title={pitch.shareId ? 'Copy link' : 'Open pitch to generate link'}
+                            className={`opacity-0 group-hover:opacity-100 w-6 h-6 flex items-center justify-center rounded-md transition ${copiedLinkId === pitch.id ? 'text-teal-600 bg-teal-50' : 'text-gray-400 hover:text-teal-600 hover:bg-teal-50'}`}
+                          >
+                            {copiedLinkId === pitch.id ? (
+                              <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><polyline points="20 6 9 17 4 12"/></svg>
+                            ) : (
+                              <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
+                            )}
+                          </button>
+                          <button
+                            onClick={e => { e.stopPropagation(); router.push(`/pitch/${pitch.id}#analytics`); }}
+                            title="View analytics"
+                            className="opacity-0 group-hover:opacity-100 w-6 h-6 flex items-center justify-center rounded-md text-gray-400 hover:text-teal-600 hover:bg-teal-50 transition"
+                          >
+                            <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                              <path strokeLinecap="round" strokeLinejoin="round" d="M3 18h2v-6H3v6zm4 0h2V9H7v9zm4 0h2V5h-2v13zm4 0h2v-3h-2v3zm4 0h2v-9h-2v9z" />
+                            </svg>
+                          </button>
+                          <button
+                            onClick={e => deleteSingle(e, pitch.id)}
+                            title="Delete pitch"
+                            className="opacity-0 group-hover:opacity-100 w-6 h-6 flex items-center justify-center rounded-md text-gray-400 hover:text-red-500 hover:bg-red-50 transition text-base leading-none"
+                          >×</button>
+                        </div>
                       </div>
-                    </div>
-                  );
-                })
+                    );
+                  })}
+
+                  {/* Inline new pitch row */}
+                  <Link href="/create"
+                    className="flex items-center gap-3 pl-5 pr-4 py-3.5 border-t border-gray-50 text-gray-400 hover:text-teal-600 hover:bg-gray-50 transition group"
+                  >
+                    <svg className="w-3.5 h-3.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4"/></svg>
+                    <span className="text-sm">New pitch</span>
+                  </Link>
+                </>
               )}
             </div>
           );
