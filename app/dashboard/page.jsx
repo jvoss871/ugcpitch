@@ -469,7 +469,7 @@ export default function Dashboard() {
                     <div className="w-6 h-6 rounded-full bg-teal-50 flex items-center justify-center flex-shrink-0">
                       <svg className="w-3 h-3 text-teal-600 ml-0.5" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
                     </div>
-                    <p className="text-sm font-semibold text-gray-900">Watch the 2-min walkthrough</p>
+                    <p className="text-sm font-semibold text-gray-900">Watch the 4-min walkthrough</p>
                   </div>
                   <div className="relative w-full" style={{ paddingTop: '56.25%' }}>
                     <iframe
