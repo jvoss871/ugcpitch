@@ -49,9 +49,12 @@ export default function WelcomePage() {
 
       {/* Skip link */}
       <div className="absolute top-5 right-6 z-10">
-        <Link href="/dashboard" className="text-xs text-gray-400 hover:text-gray-600 transition">
+        <button
+          onClick={() => { sessionStorage.setItem('welcomeSeen', 'true'); router.push('/dashboard'); }}
+          className="text-xs text-gray-400 hover:text-gray-600 transition"
+        >
           Skip for now →
-        </Link>
+        </button>
       </div>
 
       <div className="max-w-2xl mx-auto px-6 py-16">
@@ -192,7 +195,7 @@ export default function WelcomePage() {
                 Replace the demo profile with your real info — takes less than 5 minutes.
               </p>
               <button
-                onClick={() => router.push('/dashboard')}
+                onClick={() => { sessionStorage.setItem('welcomeSeen', 'true'); router.push('/dashboard'); }}
                 className="bg-white font-bold px-8 py-3 rounded-xl hover:bg-teal-50 transition text-sm"
                 style={{ color: '#0d9488' }}
               >

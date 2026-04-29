@@ -429,6 +429,10 @@ export default function Dashboard() {
 
           // Show onboarding checklist when setup is incomplete and no pitches exist yet
           if (visiblePitches.length === 0 && !allDone && activeFolder === 'all') {
+            if (typeof window !== 'undefined' && !sessionStorage.getItem('welcomeSeen')) {
+              router.replace('/welcome');
+              return null;
+            }
             const steps = [
               {
                 done: step1Done,
