@@ -127,7 +127,7 @@ export default function BrandSetup() {
   return (
     <div className="max-w-2xl mx-auto animate-fade-in-up">
       <div className="mb-8">
-        <h1 className="text-4xl font-bold text-gray-900 mb-1 font-display">Brand Setup</h1>
+        <h1 className="text-4xl font-bold text-gray-900 mb-1 font-display">Brand</h1>
         <p className="text-gray-500 text-sm">Colors and font used on your shareable pitch pages.</p>
       </div>
 
@@ -144,15 +144,19 @@ export default function BrandSetup() {
               <div key={i} className="flex flex-col items-center gap-2">
                 <button
                   onClick={() => colorRefs.current[i]?.click()}
-                  className="w-16 h-16 rounded-2xl border-4 border-white shadow-md hover:scale-105 transition-transform relative"
+                  className="w-16 h-16 rounded-2xl border-4 border-white shadow-md hover:scale-105 transition-transform relative group"
                   style={{ backgroundColor: color }}
                 >
-                  <span className="absolute bottom-1 right-1 text-[10px]">✏️</span>
+                  <span className="absolute bottom-1 right-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <svg className="w-3.5 h-3.5 text-white drop-shadow" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M15.232 5.232l3.536 3.536M9 13l6.586-6.586a2 2 0 112.828 2.828L11.828 15.828a2 2 0 01-1.414.586H9v-2a2 2 0 01.586-1.414z" />
+                    </svg>
+                  </span>
                 </button>
                 <input ref={el => colorRefs.current[i] = el} type="color" value={color}
                   onChange={e => setColor(i, e.target.value)} className="sr-only" />
                 <span className="text-xs font-mono text-gray-400">{color}</span>
-                <span className="text-xs text-gray-400">{i === 0 ? 'Primary' : i === 1 ? 'Dark' : i === 2 ? 'Background' : 'Text'}</span>
+                <span className="text-xs text-gray-400">{i === 0 ? 'Accent' : i === 1 ? 'Hero' : i === 2 ? 'Background' : 'Text'}</span>
               </div>
             ))}
           </div>
@@ -177,7 +181,7 @@ export default function BrandSetup() {
                   {font.name}
                 </p>
                 <p className="text-xl text-gray-900 truncate" style={{ fontFamily: font.stack }}>
-                  Your Name
+                  {profile?.name || 'Your Name'}
                 </p>
               </button>
             ))}
@@ -332,13 +336,13 @@ export default function BrandSetup() {
           </div>
         </div>
 
-        {/* Subdomain */}
+        {/* Handle */}
         {(() => {
           const canUse = planStatus?.features?.custom_url;
           return (
-            <div className={`card relative ${!canUse ? 'opacity-75' : ''}`}>
+            <div className="card relative">
               <div className="flex items-center justify-between mb-1">
-                <label className="block text-sm font-semibold text-gray-700">Subdomain</label>
+                <label className="block text-sm font-semibold text-gray-700">Your handle</label>
                 {canUse
                   ? <span className="text-xs bg-teal-100 text-teal-700 font-bold px-2 py-0.5 rounded-full">Pro</span>
                   : <span className="text-xs bg-gray-100 text-gray-500 font-bold px-2 py-0.5 rounded-full flex items-center gap-1">
@@ -348,36 +352,39 @@ export default function BrandSetup() {
                 }
               </div>
               <p className="text-xs text-gray-400 mb-3">
-                Share pitches as <span className="font-mono">ugc-edge.com/your-handle/pitch-id</span>
+                Your pitches share as <span className="font-mono">ugc-edge.com/your-handle/pitch-title</span>
               </p>
-              <div className="flex items-center gap-2">
-                <span className="text-sm text-gray-400 flex-shrink-0">ugc-edge.com/</span>
-                <input
-                  type="text"
-                  value={handle}
-                  onChange={e => { if (canUse) { setHandle(e.target.value); validateHandle(e.target.value); } }}
-                  placeholder="sarah-creates"
-                  disabled={!canUse}
-                  className="flex-1 px-4 py-2 border border-gray-300 rounded-lg text-sm font-mono disabled:bg-gray-50 disabled:text-gray-400 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-teal-500"
-                />
-              </div>
-              {canUse && handleStatus === 'checking' && (
-                <p className="text-xs text-gray-400 mt-2">Checking availability…</p>
-              )}
-              {canUse && handleMsg && handleStatus !== 'checking' && (
-                <p className={`text-xs mt-2 ${handleStatus === 'available' ? 'text-teal-600' : 'text-red-500'}`}>
-                  {handleMsg}
-                </p>
-              )}
-              {canUse && !handleMsg && handle && handleStatus === null && (
-                <p className="text-xs text-gray-400 mt-2">
-                  Current: <span className="font-mono font-semibold">ugc-edge.com/{handle}</span>
-                </p>
-              )}
-              {!canUse && (
-                <p className="text-xs text-gray-400 mt-2">
-                  <a href="/upgrade" className="text-teal-600 font-semibold hover:underline">Upgrade to Pro</a> to set a custom URL.
-                </p>
+              {canUse ? (
+                <>
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm text-gray-400 flex-shrink-0">ugc-edge.com/</span>
+                    <input
+                      type="text"
+                      value={handle}
+                      onChange={e => { setHandle(e.target.value); validateHandle(e.target.value); }}
+                      placeholder="sarah-creates"
+                      className="flex-1 px-4 py-2 border border-gray-300 rounded-lg text-sm font-mono focus:outline-none focus:ring-2 focus:ring-teal-500"
+                    />
+                  </div>
+                  {handleStatus === 'checking' && (
+                    <p className="text-xs text-gray-400 mt-2">Checking availability…</p>
+                  )}
+                  {handleMsg && handleStatus !== 'checking' && (
+                    <p className={`text-xs mt-2 ${handleStatus === 'available' ? 'text-teal-600' : 'text-red-500'}`}>
+                      {handleMsg}
+                    </p>
+                  )}
+                  {!handleMsg && handle && handleStatus === null && (
+                    <p className="text-xs text-gray-400 mt-2">
+                      Current: <span className="font-mono font-semibold">ugc-edge.com/{handle}</span>
+                    </p>
+                  )}
+                </>
+              ) : (
+                <div className="flex items-center gap-3 px-4 py-3 bg-gray-50 rounded-xl border border-gray-200">
+                  <svg className="w-4 h-4 text-gray-400 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
+                  <p className="text-xs text-gray-500 flex-1">Custom handles are a Pro feature. <a href="/upgrade" className="text-teal-600 font-semibold hover:underline">Upgrade to Pro →</a></p>
+                </div>
               )}
             </div>
           );
