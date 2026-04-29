@@ -118,55 +118,64 @@ export default function Home() {
                   <div className="w-3 h-3 rounded-full bg-green-400" />
                 </div>
                 <div className="flex-1 mx-3 bg-white rounded-md h-6 flex items-center px-3 border border-gray-200">
-                  <span className="text-gray-400 text-[11px] font-mono truncate">ugc-edge.com/p/jessica-kim-nike</span>
+                  <span className="text-gray-400 text-[11px] font-mono truncate">ugc-edge.com/sofia-reyes-glossier</span>
                 </div>
               </div>
 
               {/* Pitch page body */}
-              <div className="p-5 bg-white">
-                {/* Creator header */}
-                <div className="flex items-center gap-3 mb-4">
-                  <div className="w-11 h-11 rounded-full bg-gradient-to-br from-pink-400 to-purple-500 flex-shrink-0" />
-                  <div>
-                    <p className="font-black text-gray-900 text-sm">Jessica Kim</p>
-                    <p className="text-[11px] text-gray-500">Lifestyle · Beauty · Fitness</p>
-                  </div>
-                  <div className="ml-auto bg-teal-50 border border-teal-100 text-teal-700 text-[10px] font-bold px-2.5 py-1 rounded-full whitespace-nowrap">
-                    Tailored for Nike
-                  </div>
-                </div>
-
-                {/* Pitch excerpt */}
-                <p className="text-[12px] text-gray-600 leading-relaxed mb-4 border-l-2 border-teal-400 pl-3">
-                  I've been creating authentic fitness content for 3 years — the kind that actually gets people to lace up. My audience skews 18–34, highly engaged with real over polished...
-                </p>
-
-                {/* Content grid */}
-                <div className="grid grid-cols-3 gap-2 mb-4">
-                  <div className="bg-gradient-to-br from-pink-100 to-pink-200 rounded-xl h-20 flex items-center justify-center">
-                    <svg className="w-5 h-5 text-pink-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M15.75 10.5l4.72-4.72a.75.75 0 011.28.53v11.38a.75.75 0 01-1.28.53l-4.72-4.72M4.5 18.75h9a2.25 2.25 0 002.25-2.25v-9A2.25 2.25 0 0013.5 5.25h-9A2.25 2.25 0 002.25 7.5v9A2.25 2.25 0 004.5 18.75z" /></svg>
-                  </div>
-                  <div className="bg-gradient-to-br from-blue-100 to-blue-200 rounded-xl h-20 flex items-center justify-center">
-                    <svg className="w-5 h-5 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M15.75 10.5l4.72-4.72a.75.75 0 011.28.53v11.38a.75.75 0 01-1.28.53l-4.72-4.72M4.5 18.75h9a2.25 2.25 0 002.25-2.25v-9A2.25 2.25 0 0013.5 5.25h-9A2.25 2.25 0 002.25 7.5v9A2.25 2.25 0 004.5 18.75z" /></svg>
-                  </div>
-                  <div className="bg-gradient-to-br from-violet-100 to-violet-200 rounded-xl h-20 flex items-center justify-center">
-                    <svg className="w-5 h-5 text-violet-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M15.75 10.5l4.72-4.72a.75.75 0 011.28.53v11.38a.75.75 0 01-1.28.53l-4.72-4.72M4.5 18.75h9a2.25 2.25 0 002.25-2.25v-9A2.25 2.25 0 0013.5 5.25h-9A2.25 2.25 0 002.25 7.5v9A2.25 2.25 0 004.5 18.75z" /></svg>
-                  </div>
-                </div>
-
-                {/* Stats row */}
-                <div className="flex gap-0 mb-4 bg-gray-50 rounded-xl overflow-hidden divide-x divide-gray-100">
-                  {[{ v: '124K', l: 'Avg reach' }, { v: '6.2%', l: 'Engagement' }, { v: '48', l: 'UGC pieces' }].map(({ v, l }) => (
-                    <div key={l} className="flex-1 py-2.5 text-center">
-                      <p className="text-sm font-black text-gray-900">{v}</p>
-                      <p className="text-[10px] text-gray-400">{l}</p>
+              <div className="bg-white">
+                {/* Teal hero bar */}
+                <div className="bg-[#0d9488] px-5 pt-5 pb-6">
+                  <div className="flex items-center gap-3 mb-3">
+                    <img
+                      src="https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?w=400&h=400&fit=crop&crop=face"
+                      alt="Sofia Reyes"
+                      className="w-12 h-12 rounded-full object-cover ring-2 ring-white/40 flex-shrink-0"
+                    />
+                    <div>
+                      <p className="font-black text-white text-sm">Sofia Reyes</p>
+                      <p className="text-[11px] text-teal-100/80">Beauty · Lifestyle · Miami, FL</p>
                     </div>
-                  ))}
+                  </div>
+                  <div className="inline-flex items-center gap-1.5 bg-white/15 text-white text-[10px] font-bold px-2.5 py-1 rounded-full">
+                    <span className="w-1.5 h-1.5 rounded-full bg-white/60" />
+                    Pitched for Glossier
+                  </div>
                 </div>
 
-                <button className="w-full py-2.5 bg-gray-900 text-white text-xs font-bold rounded-xl">
-                  View full pitch
-                </button>
+                <div className="p-4">
+                  {/* Pitch excerpt */}
+                  <p className="text-[11.5px] text-gray-600 leading-relaxed mb-3 border-l-2 border-teal-400 pl-3">
+                    "Glossier's whole thing is skin that looks like skin — that's exactly what I create. My audience doesn't want a filter, they want to see the product actually work..."
+                  </p>
+
+                  {/* Content grid — real images */}
+                  <div className="grid grid-cols-3 gap-1.5 mb-3">
+                    {[
+                      'https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?w=300&h=375&fit=crop',
+                      'https://images.unsplash.com/photo-1487412947147-5cebf100ffc2?w=300&h=375&fit=crop',
+                      'https://images.unsplash.com/photo-1596462502278-27bfdc403348?w=300&h=375&fit=crop',
+                    ].map((src, i) => (
+                      <div key={i} className="rounded-lg overflow-hidden h-20">
+                        <img src={src} alt="" className="w-full h-full object-cover" />
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* Stats row */}
+                  <div className="flex gap-0 mb-3 bg-gray-50 rounded-xl overflow-hidden divide-x divide-gray-100">
+                    {[{ v: '86K', l: 'Followers' }, { v: '5.8%', l: 'Engagement' }, { v: '32', l: 'UGC pieces' }].map(({ v, l }) => (
+                      <div key={l} className="flex-1 py-2 text-center">
+                        <p className="text-sm font-black text-gray-900">{v}</p>
+                        <p className="text-[10px] text-gray-400">{l}</p>
+                      </div>
+                    ))}
+                  </div>
+
+                  <button className="w-full py-2 bg-[#0d9488] text-white text-xs font-bold rounded-xl">
+                    DM on Instagram
+                  </button>
+                </div>
               </div>
             </div>
 
@@ -179,7 +188,7 @@ export default function Home() {
                 </svg>
               </div>
               <div>
-                <p className="text-xs font-bold text-gray-900 leading-tight">Nike opened your pitch</p>
+                <p className="text-xs font-bold text-gray-900 leading-tight">Glossier opened your pitch</p>
                 <p className="text-[11px] text-gray-400 mt-0.5">Just now · 2 min on page</p>
               </div>
             </div>
@@ -281,10 +290,11 @@ export default function Home() {
           </div>
 
           {/* Credibility line */}
-          <div className="text-center">
-            <p className="text-sm text-gray-900 italic">
-              — A DTC brand manager, after reviewing hundreds of pitches
+          <div className="text-center max-w-xl mx-auto">
+            <p className="text-base text-gray-900 italic leading-relaxed">
+              "Most applications are 'Hey I love your brand!' and a Linktree. I can tell in 3 seconds if someone actually thought about us."
             </p>
+            <p className="text-sm text-gray-400 mt-3">— DTC brand manager, after reviewing 300+ UGC applications</p>
           </div>
 
         </div>
@@ -295,7 +305,7 @@ export default function Home() {
         <div className="max-w-6xl mx-auto">
           <div className="mb-12">
             <p className="text-xs font-bold uppercase tracking-widest text-teal-600 mb-3">What you get</p>
-            <h2 className="text-4xl font-black text-gray-900 max-w-xl">Built for creators who are serious about landing deals.</h2>
+            <h2 className="text-4xl font-black text-gray-900 max-w-xl">Everything a brand needs to say yes — already in your link.</h2>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -384,14 +394,14 @@ export default function Home() {
         <div className="max-w-4xl mx-auto">
           <div className="text-center mb-16">
             <p className="text-xs font-bold uppercase tracking-widest text-teal-600 mb-3">How it works</p>
-            <h2 className="text-4xl font-black text-gray-900">Four steps, done in minutes.</h2>
+            <h2 className="text-4xl font-black text-gray-900">Set up once. Pitch forever.</h2>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {[
-              { step: '01', title: 'Build your profile', desc: 'Add your bio, niche, and brand colors once.' },
-              { step: '02', title: 'Upload your content', desc: 'Add links or photos of your best UGC work.' },
-              { step: '03', title: 'Paste the listing', desc: 'Drop in the brand\'s job post or brief.' },
-              { step: '04', title: 'Send the link', desc: 'Copy your shareable pitch page and send it.' },
+              { step: '01', title: 'Build your profile', desc: 'Your niche, bio, and brand colors. Takes 5 minutes. Baked into every pitch you ever send.' },
+              { step: '02', title: 'Upload your content', desc: 'Add your best work once. The right pieces get pulled into each pitch automatically.' },
+              { step: '03', title: 'Paste the listing', desc: 'Drop in the brand\'s brief or job post. Get a tailored pitch page — with copy written for that brand — in seconds.' },
+              { step: '04', title: 'Send the link', desc: 'One link. Works in DMs, email, Reddit. You\'ll know the moment they open it.' },
             ].map((s, i) => (
               <div key={i} className="relative">
                 {i < 3 && (
@@ -473,8 +483,8 @@ export default function Home() {
       {/* ── CTA ──────────────────────────────────────────────────────────── */}
       <section className="bg-gradient-to-br from-teal-600 to-teal-800 py-24 px-6">
         <div className="max-w-md mx-auto text-center">
-          <h2 className="text-4xl font-black text-white mb-3">Ready to pitch smarter?</h2>
-          <p className="text-teal-100/80 mb-10">Start pitching for free. No credit card required.</p>
+          <h2 className="text-4xl font-black text-white mb-3">Brands reply to creators who come prepared.</h2>
+          <p className="text-teal-100/80 mb-10">Build your pitch page in 30 seconds. Free, no card needed.</p>
           <Link
             href="/login"
             className="inline-block px-10 py-4 bg-white text-teal-700 font-bold text-lg rounded-2xl transition-all hover:scale-105 shadow-lg"
