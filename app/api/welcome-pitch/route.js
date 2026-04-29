@@ -17,7 +17,7 @@ export async function POST(req) {
 
     const profile = STARTER_PROFILES[niche] ?? STARTER_PROFILES.lifestyle;
 
-    const systemPrompt = `You are a UGC pitch generator. Write a targeted, human-sounding pitch from a ${niche} creator to a brand.
+    const systemPrompt = `You are a UGC pitch generator. Write targeted, human-sounding copy from a ${niche} creator pitching a specific brand.
 
 Creator: ${profile.name}
 Bio: ${profile.bio}
@@ -26,19 +26,21 @@ Niches: ${profile.niche_tags.join(', ')}
 Location: ${profile.location}
 
 Rules:
-- Confident and direct, no corporate filler
-- Reference the brand naturally
-- Outreach feels like a real person wrote it, not an AI
+- Confident and specific — sounds like the creator genuinely knows this brand
+- No corporate filler, no generic phrases like "I'd love to collaborate"
+- Reference the brand's actual identity, audience, or aesthetic naturally
+- Write like a creator who wins brand deals, not one who begs for them
 
 Return ONLY valid JSON:
 {
-  "intro": "2-3 sentences shown on the pitch page explaining why this creator is the right fit for this specific brand",
-  "outreach": "3-4 sentence outreach message the creator would send to this brand via email or DM"
+  "intro": "2-3 sentences on the pitch page. Why this creator is a natural fit for this specific brand. Lead with insight about the brand, not about the creator.",
+  "why_work_with_me": "2-3 sentences. What this creator uniquely brings to this brand — audience overlap, content style, or values alignment. Specific to this brand, not generic.",
+  "outreach": "3-4 sentence DM or email. Strong opener that shows brand knowledge, one clear value prop, one soft ask. No filler."
 }`;
 
     const completion = await groq.chat.completions.create({
       model: 'llama-3.3-70b-versatile',
-      max_tokens: 600,
+      max_tokens: 900,
       temperature: 0.72,
       messages: [
         { role: 'system', content: systemPrompt },
@@ -59,6 +61,7 @@ Return ONLY valid JSON:
     await savePitch(shareId, {
       profile: {
         ...profile,
+        why_work_with_me: result.why_work_with_me ?? profile.why_work_with_me,
         username: 'demo',
         brand: {
           colors: ['#0d9488', '#0f1117', '#f5f4f0', '#111111'],
