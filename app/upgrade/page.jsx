@@ -5,16 +5,58 @@ import { useAuth } from '../context/AuthContext';
 import { useRouter } from 'next/navigation';
 
 const PLAN_META = {
-  free:    { name: 'Free',    price: '$0',  period: '/mo', tagline: 'Core features',           features: ['10 pitches/month', 'All templates', 'Content library'] },
-  starter: { name: 'Starter', price: '$9',  period: '/mo', tagline: 'Great for active creators', features: ['50 pitches/month', 'Open tracking', 'All 4 templates', 'Content library'] },
-  pro:     { name: 'Pro',     price: '$19', period: '/mo', tagline: 'For serious creators',      features: ['Unlimited pitches', 'Advanced analytics', 'Custom URL', 'Remove UGC Edge branding'] },
+  free: {
+    name: 'Free',
+    price: '$0',
+    period: '/mo',
+    tagline: 'Get started for free',
+    features: [
+      '10 pitches per month',
+      'All templates',
+      'Content library',
+      'Made with UGC Edge footer',
+    ],
+  },
+  starter: {
+    name: 'Starter',
+    price: '$9',
+    period: '/mo',
+    tagline: 'Great for active pitchers',
+    popular: true,
+    features: [
+      '50 pitches per month',
+      'Open tracking — see who viewed your pitch',
+      'All 4 templates',
+      'Content library',
+    ],
+  },
+  pro: {
+    name: 'Pro',
+    price: '$19',
+    period: '/mo',
+    tagline: 'For serious creators',
+    features: [
+      'Unlimited pitches',
+      'Advanced analytics',
+      'Custom URL handle',
+      'Remove UGC Edge branding',
+    ],
+  },
 };
 
 const OTHER_PLAN_META = {
-  free:    { name: 'Free',    price: '$0',  tagline: '10 pitches/month',    dark: false },
-  starter: { name: 'Starter', price: '$9',  tagline: '50 pitches/month',    dark: false },
-  pro:     { name: 'Pro',     price: '$19', tagline: 'Unlimited pitches',   dark: true  },
+  free:    { name: 'Free',    price: '$0',  dark: false, bullets: ['10 pitches/month', 'All templates', 'Content library'] },
+  starter: { name: 'Starter', price: '$9',  dark: false, popular: true, bullets: ['50 pitches/month', 'Open tracking', 'All 4 templates'] },
+  pro:     { name: 'Pro',     price: '$19', dark: true,  bullets: ['Unlimited pitches', 'Advanced analytics', 'Custom URL + no branding'] },
 };
+
+function CheckIcon({ color = '#0d9488' }) {
+  return (
+    <svg className="w-4 h-4 flex-shrink-0" style={{ color }} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+      <polyline points="20 6 9 17 4 12" />
+    </svg>
+  );
+}
 
 export default function UpgradePage() {
   const { user: authUser } = useAuth();
@@ -94,19 +136,18 @@ export default function UpgradePage() {
   const isPaying = currentPlan === 'starter' || currentPlan === 'pro';
   const current = PLAN_META[currentPlan] ?? PLAN_META.free;
 
-  // Other plans to show condensed
   const otherPlanIds = currentPlan === 'free'
     ? ['starter', 'pro']
     : currentPlan === 'starter'
     ? ['pro', 'free']
-    : ['starter', 'free']; // pro
+    : ['starter', 'free'];
 
   if (cancelledUntil) {
     return (
       <div className="max-w-2xl mx-auto animate-fade-in-up text-center py-16">
         <div className="w-14 h-14 rounded-2xl bg-gray-100 flex items-center justify-center mx-auto mb-5">
           <svg className="w-7 h-7 text-gray-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-            <polyline points="20 6 9 17 4 12"/>
+            <polyline points="20 6 9 17 4 12" />
           </svg>
         </div>
         <h1 className="text-2xl font-black text-gray-900 mb-2">Subscription cancelled</h1>
@@ -125,21 +166,21 @@ export default function UpgradePage() {
     <div className="max-w-2xl mx-auto animate-fade-in-up">
       <div className="text-center mb-8">
         <h1 className="text-4xl font-black text-gray-900 mb-2 font-display">
-          {isPaying ? 'Your plan' : 'Upgrade your plan'}
+          {isPaying ? 'Your plan' : 'Choose your plan'}
         </h1>
         <p className="text-gray-500">
           {isPaying
             ? `You're on the ${current.name} plan.`
-            : 'More pitches, more data, more deals.'}
+            : 'Start free. Upgrade when you\'re ready to pitch more.'}
         </p>
       </div>
 
-      {/* Current plan — full width */}
+      {/* Current plan — full card */}
       <div
         className="rounded-2xl p-6 mb-4"
         style={{
           backgroundColor: currentPlan === 'pro' ? '#0f1117' : '#fff',
-          border: currentPlan === 'pro' ? '2px solid #0d9488' : '2px solid #0d9488',
+          border: '2px solid #0d9488',
         }}
       >
         <div className="flex justify-center mb-4">
@@ -166,9 +207,7 @@ export default function UpgradePage() {
         <ul className="space-y-2 mb-5">
           {current.features.map(f => (
             <li key={f} className="flex items-center gap-2 text-sm" style={{ color: currentPlan === 'pro' ? '#d1d5db' : '#374151' }}>
-              <svg className="w-4 h-4 flex-shrink-0" style={{ color: '#0d9488' }} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-                <polyline points="20 6 9 17 4 12"/>
-              </svg>
+              <CheckIcon />
               {f}
             </li>
           ))}
@@ -189,7 +228,7 @@ export default function UpgradePage() {
         )}
       </div>
 
-      {/* Other options — condensed side by side */}
+      {/* Other plans — condensed side by side */}
       <div className="grid grid-cols-2 gap-3">
         {otherPlanIds.map(planId => {
           const meta = OTHER_PLAN_META[planId];
@@ -200,12 +239,20 @@ export default function UpgradePage() {
           return (
             <div
               key={planId}
-              className="rounded-2xl p-4 flex flex-col"
+              className="rounded-2xl p-4 flex flex-col relative"
               style={{
                 backgroundColor: meta.dark ? '#0f1117' : '#f9fafb',
                 border: meta.dark ? 'none' : '1px solid #e5e7eb',
               }}
             >
+              {meta.popular && (
+                <div className="absolute -top-2.5 left-4">
+                  <span className="text-[10px] font-bold bg-teal-500 text-white px-2 py-0.5 rounded-full">
+                    Most popular
+                  </span>
+                </div>
+              )}
+
               <div className="flex items-baseline justify-between mb-1">
                 <p className="font-black text-base" style={{ color: meta.dark ? '#fff' : '#111' }}>
                   {meta.name}
@@ -215,9 +262,15 @@ export default function UpgradePage() {
                   <span className="text-xs font-normal" style={{ color: meta.dark ? '#6b7280' : '#9ca3af' }}>/mo</span>
                 </p>
               </div>
-              <p className="text-xs mb-4" style={{ color: meta.dark ? '#6b7280' : '#9ca3af' }}>
-                {meta.tagline}
-              </p>
+
+              <ul className="space-y-1.5 mb-4 mt-2">
+                {meta.bullets.map(b => (
+                  <li key={b} className="flex items-start gap-1.5 text-xs" style={{ color: meta.dark ? '#9ca3af' : '#6b7280' }}>
+                    <CheckIcon color={meta.dark ? '#0d9488' : '#0d9488'} />
+                    <span>{b}</span>
+                  </li>
+                ))}
+              </ul>
 
               {isDowngradeToFree ? (
                 !cancelConfirm ? (
@@ -260,7 +313,7 @@ export default function UpgradePage() {
                     ? '…'
                     : isUpgrade
                     ? `Upgrade to ${meta.name}`
-                    : `Downgrade to ${meta.name}`}
+                    : `Switch to ${meta.name}`}
                 </button>
               )}
             </div>
