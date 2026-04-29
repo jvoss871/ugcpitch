@@ -13,8 +13,17 @@ export default function AuthCallback() {
       router.replace('/login');
       return;
     }
-    supabase.auth.exchangeCodeForSession(code).then(({ error }) => {
-      router.replace(error ? '/login' : '/dashboard');
+    supabase.auth.exchangeCodeForSession(code).then(async ({ error, data }) => {
+      if (error) { router.replace('/login'); return; }
+      const email = data.session?.user?.email;
+      if (email) {
+        try {
+          const res = await fetch(`/api/profile?username=${encodeURIComponent(email)}`);
+          const profile = await res.json();
+          if (!profile?.name) { router.replace('/welcome'); return; }
+        } catch {}
+      }
+      router.replace('/dashboard');
     });
   }, [router]);
 
