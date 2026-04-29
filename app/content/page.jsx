@@ -37,6 +37,14 @@ function compressImage(file, maxDimension = 900, quality = 0.8) {
   });
 }
 
+function StarIcon({ className = 'w-3.5 h-3.5', filled = false }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill={filled ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth="2">
+      <path strokeLinecap="round" strokeLinejoin="round" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
+    </svg>
+  );
+}
+
 function Thumbnail({ item }) {
   const ytId = item.type === 'video' ? getYouTubeId(item.url) : null;
   if (item.type === 'video') {
@@ -72,6 +80,7 @@ export default function Content() {
   const [compressing, setCompressing] = useState(false);
   const [activeType, setActiveType] = useState('all');
   const [activeTags, setActiveTags] = useState([]);
+  const [formError, setFormError] = useState('');
   const [confirmDialog, setConfirmDialog] = useState({ open: false, message: '', onConfirm: null });
   const fileInputRef = useRef(null);
 
@@ -113,7 +122,7 @@ export default function Content() {
       setPreview(compressed);
       setFormData(f => ({ ...f, url: compressed }));
     } catch {
-      alert('Could not process image.');
+      setFormError('Could not process image.');
     } finally {
       setCompressing(false);
     }
@@ -123,14 +132,16 @@ export default function Content() {
     setFormData(f => ({ ...f, type, url: '' }));
     setPreview(null);
     setInputMode(type === 'video' ? 'url' : 'upload');
+    setFormError('');
   };
 
   const handleAddContent = async (e) => {
     e.preventDefault();
     if (!formData.title.trim() || !formData.url.trim()) {
-      alert('Please fill in title and add an image or URL');
+      setFormError('Add a title and an image or URL before saving.');
       return;
     }
+    setFormError('');
     const res = await fetch('/api/content', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -148,7 +159,7 @@ export default function Content() {
   const handleDelete = (id) => {
     setConfirmDialog({
       open: true,
-      message: 'Delete this piece? This can\'t be undone.',
+      message: "Delete this piece? This can't be undone.",
       onConfirm: async () => {
         await fetch(`/api/content/${id}`, {
           method: 'DELETE',
@@ -206,22 +217,21 @@ export default function Content() {
       {/* Header */}
       <div className="mb-6 flex items-center justify-between">
         <div>
-          <h1 className="text-4xl font-bold text-gray-900 font-display">Content Library</h1>
+          <h1 className="text-4xl font-bold text-gray-900 font-display">Content</h1>
           <p className="text-sm text-gray-500 mt-1">{content.length} piece{content.length !== 1 ? 's' : ''} · AI matches these to your pitches</p>
         </div>
-        <button onClick={() => setShowPanel(true)} className="btn-primary">+ Add Content</button>
+        <button onClick={() => { setShowPanel(true); setFormError(''); }} className="btn-primary">+ Add</button>
       </div>
 
       {/* Filter bar */}
       {content.length > 0 && (
         <div className="mb-6 space-y-2">
-          {/* Type row */}
           <div className="flex items-center gap-2">
             {[
               { id: 'all', label: `All (${content.length})` },
-              { id: 'image', label: `🖼 Images (${content.filter(c => c.type === 'image').length})` },
+              { id: 'image', label: `Images (${content.filter(c => c.type === 'image').length})` },
               { id: 'video', label: `Videos (${content.filter(c => c.type === 'video').length})` },
-              { id: 'featured', label: `⭐ Featured` },
+              { id: 'featured', label: 'Featured' },
             ].map(({ id, label }) => (
               <button key={id} onClick={() => setActiveType(id)}
                 className="text-xs px-3 py-1.5 rounded-full font-medium transition"
@@ -233,7 +243,6 @@ export default function Content() {
             ))}
           </div>
 
-          {/* Tag row */}
           {usedTags.length > 0 && (
             <div className="flex items-center gap-2 flex-wrap">
               {usedTags.map(tag => {
@@ -263,9 +272,15 @@ export default function Content() {
         <div className="text-center py-20 text-gray-400">
           {content.length === 0 ? (
             <>
-              <p className="text-4xl mb-3 opacity-20">—</p>
-              <p className="text-sm mb-4">Nothing here yet. Add your best work — the AI matches it to brands automatically.</p>
-              <button onClick={() => setShowPanel(true)} className="btn-primary">+ Add your first piece</button>
+              <div className="flex justify-center mb-4 opacity-20">
+                <svg className="w-14 h-14" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.2">
+                  <rect x="3" y="3" width="18" height="18" rx="3" />
+                  <circle cx="8.5" cy="8.5" r="1.5" />
+                  <path d="M21 15l-5-5L5 21" />
+                </svg>
+              </div>
+              <p className="text-sm mb-4">Nothing here yet. Add your best work — AI matches it to brands automatically.</p>
+              <button onClick={() => { setShowPanel(true); setFormError(''); }} className="btn-primary">+ Add your first piece</button>
             </>
           ) : (
             <>
@@ -284,13 +299,13 @@ export default function Content() {
               <Thumbnail item={item} />
 
               {/* Type badge */}
-              <div className={`absolute top-2 right-2 text-[10px] font-bold px-1.5 py-0.5 rounded flex items-center gap-1 ${item.type === 'video' ? 'bg-red-600 text-white' : 'bg-black/50 text-white'}`}>
+              <div className={`absolute top-2 right-2 text-[10px] font-bold px-1.5 py-0.5 rounded ${item.type === 'video' ? 'bg-red-600 text-white' : 'bg-black/50 text-white'}`}>
                 {item.type === 'video' ? 'VIDEO' : 'IMG'}
               </div>
 
               {item.featured && (
-                <div className="absolute top-2 left-2 bg-yellow-400 text-yellow-900 text-[10px] font-bold px-1.5 py-0.5 rounded">
-                  ⭐
+                <div className="absolute top-2 left-2 bg-amber-400 text-amber-900 p-1 rounded">
+                  <StarIcon className="w-3 h-3" filled />
                 </div>
               )}
 
@@ -300,13 +315,15 @@ export default function Content() {
                   <button
                     onClick={() => handleToggleFeatured(item.id)}
                     title={item.featured ? 'Unfeature' : 'Feature'}
-                    className="w-7 h-7 rounded-full bg-white/20 hover:bg-yellow-400 hover:text-yellow-900 text-white text-xs flex items-center justify-center transition">
-                    ⭐
+                    className="w-7 h-7 rounded-full bg-white/20 hover:bg-amber-400 hover:text-amber-900 text-white flex items-center justify-center transition">
+                    <StarIcon className="w-3.5 h-3.5" filled={item.featured} />
                   </button>
                   <button
                     onClick={() => handleDelete(item.id)}
-                    className="w-7 h-7 rounded-full bg-white/20 hover:bg-red-500 text-white text-xs flex items-center justify-center transition">
-                    ✕
+                    className="w-7 h-7 rounded-full bg-white/20 hover:bg-red-500 text-white flex items-center justify-center transition">
+                    <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
                   </button>
                 </div>
                 <div>
@@ -332,7 +349,11 @@ export default function Content() {
           <div className="relative bg-white w-full max-w-md h-full overflow-y-auto shadow-2xl flex flex-col">
             <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
               <h2 className="text-lg font-bold text-gray-900">Add Content</h2>
-              <button onClick={() => setShowPanel(false)} className="text-gray-400 hover:text-gray-600 text-xl transition">×</button>
+              <button onClick={() => setShowPanel(false)} className="text-gray-400 hover:text-gray-600 transition">
+                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
             </div>
 
             <form onSubmit={handleAddContent} className="flex-1 px-6 py-5 space-y-5">
@@ -347,7 +368,7 @@ export default function Content() {
                       style={formData.type === t ? { borderColor: '#0d9488', backgroundColor: '#f0fdfa' } : { borderColor: '#e5e7eb' }}>
                       <input type="radio" name="type" value={t} checked={formData.type === t}
                         onChange={() => handleTypeChange(t)} className="sr-only" />
-                      <span className="text-sm font-medium">{t === 'image' ? 'Image' : 'Video'}</span>
+                      <span className="text-sm font-medium capitalize">{t}</span>
                     </label>
                   ))}
                 </div>
@@ -370,14 +391,27 @@ export default function Content() {
                     <>
                       <div onClick={() => fileInputRef.current?.click()}
                         className="border-2 border-dashed border-gray-300 rounded-xl p-6 text-center cursor-pointer hover:border-teal-400 hover:bg-teal-50 transition">
-                        {compressing ? <p className="text-sm text-gray-500">Compressing…</p>
-                          : preview ? <img src={preview} alt="preview" className="max-h-32 mx-auto rounded-lg object-contain" />
-                          : <><p className="text-2xl mb-1">📷</p><p className="text-sm text-gray-600">Click to upload</p><p className="text-xs text-gray-400 mt-1">Compressed automatically</p></>}
+                        {compressing ? (
+                          <p className="text-sm text-gray-500">Compressing…</p>
+                        ) : preview ? (
+                          <img src={preview} alt="preview" className="max-h-32 mx-auto rounded-lg object-contain" />
+                        ) : (
+                          <>
+                            <div className="flex justify-center mb-2 text-gray-300">
+                              <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.5">
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
+                              </svg>
+                            </div>
+                            <p className="text-sm text-gray-600">Click to upload</p>
+                            <p className="text-xs text-gray-400 mt-1">Compressed automatically</p>
+                          </>
+                        )}
                       </div>
                       <input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={handleFileChange} />
                       {preview && (
                         <button type="button" onClick={() => { setPreview(null); setFormData(f => ({ ...f, url: '' })); if (fileInputRef.current) fileInputRef.current.value = ''; }}
-                          className="text-xs text-gray-400 hover:text-red-500 mt-1 transition">✕ Remove</button>
+                          className="text-xs text-gray-400 hover:text-red-500 mt-1 transition">Remove image</button>
                       )}
                     </>
                   ) : (
@@ -401,18 +435,19 @@ export default function Content() {
               {/* Title */}
               <div>
                 <label className="block text-sm font-semibold text-gray-700 mb-2">Title</label>
-                <input type="text" placeholder='e.g. "SaaS walkthrough – screen record"'
+                <input type="text" placeholder='e.g. "Skincare demo – morning routine"'
                   value={formData.title} onChange={e => setFormData(f => ({ ...f, title: e.target.value }))}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-teal-500" />
               </div>
 
               {/* Description */}
               <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">
-                  Description <span className="text-xs font-normal text-gray-400">— helps AI match this to the right pitch</span>
+                <label className="block text-sm font-semibold text-gray-700 mb-1">
+                  Description
                 </label>
+                <p className="text-xs text-gray-400 mb-2">Helps AI pick the right pieces for each pitch.</p>
                 <textarea
-                  placeholder='e.g. "30-sec skincare demo showing morning routine for dry skin, filmed in natural light"'
+                  placeholder='e.g. "30-sec skincare demo, natural light, dry skin focus"'
                   value={formData.description}
                   onChange={e => setFormData(f => ({ ...f, description: e.target.value }))}
                   rows={2}
@@ -446,6 +481,10 @@ export default function Content() {
                   className="w-4 h-4 rounded border-gray-300 text-teal-600" />
                 <span className="text-sm text-gray-700">Mark as featured</span>
               </label>
+
+              {formError && (
+                <p className="text-xs text-red-500 bg-red-50 border border-red-200 rounded-lg px-3 py-2">{formError}</p>
+              )}
 
               <button type="submit" disabled={compressing} className="w-full btn-primary">
                 Add to Library
