@@ -2,12 +2,15 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import { useAuth } from '../context/AuthContext';
 import { STARTER_NICHES } from '@/lib/starter-profiles';
 
 export default function WelcomePage() {
   const router = useRouter();
+  const { user: authUser } = useAuth();
   const [step, setStep] = useState(null); // null = loading, then 'demo' | 'form' | 'generating' | 'result'
   const [hasDemoStep, setHasDemoStep] = useState(false);
+  const [name, setName] = useState('');
   const [niche, setNiche] = useState('');
   const [brandName, setBrandName] = useState('');
   const [shareId, setShareId] = useState(null);
@@ -32,7 +35,12 @@ export default function WelcomePage() {
       const res = await fetch('/api/welcome-pitch', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ brandName: brandName.trim(), niche }),
+        body: JSON.stringify({
+          brandName: brandName.trim(),
+          niche,
+          name: name.trim() || null,
+          username: authUser?.username ?? null,
+        }),
       });
       const data = await res.json();
       if (data.shareId) {
@@ -157,6 +165,18 @@ export default function WelcomePage() {
 
             <div className="space-y-7">
               <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-2">Your name</label>
+                <input
+                  type="text"
+                  value={name}
+                  onChange={e => setName(e.target.value)}
+                  placeholder="e.g. Jessica, Marcus, Taylor…"
+                  className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-teal-500 text-base transition"
+                />
+                <p className="text-xs text-gray-400 mt-1.5">Goes on your pitch page — optional but makes it feel real.</p>
+              </div>
+
+              <div>
                 <label className="block text-sm font-semibold text-gray-700 mb-3">Your niche</label>
                 <div className="flex flex-wrap gap-2">
                   {STARTER_NICHES.map(n => (
@@ -208,7 +228,7 @@ export default function WelcomePage() {
           <div className="flex flex-col items-center justify-center py-36 animate-fade-in-up">
             <div className="w-10 h-10 border-2 border-teal-500 border-t-transparent rounded-full animate-spin mb-6" />
             <p className="text-lg font-semibold text-gray-900 mb-1">
-              Crafting your {brandName} pitch…
+              Crafting {name.trim() ? `${name.trim()}'s` : 'your'} {brandName} pitch…
             </p>
             <p className="text-sm text-gray-400">Usually done in about 30 seconds</p>
           </div>

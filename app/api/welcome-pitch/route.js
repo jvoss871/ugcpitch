@@ -1,5 +1,5 @@
 import { Groq } from 'groq-sdk';
-import { savePitch } from '@/lib/db';
+import { savePitch, getUser, upsertUser } from '@/lib/db';
 import { STARTER_PROFILES } from '@/lib/starter-profiles';
 
 const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
@@ -10,16 +10,17 @@ function generateId() {
 
 export async function POST(req) {
   try {
-    const { brandName, niche } = await req.json();
+    const { brandName, niche, name, username } = await req.json();
     if (!brandName || !niche) {
       return Response.json({ error: 'Missing brandName or niche' }, { status: 400 });
     }
 
     const profile = STARTER_PROFILES[niche] ?? STARTER_PROFILES.lifestyle;
+    const creatorName = name?.trim() || profile.name;
 
     const systemPrompt = `You are a UGC pitch generator. Write targeted, human-sounding copy from a ${niche} creator pitching a specific brand.
 
-Creator: ${profile.name}
+Creator: ${creatorName}
 Bio: ${profile.bio}
 Positioning: ${profile.positioning_statement}
 Niches: ${profile.niche_tags.join(', ')}
@@ -57,10 +58,20 @@ Return ONLY valid JSON:
       return Response.json({ error: 'Failed to parse AI response' }, { status: 500 });
     }
 
+    // Save name to user's profile if provided
+    if (username && name?.trim()) {
+      const user = await getUser(username) ?? {};
+      const existingProfile = user.profile ?? {};
+      if (!existingProfile.name) {
+        await upsertUser(username, { ...user, profile: { ...existingProfile, name: name.trim() } });
+      }
+    }
+
     const shareId = generateId();
     await savePitch(shareId, {
       profile: {
         ...profile,
+        name: creatorName,
         why_work_with_me: result.why_work_with_me ?? profile.why_work_with_me,
         username: 'demo',
         brand: {
