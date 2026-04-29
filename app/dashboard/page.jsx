@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useAuth } from '../context/AuthContext';
 import { storage, utils } from '@/lib/storage';
+import { ConfirmDialog } from '../components/ConfirmDialog';
 
 const DEFAULT_FOLDERS = [
   { id: 'all', name: 'All Pitches' },
@@ -48,6 +49,7 @@ export default function Dashboard() {
   const [brand, setBrand] = useState(null);
   const [contentCount, setContentCount] = useState(null);
   const [bannerUpgrading, setBannerUpgrading] = useState(false);
+  const [confirmDialog, setConfirmDialog] = useState({ open: false, message: '', onConfirm: null });
   const newFolderInputRef = useRef(null);
 
   useEffect(() => {
@@ -138,22 +140,30 @@ export default function Dashboard() {
 
   // ── Delete ────────────────────────────────────────────────────────────
   const deleteSelected = () => {
-    if (!window.confirm(`Delete ${selected.length} pitch${selected.length !== 1 ? 'es' : ''}?`)) return;
-    fetch('/api/pitches', {
-      method: 'DELETE',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ ids: selected }),
+    setConfirmDialog({
+      open: true,
+      message: `Delete ${selected.length} pitch${selected.length !== 1 ? 'es' : ''}? This can't be undone.`,
+      onConfirm: () => {
+        fetch('/api/pitches', { method: 'DELETE', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ ids: selected }) });
+        setPitches(ps => ps.filter(p => !selected.includes(p.id)));
+        setSelected([]);
+        setConfirmDialog(d => ({ ...d, open: false }));
+      },
     });
-    setPitches(ps => ps.filter(p => !selected.includes(p.id)));
-    setSelected([]);
   };
 
   const deleteSingle = (e, pitchId) => {
     e.stopPropagation();
-    if (!window.confirm('Delete this pitch?')) return;
-    fetch(`/api/pitches/${pitchId}`, { method: 'DELETE' });
-    setPitches(prev => prev.filter(p => p.id !== pitchId));
-    setSelected(prev => prev.filter(id => id !== pitchId));
+    setConfirmDialog({
+      open: true,
+      message: 'Delete this pitch? This can\'t be undone.',
+      onConfirm: () => {
+        fetch(`/api/pitches/${pitchId}`, { method: 'DELETE' });
+        setPitches(prev => prev.filter(p => p.id !== pitchId));
+        setSelected(prev => prev.filter(id => id !== pitchId));
+        setConfirmDialog(d => ({ ...d, open: false }));
+      },
+    });
   };
 
   // ── Folders ───────────────────────────────────────────────────────────
@@ -252,7 +262,12 @@ export default function Dashboard() {
 
   return (
     <div className="flex flex-col -mx-6 -my-12 min-h-[calc(100vh-80px)]">
-
+      <ConfirmDialog
+        open={confirmDialog.open}
+        message={confirmDialog.message}
+        onConfirm={confirmDialog.onConfirm}
+        onCancel={() => setConfirmDialog(d => ({ ...d, open: false }))}
+      />
 
       <div className="flex flex-1 gap-0">
 
@@ -447,6 +462,25 @@ export default function Dashboard() {
                       style={{ width: `${(doneCount / 3) * 100}%` }} />
                   </div>
                 </div>
+
+                {/* Product demo */}
+                <div className="mb-5 rounded-2xl overflow-hidden border border-gray-200 bg-white shadow-sm">
+                  <div className="px-5 py-3.5 border-b border-gray-100 flex items-center gap-2.5">
+                    <div className="w-6 h-6 rounded-full bg-teal-50 flex items-center justify-center flex-shrink-0">
+                      <svg className="w-3 h-3 text-teal-600 ml-0.5" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+                    </div>
+                    <p className="text-sm font-semibold text-gray-900">Watch the 2-min walkthrough</p>
+                  </div>
+                  <div className="relative w-full" style={{ paddingTop: '56.25%' }}>
+                    <iframe
+                      src="https://www.loom.com/embed/a6485eae6d9240d388f385273d5620e7"
+                      className="absolute inset-0 w-full h-full"
+                      allow="autoplay; fullscreen"
+                      allowFullScreen
+                    />
+                  </div>
+                </div>
+
                 <div className="space-y-3">
                   {steps.map((step, i) => (
                     <div key={i}

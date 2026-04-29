@@ -130,7 +130,7 @@ function CustomContentEmbed({ url, primary }) {
   );
 }
 
-function MediaCard({ item }) {
+function MediaCard({ item, onOpen }) {
   const ytId = item.type === 'video' ? getYouTubeId(item.url) : null;
   const inner = item.type === 'video' ? (
     ytId ? (
@@ -152,9 +152,11 @@ function MediaCard({ item }) {
       onError={e => { e.target.style.display = 'none'; }} />
   );
   const Wrapper = item.type === 'video' ? 'a' : 'div';
-  const wrapperProps = item.type === 'video' ? { href: item.url, target: '_blank', rel: 'noopener noreferrer' } : {};
+  const wrapperProps = item.type === 'video'
+    ? { href: item.url, target: '_blank', rel: 'noopener noreferrer' }
+    : { onClick: () => onOpen?.(item), style: { cursor: 'pointer' } };
   return (
-    <Wrapper {...wrapperProps} className="group block rounded-2xl overflow-hidden bg-gray-100 shadow-sm hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
+    <Wrapper {...wrapperProps} className="group block rounded-2xl overflow-hidden bg-gray-100 shadow-sm hover:shadow-xl transition-all duration-300 hover:scale-[1.03]">
       <div className="aspect-[4/5] relative overflow-hidden">
         {inner}
         <div className="absolute bottom-0 left-0 right-0 p-3 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity">
@@ -223,6 +225,7 @@ export default function PitchPage() {
   const [analytics, setAnalytics] = useState(null);
   const [showAnalytics, setShowAnalytics] = useState(false);
   const [planStatus, setPlanStatus] = useState(null);
+  const [lightboxItem, setLightboxItem] = useState(null);
 
   useEffect(() => {
     if (!loading && !authUser) router.push('/');
@@ -328,6 +331,7 @@ export default function PitchPage() {
         languages: profile.languages ?? [],
         socials: profile.socials ?? {},
         why_work_with_me: profile.why_work_with_me ?? '',
+        stats: profile.stats ?? null,
       },
       pitch: {
         title: pitch.title,
@@ -611,7 +615,7 @@ export default function PitchPage() {
               </div>
             ) : (
               <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
-                {pitchContent.map((item, i) => <MediaCard key={item.id ?? i} item={item} />)}
+                {pitchContent.map((item, i) => <MediaCard key={item.id ?? i} item={item} onOpen={setLightboxItem} />)}
               </div>
             )}
           </div>
@@ -619,6 +623,50 @@ export default function PitchPage() {
 
         const hasWhy = !!(profile.why_work_with_me || profile.positioning_statement);
         const whyText = profile.why_work_with_me || profile.positioning_statement;
+
+        const StatsRow = () => {
+          const s = profile.stats;
+          if (!s) return null;
+          const items = [
+            s.followers && { label: 'Followers', value: s.followers },
+            s.engagement_rate && { label: 'Avg. Engagement', value: s.engagement_rate },
+            s.avg_views && { label: 'Avg. Views', value: s.avg_views },
+          ].filter(Boolean);
+          if (!items.length) return null;
+          return (
+            <div className="flex flex-wrap gap-6 mt-5">
+              {items.map(item => (
+                <div key={item.label}>
+                  <p className="text-2xl font-black" style={{ color: primary }}>{item.value}</p>
+                  <p className="text-xs uppercase tracking-wider mt-0.5" style={{ color: T.heroSubtext }}>{item.label}</p>
+                </div>
+              ))}
+            </div>
+          );
+        };
+
+        const Lightbox = () => lightboxItem ? (
+          <div
+            className="fixed inset-0 z-[9999] flex items-center justify-center p-4"
+            style={{ backgroundColor: 'rgba(0,0,0,0.88)' }}
+            onClick={() => setLightboxItem(null)}
+          >
+            <div className="relative max-w-4xl w-full" onClick={e => e.stopPropagation()}>
+              <button
+                onClick={() => setLightboxItem(null)}
+                className="absolute -top-10 right-0 text-white/60 hover:text-white text-4xl leading-none transition"
+              >×</button>
+              <img
+                src={lightboxItem.url}
+                alt={lightboxItem.title}
+                className="w-full rounded-2xl shadow-2xl max-h-[85vh] object-contain"
+              />
+              {lightboxItem.title && (
+                <p className="text-white/60 text-sm text-center mt-3">{lightboxItem.title}</p>
+              )}
+            </div>
+          </div>
+        ) : null;
 
         const CtaSection = () => {
           const { instagram: ig, tiktok: tt, youtube: yt, email: em } = profile.socials ?? {};
@@ -660,6 +708,7 @@ export default function PitchPage() {
         // ── CENTERED ────────────────────────────────────────────────────────
         if (T.layout === 'centered') return (
           <div style={{ backgroundColor: T.bodyBg }}>
+            <Lightbox />
             <div style={{ backgroundColor: T.heroBg, borderBottom: `1px solid ${T.heroBorder}` }}>
               <div className="max-w-3xl mx-auto px-8 py-14 text-center">
                 <div className="mx-auto mb-5 overflow-hidden shadow-xl" style={{ width: 96, height: 96, borderRadius: T.avatarRadius, backgroundColor: primary }}>
@@ -669,6 +718,7 @@ export default function PitchPage() {
                 <div className="flex flex-wrap gap-2 justify-center mb-2">
                   {profile.niche_tags?.map(t => <span key={t} className="text-xs font-semibold uppercase tracking-wider px-3 py-1 rounded-full" style={{ border: `1px solid ${T.tagBorder}`, color: T.tagText }}>{t}</span>)}
                 </div>
+                <StatsRow />
                 <Socials socials={profile.socials} variant="icons" primary={primary} />
               </div>
             </div>
@@ -695,13 +745,13 @@ export default function PitchPage() {
               <RatesSection pitch={pitch} T={T} primary={primary} />
               <CtaSection />
             </div>
-            <div className="py-8 text-center"><p className="text-xs text-gray-300 tracking-widest uppercase">Made with UGC Edge</p></div>
-          </div>
+                      </div>
         );
 
         // ── COVER ────────────────────────────────────────────────────────────
         if (T.layout === 'cover') return (
           <div style={{ backgroundColor: T.bodyBg }}>
+            <Lightbox />
             <div style={{ backgroundColor: primary, paddingTop: '3.5rem', paddingBottom: '5rem' }}>
               <div className="max-w-5xl mx-auto px-8">
                 <p className="text-sm font-bold uppercase tracking-widest mb-1" style={{ color: 'rgba(255,255,255,0.55)' }}>Created for</p>
@@ -713,6 +763,7 @@ export default function PitchPage() {
                   <div className="flex-1 sm:pb-2">
                     {profile.name && <h1 className="text-5xl font-black tracking-tight leading-none mb-4" style={{ fontFamily: fontStack, color: '#fff' }}>{profile.name}</h1>}
                     <NicheTags borderColor="rgba(255,255,255,0.3)" color="rgba(255,255,255,0.8)" />
+                    <StatsRow />
                     <div className="mt-4">
                       <Socials socials={profile.socials} variant="pills" primary={primary} />
                     </div>
@@ -743,13 +794,13 @@ export default function PitchPage() {
                 <CtaSection />
               </div>
             </div>
-            <div className="py-8 text-center"><p className="text-xs text-gray-300 tracking-widest uppercase">Made with UGC Edge</p></div>
-          </div>
+                      </div>
         );
 
         // ── SIDEBAR ──────────────────────────────────────────────────────────
         if (T.layout === 'sidebar') return (
           <div style={{ backgroundColor: T.bodyBg, minHeight: '100vh' }}>
+            <Lightbox />
             <div style={{ backgroundColor: T.heroBannerBg, borderBottom: `1px solid ${T.heroBannerBorder}` }}>
               <div className="px-8 py-4 flex items-baseline gap-3">
                 <p className="text-xs font-bold uppercase tracking-widest flex-shrink-0" style={{ color: primary }}>Created for</p>
@@ -776,6 +827,7 @@ export default function PitchPage() {
                   </div>
                 )}
                 <Socials socials={profile.socials} variant="stacked" primary={primary} />
+                <StatsRow />
               </div>
               <div className="flex-1 min-w-0" style={{ padding: '3rem 3.5rem' }}>
                 <div className="max-w-2xl space-y-10">
@@ -797,13 +849,13 @@ export default function PitchPage() {
                 </div>
               </div>
             </div>
-            <div className="py-8 text-center"><p className="text-xs text-gray-300 tracking-widest uppercase">Made with UGC Edge</p></div>
-          </div>
+                      </div>
         );
 
         // ── STACK (default) ──────────────────────────────────────────────────
         return (
           <div style={{ backgroundColor: T.bodyBg }}>
+            <Lightbox />
             <div style={{ backgroundColor: T.heroBg, color: T.heroText }}>
               <div style={{ borderBottom: `1px solid ${T.heroBannerBorder}`, backgroundColor: T.heroBannerBg }}>
                 <div className="max-w-5xl mx-auto px-8 py-5 flex items-baseline gap-4">
@@ -823,6 +875,7 @@ export default function PitchPage() {
                       {profile.location && <span className="text-xs" style={{ color: T.heroSubtext }}>{profile.location}</span>}
                       {profile.languages?.length > 0 && <span className="text-xs" style={{ color: T.heroSubtext }}>{profile.languages.join(', ')}</span>}
                     </div>
+                    <StatsRow />
                   </div>
                   {profile.socials && Object.values(profile.socials).some(Boolean) && (
                     <div className="flex-shrink-0">
@@ -854,8 +907,7 @@ export default function PitchPage() {
               <RatesSection pitch={pitch} T={T} primary={primary} />
               <CtaSection />
             </div>
-            <div className="py-8 text-center"><p className="text-xs text-gray-300 tracking-widest uppercase">Made with UGC Edge</p></div>
-          </div>
+                      </div>
         );
       })()}
     </div>

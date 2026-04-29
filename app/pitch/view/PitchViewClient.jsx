@@ -116,7 +116,7 @@ function CustomContentEmbed({ url, label, T }) {
   );
 }
 
-function MediaCard({ item, T, onTrackClick }) {
+function MediaCard({ item, T, onTrackClick, onOpen }) {
   const ytId = item.type === 'video' ? getYouTubeId(item.url) : null;
   const inner = item.type === 'video' ? (
     ytId ? (
@@ -140,9 +140,11 @@ function MediaCard({ item, T, onTrackClick }) {
     <img src={item.url} alt={item.title} className="w-full h-full object-cover" onError={e => { e.target.style.display = 'none'; }} />
   );
   const Wrapper = item.type === 'video' ? 'a' : 'div';
-  const wrapperProps = item.type === 'video' ? { href: item.url, target: '_blank', rel: 'noopener noreferrer' } : {};
+  const wrapperProps = item.type === 'video'
+    ? { href: item.url, target: '_blank', rel: 'noopener noreferrer', onClick: () => onTrackClick?.(item.title) }
+    : { onClick: () => { onTrackClick?.(item.title); onOpen?.(item); }, style: { cursor: 'pointer' } };
   return (
-    <Wrapper {...wrapperProps} onClick={() => onTrackClick?.(item.title)}
+    <Wrapper {...wrapperProps}
       className="group block overflow-hidden bg-gray-100 hover:shadow-2xl transition-all duration-300 hover:scale-[1.03]"
       style={{ borderRadius: T.cardRadius, boxShadow: T.cardShadow, border: T.cardBorder }}>
       <div className="aspect-[4/5] relative overflow-hidden">
@@ -150,7 +152,7 @@ function MediaCard({ item, T, onTrackClick }) {
         <div className="absolute bottom-0 left-0 right-0 p-3 bg-gradient-to-t from-black/70 to-transparent opacity-0 group-hover:opacity-100 transition-opacity">
           <div className="flex items-center justify-between gap-2">
             <p className="text-white text-xs font-medium truncate">{item.title}</p>
-            <span className="text-white text-xs font-bold flex-shrink-0">View →</span>
+            <span className="text-white text-xs font-bold flex-shrink-0">{item.type === 'video' ? 'Watch →' : 'View →'}</span>
           </div>
         </div>
       </div>
@@ -164,6 +166,7 @@ function PitchView({ pitchId: propId }) {
   const resolvedId = propId ?? searchParams.get('id');
   const [data, setData] = useState(null);
   const [error, setError] = useState(false);
+  const [lightboxItem, setLightboxItem] = useState(null);
 
   useEffect(() => {
     const id = resolvedId;
@@ -284,7 +287,7 @@ function PitchView({ pitchId: propId }) {
         <p className="text-xs text-gray-400">{pitch.selectedContent.length} piece{pitch.selectedContent.length !== 1 ? 's' : ''}</p>
       </div>
       <div className={`grid gap-4 grid-cols-2 sm:grid-cols-${Math.min(cols, 3)} md:grid-cols-${cols}`}>
-        {pitch.selectedContent.map((item, i) => <MediaCard key={item.id ?? i} item={item} T={T} onTrackClick={trackClick} />)}
+        {pitch.selectedContent.map((item, i) => <MediaCard key={item.id ?? i} item={item} T={T} onTrackClick={trackClick} onOpen={setLightboxItem} />)}
       </div>
     </div>
   ) : null;
@@ -325,6 +328,50 @@ function PitchView({ pitchId: propId }) {
       </div>
     );
   };
+
+  const StatsRow = () => {
+    const s = profile.stats;
+    if (!s) return null;
+    const items = [
+      s.followers && { label: 'Followers', value: s.followers },
+      s.engagement_rate && { label: 'Avg. Engagement', value: s.engagement_rate },
+      s.avg_views && { label: 'Avg. Views', value: s.avg_views },
+    ].filter(Boolean);
+    if (!items.length) return null;
+    return (
+      <div className="flex flex-wrap gap-6 mt-5">
+        {items.map(item => (
+          <div key={item.label}>
+            <p className="text-2xl font-black" style={{ color: primary }}>{item.value}</p>
+            <p className="text-xs uppercase tracking-wider mt-0.5" style={{ color: T.heroSubtext }}>{item.label}</p>
+          </div>
+        ))}
+      </div>
+    );
+  };
+
+  const Lightbox = () => lightboxItem ? (
+    <div
+      className="fixed inset-0 z-[9999] flex items-center justify-center p-4"
+      style={{ backgroundColor: 'rgba(0,0,0,0.88)' }}
+      onClick={() => setLightboxItem(null)}
+    >
+      <div className="relative max-w-4xl w-full" onClick={e => e.stopPropagation()}>
+        <button
+          onClick={() => setLightboxItem(null)}
+          className="absolute -top-10 right-0 text-white/60 hover:text-white text-4xl leading-none transition"
+        >×</button>
+        <img
+          src={lightboxItem.url}
+          alt={lightboxItem.title}
+          className="w-full rounded-2xl shadow-2xl max-h-[85vh] object-contain"
+        />
+        {lightboxItem.title && (
+          <p className="text-white/60 text-sm text-center mt-3">{lightboxItem.title}</p>
+        )}
+      </div>
+    </div>
+  ) : null;
 
   const RatesSection = () => {
     const [open, setOpen] = useState(false);
@@ -394,6 +441,7 @@ function PitchView({ pitchId: propId }) {
   if (T.layout === 'centered') {
     return (
       <div className="min-h-screen font-sans animate-fade-in-up" style={{ backgroundColor: T.bodyBg, paddingBottom: pitch.removeBranding ? 0 : 52 }}>
+        <Lightbox />
         <div style={{ backgroundColor: T.heroBg, borderBottom: `1px solid ${T.heroBorder}` }}>
           <div className="max-w-3xl mx-auto px-8 py-16 text-center">
             <div className="mx-auto mb-5 overflow-hidden shadow-xl"
@@ -407,6 +455,7 @@ function PitchView({ pitchId: propId }) {
             {(profile.location || profile.languages?.length > 0) && (
               <p className="text-sm" style={{ color: T.heroSubtext }}>{[profile.location, profile.languages?.join(', ')].filter(Boolean).join(' · ')}</p>
             )}
+            <StatsRow />
             <Socials socials={profile.socials} variant="icons" primary={primary} />
           </div>
         </div>
@@ -447,6 +496,7 @@ function PitchView({ pitchId: propId }) {
   if (T.layout === 'cover') {
     return (
       <div className="min-h-screen font-sans animate-fade-in-up" style={{ backgroundColor: T.bodyBg, paddingBottom: pitch.removeBranding ? 0 : 52 }}>
+        <Lightbox />
         <div style={{ backgroundColor: primary, paddingTop: '3.5rem', paddingBottom: '5rem' }}>
           <div className="max-w-5xl mx-auto px-8">
             <p className="text-sm font-bold uppercase tracking-widest mb-1" style={{ color: 'rgba(255,255,255,0.55)' }}>Created for</p>
@@ -462,6 +512,7 @@ function PitchView({ pitchId: propId }) {
                 {(profile.location || profile.languages?.length > 0) && (
                   <p className="text-sm mt-3 mb-4" style={{ color: 'rgba(255,255,255,0.5)' }}>{[profile.location, profile.languages?.join(', ')].filter(Boolean).join(' · ')}</p>
                 )}
+                <StatsRow />
                 <div className="mt-4"><Socials socials={profile.socials} variant="pills" primary={primary} /></div>
               </div>
             </div>
@@ -501,6 +552,7 @@ function PitchView({ pitchId: propId }) {
   if (T.layout === 'sidebar') {
     return (
       <div className="min-h-screen font-sans animate-fade-in-up" style={{ backgroundColor: T.bodyBg, paddingBottom: pitch.removeBranding ? 0 : 52 }}>
+        <Lightbox />
         <div style={{ backgroundColor: T.heroBannerBg, borderBottom: `1px solid ${T.heroBannerBorder}` }}>
           <div className="px-8 py-5 flex items-baseline gap-3">
             <p className="text-xs font-bold uppercase tracking-widest flex-shrink-0" style={{ color: primary }}>Created for</p>
@@ -534,6 +586,7 @@ function PitchView({ pitchId: propId }) {
             )}
             <div className="border-t mb-5" style={{ borderColor: T.heroBorder }} />
             <Socials socials={profile.socials} variant="stacked" primary={primary} />
+            <StatsRow />
           </div>
 
           {/* Main content */}
@@ -579,6 +632,7 @@ function PitchView({ pitchId: propId }) {
   // ── STACK (Modern) — default ───────────────────────────────────────────────
   return (
     <div className="min-h-screen font-sans animate-fade-in-up" style={{ backgroundColor: T.bodyBg, paddingBottom: pitch.removeBranding ? 0 : 52 }}>
+      <Lightbox />
       <div style={{ backgroundColor: T.heroBg, color: T.heroText }}>
         <div style={{ borderBottom: `1px solid ${T.heroBannerBorder}`, backgroundColor: T.heroBannerBg }}>
           <div className="max-w-5xl mx-auto px-8 py-6 flex items-baseline gap-4">
@@ -598,6 +652,7 @@ function PitchView({ pitchId: propId }) {
                 {profile.location && <span className="text-xs" style={{ color: T.heroSubtext }}>{profile.location}</span>}
                 {profile.languages?.length > 0 && <span className="text-xs" style={{ color: T.heroSubtext }}>{profile.languages.join(', ')}</span>}
               </div>
+              <StatsRow />
             </div>
             {Object.values(profile.socials ?? {}).some(Boolean) && (
               <div className="flex-shrink-0">
@@ -629,7 +684,7 @@ function PitchView({ pitchId: propId }) {
         {pitch.customContent?.url && <div data-reveal className="reveal"><CustomCard /></div>}
         {pitch.selectedContent?.length > 0 && <div data-reveal className="reveal"><ContentGrid cols={4} /></div>}
         {!!pitch.rates?.length && <div data-reveal className="reveal"><RatesSection /></div>}
-        {Object.values(profile.socials ?? {}).some(Boolean) && <div data-reveal className="reveal"><CtaSection /></div>}
+        <div data-reveal className="reveal"><CtaSection /></div>
       </div>
       <Footer />
     </div>

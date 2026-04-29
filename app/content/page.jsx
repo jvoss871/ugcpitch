@@ -4,6 +4,7 @@ import { useEffect, useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '../context/AuthContext';
 import { storage } from '@/lib/storage';
+import { ConfirmDialog } from '../components/ConfirmDialog';
 
 const AVAILABLE_TAGS = [
   'beauty', 'tech', 'fitness', 'food', 'fashion', 'lifestyle',
@@ -71,6 +72,7 @@ export default function Content() {
   const [compressing, setCompressing] = useState(false);
   const [activeType, setActiveType] = useState('all');
   const [activeTags, setActiveTags] = useState([]);
+  const [confirmDialog, setConfirmDialog] = useState({ open: false, message: '', onConfirm: null });
   const fileInputRef = useRef(null);
 
   useEffect(() => {
@@ -143,14 +145,20 @@ export default function Content() {
     setShowPanel(false);
   };
 
-  const handleDelete = async (id) => {
-    if (!window.confirm('Delete this content?')) return;
-    await fetch(`/api/content/${id}`, {
-      method: 'DELETE',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ username: authUser.username }),
+  const handleDelete = (id) => {
+    setConfirmDialog({
+      open: true,
+      message: 'Delete this piece? This can\'t be undone.',
+      onConfirm: async () => {
+        await fetch(`/api/content/${id}`, {
+          method: 'DELETE',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ username: authUser.username }),
+        });
+        setContent(c => c.filter(x => x.id !== id));
+        setConfirmDialog(d => ({ ...d, open: false }));
+      },
     });
-    setContent(c => c.filter(x => x.id !== id));
   };
 
   const handleToggleFeatured = async (id) => {
@@ -188,6 +196,12 @@ export default function Content() {
 
   return (
     <div className="animate-fade-in-up">
+      <ConfirmDialog
+        open={confirmDialog.open}
+        message={confirmDialog.message}
+        onConfirm={confirmDialog.onConfirm}
+        onCancel={() => setConfirmDialog(d => ({ ...d, open: false }))}
+      />
 
       {/* Header */}
       <div className="mb-6 flex items-center justify-between">

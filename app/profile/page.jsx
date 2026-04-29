@@ -56,7 +56,7 @@ export default function Profile() {
     fetch(`/api/profile?username=${encodeURIComponent(authUser.username)}`)
       .then(r => r.json())
       .then(serverProfile => {
-        const base = { socials: { instagram: '', tiktok: '', canva: '', email: '' }, languages: [], location: '' };
+        const base = { socials: { instagram: '', tiktok: '', canva: '', email: '' }, languages: [], location: '', stats: {} };
         if (!serverProfile.name) {
           const local = storage.getProfile(authUser.username);
           if (local.name) {
@@ -380,6 +380,46 @@ export default function Profile() {
           >
             + Add package
           </button>
+        </div>
+
+        {/* Stats */}
+        <div className="card space-y-4">
+          <div>
+            <p className="text-sm font-semibold text-gray-700 mb-1">Stats</p>
+            <p className="text-xs text-gray-400">Optional — shown as a highlight strip on your pitch pages.</p>
+          </div>
+          <div className="grid grid-cols-3 gap-3">
+            <div>
+              <label className="block text-xs font-semibold text-gray-500 mb-1">Total Followers</label>
+              <input
+                type="text"
+                value={profile.stats?.followers || ''}
+                onChange={e => setProfile(p => ({ ...p, stats: { ...p.stats, followers: e.target.value } }))}
+                placeholder="e.g. 42K"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-teal-500"
+              />
+            </div>
+            <div>
+              <label className="block text-xs font-semibold text-gray-500 mb-1">Avg. Engagement</label>
+              <input
+                type="text"
+                value={profile.stats?.engagement_rate || ''}
+                onChange={e => setProfile(p => ({ ...p, stats: { ...p.stats, engagement_rate: e.target.value } }))}
+                placeholder="e.g. 4.2%"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-teal-500"
+              />
+            </div>
+            <div>
+              <label className="block text-xs font-semibold text-gray-500 mb-1">Avg. Views</label>
+              <input
+                type="text"
+                value={profile.stats?.avg_views || ''}
+                onChange={e => setProfile(p => ({ ...p, stats: { ...p.stats, avg_views: e.target.value } }))}
+                placeholder="e.g. 85K"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-teal-500"
+              />
+            </div>
+          </div>
         </div>
 
         {/* Niches */}
