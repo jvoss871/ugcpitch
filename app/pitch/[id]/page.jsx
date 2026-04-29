@@ -29,12 +29,18 @@ function EmIcon() { return <svg className="w-4 h-4 flex-shrink-0" viewBox="0 0 2
 
 function Socials({ socials, variant = 'pills', primary }) {
   if (!socials) return null;
-  const { instagram: ig, email: em } = socials;
-  if (!ig && !em) return null;
+  const { instagram: ig, tiktok: tt, youtube: yt, canva: cv, email: em } = socials;
+  if (!ig && !tt && !yt && !cv && !em) return null;
   const igHref = ig ? `https://instagram.com/${ig.replace('@', '')}` : null;
+  const ttHref = tt ? `https://tiktok.com/@${tt.replace('@', '')}` : null;
+  const ytHref = yt ? `https://youtube.com/@${yt.replace('@', '')}` : null;
+  const cvHref = cv ? (cv.startsWith('http') ? cv : `https://${cv}`) : null;
   if (variant === 'icons') {
     const items = [
       ig && { href: igHref, bg: 'linear-gradient(135deg,#833ab4,#fd1d1d,#fcb045)', icon: <IgIcon /> },
+      tt && { href: ttHref, bg: '#010101', icon: <TtIcon /> },
+      yt && { href: ytHref, bg: '#FF0000', icon: <YtIcon /> },
+      cv && { href: cvHref, bg: '#7D2AE8', icon: <CvIcon /> },
       em && { href: `mailto:${em}`, bg: `${primary}30`, icon: <EmIcon />, color: primary },
     ].filter(Boolean);
     return (
@@ -52,6 +58,9 @@ function Socials({ socials, variant = 'pills', primary }) {
   if (variant === 'stacked') {
     const items = [
       ig && { href: igHref, label: ig, bg: 'linear-gradient(135deg,#833ab4,#fd1d1d,#fcb045)', icon: <IgIcon /> },
+      tt && { href: ttHref, label: tt, bg: '#010101', icon: <TtIcon /> },
+      yt && { href: ytHref, label: yt, bg: '#FF0000', icon: <YtIcon /> },
+      cv && { href: cvHref, label: 'Canva Portfolio', bg: '#7D2AE8', icon: <CvIcon /> },
       em && { href: `mailto:${em}`, label: em, bg: `${primary}25`, icon: <EmIcon />, color: primary },
     ].filter(Boolean);
     return (
@@ -72,6 +81,9 @@ function Socials({ socials, variant = 'pills', primary }) {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 8, alignItems: 'flex-start' }}>
       {ig && <a href={igHref} target="_blank" rel="noopener noreferrer" className="hover:scale-105 transition" style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '8px 16px', borderRadius: 12, background: 'linear-gradient(135deg,#833ab4,#fd1d1d,#fcb045)', color: '#fff', fontSize: 14, fontWeight: 600, textDecoration: 'none' }}><IgIcon />{ig}</a>}
+      {tt && <a href={ttHref} target="_blank" rel="noopener noreferrer" className="hover:scale-105 transition" style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '8px 16px', borderRadius: 12, backgroundColor: '#010101', color: '#fff', fontSize: 14, fontWeight: 600, textDecoration: 'none' }}><TtIcon />{tt}</a>}
+      {yt && <a href={ytHref} target="_blank" rel="noopener noreferrer" className="hover:scale-105 transition" style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '8px 16px', borderRadius: 12, backgroundColor: '#FF0000', color: '#fff', fontSize: 14, fontWeight: 600, textDecoration: 'none' }}><YtIcon />{yt}</a>}
+      {cv && <a href={cvHref} target="_blank" rel="noopener noreferrer" className="hover:scale-105 transition" style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '8px 16px', borderRadius: 12, backgroundColor: '#7D2AE8', color: '#fff', fontSize: 14, fontWeight: 600, textDecoration: 'none' }}><CvIcon />Canva Portfolio</a>}
       {em && <a href={`mailto:${em}`} className="hover:scale-105 transition" style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '8px 16px', borderRadius: 12, backgroundColor: 'rgba(255,255,255,0.1)', color: '#fff', border: '1px solid rgba(255,255,255,0.15)', fontSize: 14, fontWeight: 600, textDecoration: 'none' }}><EmIcon />{em}</a>}
     </div>
   );
