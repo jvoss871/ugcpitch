@@ -174,6 +174,7 @@ function PitchView({ pitchId: propId }) {
     fetch(`/api/share-pitch?id=${id}`)
       .then(res => { if (!res.ok) throw new Error(); return res.json(); })
       .then(d => {
+        if (!d?.profile || !d?.pitch) throw new Error();
         setData(d);
       })
       .catch(() => setError(true));
