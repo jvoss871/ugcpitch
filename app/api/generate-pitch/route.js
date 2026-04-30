@@ -87,14 +87,17 @@ Your task:
 5. If messageType is 'message': Write a confident, specific email pitch (3-5 sentences) that connects the creator's work directly to the brand's brief.
 
 TONE EXAMPLES (match this voice exactly — confident, brief, human, no corporate speak):
-- note: "Huge fan of what you're building — I've done a bunch of lifestyle/demo work that fits this brief perfectly. Happy to send samples."
-- message: "I came across your listing and this one's right in my wheelhouse — I've been creating fitness content for the past two years and have a solid library of demo-style videos that match the energy you're going for. My engagement skews 25–34F which lines up well with your target. Would love to put together a few concepts if you're open to it."
+- note: "Saw your post — this fits exactly what I do. I've got a solid library of lifestyle content and can do voiceover or on-camera. Happy to send samples."
+- message: "Saw your listing for TinyPicasso and wanted to reach out — kids and family content is my lane and I've got a library of exactly this style. I do natural, ad-like videos and am comfortable on camera. Would love to put a few concepts together if you want to see what I'm thinking."
 
 RULES:
+- NEVER say "I came across" — it's the most recognisable AI tell and instantly disqualifies the reply
+- The creator saw a post/listing — reference it naturally: "saw your post", "saw your listing", "just saw this"
+- Lead with the connection to their specific brief, not with enthusiasm about the brand
 - Direct, warm, zero filler ("I am writing to express my interest" is banned)
 - Reference specific content pieces or niches from the library where they fit
 - For selectedTags: ONLY use tags from the creator's full tag library. Never invent new ones.
-- Outreach must feel written by a human, not an AI
+- Outreach must feel written by a human, not generated
 
 Return ONLY valid JSON (no markdown, no preamble):
 {

@@ -28,15 +28,16 @@ Location: ${profile.location}
 
 Rules:
 - Confident and specific — sounds like the creator genuinely knows this brand
-- No corporate filler, no generic phrases like "I'd love to collaborate"
+- No corporate filler, no generic phrases like "I'd love to collaborate" or "I came across your brand"
 - Reference the brand's actual identity, audience, or aesthetic naturally
 - Write like a creator who wins brand deals, not one who begs for them
+- Outreach opener must be specific to the brand — never a generic "I came across" or "I wanted to reach out"
 
 Return ONLY valid JSON:
 {
   "intro": "2-3 sentences on the pitch page. Why this creator is a natural fit for this specific brand. Lead with insight about the brand, not about the creator.",
   "why_work_with_me": "2-3 sentences. What this creator uniquely brings to this brand — audience overlap, content style, or values alignment. Specific to this brand, not generic.",
-  "outreach": "3-4 sentence DM or email. Strong opener that shows brand knowledge, one clear value prop, one soft ask. No filler."
+  "outreach": "3-4 sentence DM or email. Open with something specific about the brand (their product, aesthetic, or audience) — not about how you found them. One clear value prop, one soft ask. No filler."
 }`;
 
     const completion = await groq.chat.completions.create({
