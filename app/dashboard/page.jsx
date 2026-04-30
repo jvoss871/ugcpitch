@@ -53,16 +53,69 @@ export default function Dashboard() {
   const [copiedLinkId, setCopiedLinkId] = useState(null);
   const newFolderInputRef = useRef(null);
 
-  const copyPitchLink = (e, pitch) => {
+  const copyPitchLink = async (e, pitch) => {
     e.stopPropagation();
-    if (!pitch.shareId) { router.push(`/pitch/${pitch.id}`); return; }
     const proHandle = planStatus?.handle ?? null;
-    const url = proHandle
-      ? `${window.location.origin}/${proHandle}/${pitch.shareId}`
-      : `${window.location.origin}/pitch/view?id=${pitch.shareId}`;
-    navigator.clipboard.writeText(url);
-    setCopiedLinkId(pitch.id);
-    setTimeout(() => setCopiedLinkId(null), 2000);
+    const buildUrl = (id) => proHandle
+      ? `${window.location.origin}/${proHandle}/${id}`
+      : `${window.location.origin}/pitch/view?id=${id}`;
+
+    if (pitch.shareId) {
+      navigator.clipboard.writeText(buildUrl(pitch.shareId));
+      setCopiedLinkId(pitch.id);
+      setTimeout(() => setCopiedLinkId(null), 2000);
+      return;
+    }
+
+    // No shareId yet — generate one on the spot
+    setCopiedLinkId(`generating-${pitch.id}`);
+    try {
+      const shareData = {
+        profile: {
+          username: user.username,
+          name: profile?.name ?? '',
+          bio: profile?.bio ?? '',
+          positioning_statement: profile?.positioning_statement ?? '',
+          niche_tags: profile?.niche_tags ?? [],
+          avatar: profile?.avatar ?? null,
+          brand: brand ?? null,
+          templateId: brand?.templateId ?? 'modern',
+          location: profile?.location ?? '',
+          languages: profile?.languages ?? [],
+          socials: profile?.socials ?? {},
+          why_work_with_me: profile?.why_work_with_me ?? '',
+          stats: profile?.stats ?? null,
+        },
+        pitch: {
+          title: pitch.title,
+          intro: pitch.intro,
+          messageType: pitch.messageType,
+          selectedContent: pitch.selectedContent || [],
+          customContent: pitch.customContent ?? null,
+          removeBranding: planStatus?.features?.remove_branding ?? false,
+          rates: pitch.rates ?? null,
+        },
+      };
+      const res = await fetch('/api/share-pitch', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(shareData),
+      });
+      const { id } = await res.json();
+      if (!id) throw new Error();
+      fetch(`/api/pitches/${pitch.id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ shareId: id }),
+      });
+      setPitches(ps => ps.map(p => p.id === pitch.id ? { ...p, shareId: id } : p));
+      navigator.clipboard.writeText(buildUrl(id));
+      setCopiedLinkId(pitch.id);
+      setTimeout(() => setCopiedLinkId(null), 2000);
+    } catch {
+      setCopiedLinkId(null);
+      router.push(`/pitch/${pitch.id}`);
+    }
   };
 
   useEffect(() => {
@@ -642,11 +695,13 @@ export default function Dashboard() {
                         <div className="flex items-center justify-end gap-1.5">
                           <button
                             onClick={e => copyPitchLink(e, pitch)}
-                            title={pitch.shareId ? 'Copy link' : 'Open pitch to generate link'}
+                            title="Copy share link"
                             className={`opacity-0 group-hover:opacity-100 w-6 h-6 flex items-center justify-center rounded-md transition ${copiedLinkId === pitch.id ? 'text-teal-600 bg-teal-50' : 'text-gray-400 hover:text-teal-600 hover:bg-teal-50'}`}
                           >
                             {copiedLinkId === pitch.id ? (
                               <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><polyline points="20 6 9 17 4 12"/></svg>
+                            ) : copiedLinkId === `generating-${pitch.id}` ? (
+                              <svg className="w-3.5 h-3.5 animate-spin" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
                             ) : (
                               <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
                             )}
