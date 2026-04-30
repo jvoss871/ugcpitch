@@ -60,14 +60,7 @@ export default function Dashboard() {
       ? `${window.location.origin}/${proHandle}/${id}`
       : `${window.location.origin}/pitch/view?id=${id}`;
 
-    if (pitch.shareId) {
-      navigator.clipboard.writeText(buildUrl(pitch.shareId));
-      setCopiedLinkId(pitch.id);
-      setTimeout(() => setCopiedLinkId(null), 2000);
-      return;
-    }
-
-    // No shareId yet — generate one on the spot
+    // Always regenerate the share record so it includes current profile data
     setCopiedLinkId(`generating-${pitch.id}`);
     try {
       const shareData = {
